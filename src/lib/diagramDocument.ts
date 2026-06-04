@@ -1,5 +1,9 @@
 import { handlesForEdgeKind, validateConnection } from "../model/connections";
 import {
+  isValidDiagramId,
+  nodeIdMatchesKind,
+} from "./id";
+import {
   DIAGRAM_DOCUMENT_VERSION,
   type DiagramDocument,
   type DiagramEdge,
@@ -86,30 +90,40 @@ function parseNode(raw: unknown): DiagramNode {
   }
 
   const { id, kind, position, data } = raw;
-  if (typeof id !== "string" || !id.trim()) {
-    throw new DiagramParseError("Nó sem id válido.");
+  if (typeof id !== "string" || !isValidDiagramId(id)) {
+    throw new DiagramParseError(`ID de nó inválido: ${String(id)}`);
   }
 
   const parsedPosition = parsePosition(position);
+  const nodeId = id;
 
   switch (kind) {
     case "vpc":
+      if (!nodeIdMatchesKind(nodeId, "vpc")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo VPC.`);
+      }
       return {
-        id,
+        id: nodeId,
         kind: "vpc",
         position: parsedPosition,
         data: parseVpcData(data),
       };
     case "subnet":
+      if (!nodeIdMatchesKind(nodeId, "subnet")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo sub-rede.`);
+      }
       return {
-        id,
+        id: nodeId,
         kind: "subnet",
         position: parsedPosition,
         data: parseSubnetData(data),
       };
     case "vm":
+      if (!nodeIdMatchesKind(nodeId, "vm")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo VM.`);
+      }
       return {
-        id,
+        id: nodeId,
         kind: "vm",
         position: parsedPosition,
         data: parseVmData(data),
@@ -127,11 +141,17 @@ function parseEdge(raw: unknown): DiagramEdge {
   const { id, source, target, kind } = raw;
   if (
     typeof id !== "string" ||
-    !id.trim() ||
     typeof source !== "string" ||
-    typeof target !== "string"
+    typeof target !== "string" ||
+    !isValidDiagramId(id) ||
+    !isValidDiagramId(source) ||
+    !isValidDiagramId(target)
   ) {
-    throw new DiagramParseError("Aresta com campos obrigatórios ausentes.");
+    throw new DiagramParseError("Aresta com id, source ou target inválido.");
+  }
+
+  if (source === target) {
+    throw new DiagramParseError("Aresta não pode ligar um nó a si mesmo.");
   }
 
   if (kind !== "subnet-vpc" && kind !== "vm-subnet") {
@@ -139,6 +159,27 @@ function parseEdge(raw: unknown): DiagramEdge {
   }
 
   return { id, source, target, kind };
+}
+
+function assertUniqueNodeIds(nodes: DiagramNode[]): void {
+  const seen = new Set<string>();
+  for (const node of nodes) {
+    if (seen.has(node.id)) {
+      throw new DiagramParseError(`ID de nó duplicado: ${node.id}`);
+    }
+    seen.add(node.id);
+  }
+}
+
+/** Mantém arestas cujo source/target existem nos nós importados (referências intactas). */
+export function filterEdgesWithValidReferences(
+  nodes: DiagramNode[],
+  edges: DiagramEdge[],
+): DiagramEdge[] {
+  const nodeIds = new Set(nodes.map((node) => node.id));
+  return edges.filter(
+    (edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target),
+  );
 }
 
 function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
@@ -239,7 +280,13 @@ export function normalizeLoadedDocument(
   input: DiagramDocument | LegacyDiagramDocument,
 ): DiagramDocument {
   const nodes = input.nodes.map((node) => structuredClone(node));
-  const edges = sanitizeDocumentEdges(nodes, input.edges.map((edge) => structuredClone(edge)));
+  assertUniqueNodeIds(nodes);
+
+  const referencedEdges = filterEdgesWithValidReferences(
+    nodes,
+    input.edges.map((edge) => structuredClone(edge)),
+  );
+  const edges = sanitizeDocumentEdges(nodes, referencedEdges);
   const metadata =
     "metadata" in input && input.metadata
       ? parseMetadata(input.metadata)

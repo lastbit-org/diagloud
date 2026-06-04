@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { suggestSubnetCidr } from "../lib/cidr";
 import { defaultResourceData } from "../lib/defaults";
-import { createId } from "../lib/id";
+import { createEdgeId, createNodeId } from "../lib/id";
 import {
   buildDiagramDocument,
   normalizeLoadedDocument,
@@ -75,7 +75,7 @@ function buildNode<K extends ResourceKind>(
   data?: Partial<ResourcePropsByKind[K]>,
   context?: { existingSubnetCidrs: string[]; nodes: DiagramNode[] },
 ): DiagramNode {
-  const base = { id: createId(kind), position };
+  const base = { id: createNodeId(kind), position };
   const existingSubnetCidrs = context?.existingSubnetCidrs ?? [];
   const nodes = context?.nodes ?? [];
   const resourceContext = { existingSubnetCidrs, nodes };
@@ -248,7 +248,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       );
       if (!result.valid) return state;
 
-      const next: DiagramEdge = { ...edge, id: edge.id ?? createId("edge") };
+      const next: DiagramEdge = { ...edge, id: edge.id ?? createEdgeId() };
       const edges = [...state.edges, next];
       let nodes = state.nodes;
 

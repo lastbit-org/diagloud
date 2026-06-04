@@ -1,7 +1,9 @@
 import { describe, expect, it, afterEach, beforeEach } from "vitest";
+import { createEdgeId, createNodeId } from "./id";
 import {
   buildDiagramDocument,
   documentsEqual,
+  filterEdgesWithValidReferences,
   parseDiagramDocument,
   serializeDiagramDocument,
 } from "./diagramDocument";
@@ -123,6 +125,101 @@ describe("diagramDocument", () => {
     });
     expect(doc.metadata.naming?.area).toBe("rh");
     expect(doc.version).toBe(1);
+  });
+
+  it("reimport com UUID preserva referências source/target das arestas", () => {
+    const vpcId = createNodeId("vpc");
+    const subnetId = createNodeId("subnet");
+    const vmId = createNodeId("vm");
+    const edgeVpcId = createEdgeId();
+    const edgeVmId = createEdgeId();
+
+    const doc: DiagramDocument = {
+      version: 1,
+      metadata: {
+        savedAt: "2026-06-01T12:00:00.000Z",
+        generator: "diagloud",
+      },
+      nodes: [
+        {
+          id: vpcId,
+          kind: "vpc",
+          position: { x: 0, y: 0 },
+          data: { name: "vpc-a" },
+        },
+        {
+          id: subnetId,
+          kind: "subnet",
+          position: { x: 0, y: 100 },
+          data: {
+            name: "sub-a",
+            region: "southamerica-east1",
+            cidr: "10.0.0.0/24",
+          },
+        },
+        {
+          id: vmId,
+          kind: "vm",
+          position: { x: 0, y: 200 },
+          data: { name: "vm-a", machineType: "e2-micro" },
+        },
+      ],
+      edges: [
+        {
+          id: edgeVpcId,
+          source: subnetId,
+          target: vpcId,
+          kind: "subnet-vpc",
+        },
+        {
+          id: edgeVmId,
+          source: vmId,
+          target: subnetId,
+          kind: "vm-subnet",
+        },
+      ],
+    };
+
+    const json = serializeDiagramDocument(doc);
+    const parsed = parseDiagramDocument(json);
+
+    expect(parsed.nodes.map((n) => n.id)).toEqual([vpcId, subnetId, vmId]);
+    expect(parsed.edges).toHaveLength(2);
+    expect(parsed.edges[0].source).toBe(subnetId);
+    expect(parsed.edges[0].target).toBe(vpcId);
+    expect(parsed.edges[1].source).toBe(vmId);
+    expect(parsed.edges[1].target).toBe(subnetId);
+
+    useDiagramStore.getState().loadDocument(parsed);
+    const exported = useDiagramStore.getState().getDocument();
+    expect(exported.edges).toEqual(parsed.edges);
+    expect(exported.nodes.map((n) => n.id)).toEqual(parsed.nodes.map((n) => n.id));
+  });
+
+  it("rejeita IDs de nó duplicados", () => {
+    const duplicate = {
+      ...sampleDocument,
+      nodes: [sampleDocument.nodes[0], sampleDocument.nodes[0]],
+    };
+    expect(() => parseDiagramDocument(JSON.stringify(duplicate))).toThrow(
+      /duplicado/,
+    );
+  });
+
+  it("remove arestas com referência quebrada sem alterar IDs dos nós", () => {
+    const nodes = sampleDocument.nodes;
+    const edges = [
+      ...sampleDocument.edges,
+      {
+        id: "edge-orphan",
+        source: "missing-vm",
+        target: "subnet-1",
+        kind: "vm-subnet" as const,
+      },
+    ];
+    const filtered = filterEdgesWithValidReferences(nodes, edges);
+    expect(filtered).toHaveLength(2);
+    expect(filtered.every((e) => e.id !== "edge-orphan")).toBe(true);
   });
 
   it("store loadDocument + getDocument preserva o diagrama", () => {
