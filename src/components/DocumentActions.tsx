@@ -14,14 +14,20 @@ export function DocumentActions() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const showFeedback = (message: string) => {
+  const [feedbackIsError, setFeedbackIsError] = useState(false);
+
+  const showFeedback = (message: string, isError = false) => {
     setFeedback(message);
-    window.setTimeout(() => setFeedback(null), 2800);
+    setFeedbackIsError(isError);
+    window.setTimeout(() => {
+      setFeedback(null);
+      setFeedbackIsError(false);
+    }, 2800);
   };
 
   const handleExport = () => {
     downloadDiagramDocument(getDocument());
-    showFeedback("Diagrama exportado como JSON.");
+    showFeedback("Diagrama exportado.");
   };
 
   const handleImportClick = () => {
@@ -37,13 +43,13 @@ export function DocumentActions() {
       const text = await file.text();
       const document = parseDiagramDocument(text);
       loadDocument(document);
-      showFeedback("Diagrama carregado com sucesso.");
+      showFeedback("Diagrama importado com sucesso.");
     } catch (error) {
       const message =
         error instanceof DiagramParseError
           ? error.message
           : "Não foi possível carregar o arquivo.";
-      showFeedback(message);
+      showFeedback(message, true);
     }
   };
 
@@ -60,15 +66,23 @@ export function DocumentActions() {
 
   return (
     <div className="document-actions">
-      <button type="button" className="document-actions__btn" onClick={handleExport}>
-        Exportar JSON
+      <button
+        type="button"
+        className="document-actions__btn"
+        onClick={handleExport}
+        title="Baixar diagrama como arquivo .json"
+        aria-label="Exportar diagrama como JSON"
+      >
+        Exportar
       </button>
       <button
         type="button"
         className="document-actions__btn"
         onClick={handleImportClick}
+        title="Carregar diagrama de um arquivo .json"
+        aria-label="Importar diagrama de arquivo JSON"
       >
-        Importar JSON
+        Importar
       </button>
       <button type="button" className="document-actions__btn" onClick={handleNew}>
         Novo
@@ -79,11 +93,14 @@ export function DocumentActions() {
         accept="application/json,.json"
         className="document-actions__file-input"
         onChange={handleFileChange}
-        aria-hidden
+        aria-label="Selecionar arquivo JSON do diagrama"
         tabIndex={-1}
       />
       {feedback && (
-        <span className="document-actions__feedback" role="status">
+        <span
+          className={`document-actions__feedback${feedbackIsError ? " document-actions__feedback--error" : ""}`}
+          role={feedbackIsError ? "alert" : "status"}
+        >
           {feedback}
         </span>
       )}
