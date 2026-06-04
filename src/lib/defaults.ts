@@ -5,6 +5,7 @@ import type {
   DiagramNode,
   ResourceKind,
   ResourcePropsByKind,
+  SqlProps,
   StorageProps,
   SubnetProps,
   VmProps,
@@ -47,6 +48,13 @@ export function defaultResourceData<K extends ResourceKind>(
         storageClass: "STANDARD",
         accessMode: "public",
       } as StorageProps as ResourcePropsByKind[K];
+    case "sql":
+      return {
+        name,
+        region: "southamerica-east1",
+        engine: "POSTGRES_15",
+        accessMode: "public",
+      } as SqlProps as ResourcePropsByKind[K];
   }
 }
 
@@ -61,5 +69,7 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `vm-${count}`;
     case "storage":
       return `bucket-${count}`;
+    case "sql":
+      return `sql-${count}`;
   }
 }

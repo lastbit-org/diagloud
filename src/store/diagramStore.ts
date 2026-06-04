@@ -12,6 +12,10 @@ import {
   clearVmIp,
   reassignSubnetVmIps,
 } from "../model/ipAssignment";
+import {
+  clearSqlPrivateNetwork,
+  reassignSubnetSqlIps,
+} from "../model/sqlSubnet";
 import { handlesForEdgeKind, validateConnection } from "../model/connections";
 import { validateSubnetCidr } from "../model/subnet";
 import type {
@@ -21,6 +25,7 @@ import type {
   LegacyDiagramDocument,
   ResourceKind,
   ResourcePropsByKind,
+  SqlProps,
   StorageProps,
   SubnetProps,
   VmProps,
@@ -50,7 +55,8 @@ type DiagramActions = {
       | Partial<VpcProps>
       | Partial<SubnetProps>
       | Partial<VmProps>
-      | Partial<StorageProps>,
+      | Partial<StorageProps>
+      | Partial<SqlProps>,
   ) => void;
   setSubnetCidr: (id: string, cidr: string) => boolean;
   removeNode: (id: string) => void;
@@ -133,6 +139,12 @@ function buildNode<K extends ResourceKind>(
         kind: "storage",
         data: { ...defaultResourceData("storage", resourceContext), ...data },
       };
+    case "sql":
+      return {
+        ...base,
+        kind: "sql",
+        data: { ...defaultResourceData("sql", resourceContext), ...data },
+      };
   }
 }
 
@@ -142,18 +154,46 @@ function mergeNodeData(
     | Partial<VpcProps>
     | Partial<SubnetProps>
     | Partial<VmProps>
-    | Partial<StorageProps>,
+    | Partial<StorageProps>
+    | Partial<SqlProps>,
 ): DiagramNode {
   switch (node.kind) {
     case "vpc":
-      return { ...node, data: { ...node.data, ...patch } };
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<VpcProps>) },
+      };
     case "subnet":
-      return { ...node, data: { ...node.data, ...patch } };
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<SubnetProps>) },
+      };
     case "vm":
-      return { ...node, data: { ...node.data, ...patch } };
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<VmProps>) },
+      };
     case "storage":
-      return { ...node, data: { ...node.data, ...patch } };
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<StorageProps>) },
+      };
+    case "sql":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<SqlProps>) },
+      };
   }
+}
+
+function reassignSubnetHostIps(
+  subnetId: string,
+  nodes: DiagramNode[],
+  edges: DiagramEdge[],
+): DiagramNode[] {
+  let next = reassignSubnetVmIps(subnetId, nodes, edges);
+  next = reassignSubnetSqlIps(subnetId, next, edges);
+  return next;
 }
 
 export const useDiagramStore = create<DiagramStore>((set, get) => ({
@@ -185,15 +225,36 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       let nodes = state.nodes.map((node) =>
         node.id === id ? mergeNodeData(node, data) : node,
       );
+      let edges = state.edges;
       const updated = nodes.find((node) => node.id === id);
-      if (
-        updated?.kind === "subnet" &&
-        "region" in data &&
-        data.region !== undefined
-      ) {
-        nodes = reassignSubnetVmIps(id, nodes, state.edges);
+
+      if (updated?.kind === "subnet" && "region" in data && data.region !== undefined) {
+        nodes = reassignSubnetHostIps(id, nodes, edges);
       }
-      return { nodes };
+
+      if (updated?.kind === "sql" && "accessMode" in data && data.accessMode === "public") {
+        nodes = clearSqlPrivateNetwork(id, nodes);
+        const subnetEdge = edges.find(
+          (e) => e.kind === "sql-subnet" && e.source === id,
+        );
+        edges = edges.filter(
+          (e) => !(e.kind === "sql-subnet" && e.source === id),
+        );
+        if (subnetEdge) {
+          nodes = reassignSubnetHostIps(subnetEdge.target, nodes, edges);
+        }
+      }
+
+      if (updated?.kind === "sql" && "accessMode" in data && data.accessMode === "private") {
+        const subnetEdge = edges.find(
+          (e) => e.kind === "sql-subnet" && e.source === id,
+        );
+        if (subnetEdge) {
+          nodes = reassignSubnetSqlIps(subnetEdge.target, nodes, edges);
+        }
+      }
+
+      return { nodes, edges };
     });
   },
 
@@ -204,7 +265,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       if (!validation.valid) return state;
 
       applied = true;
-      const nodes = state.nodes.map((node) =>
+      let nodes = state.nodes.map((node) =>
         node.id === id && node.kind === "subnet"
           ? {
               ...node,
@@ -212,7 +273,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
             }
           : node,
       );
-      return { nodes: reassignSubnetVmIps(id, nodes, state.edges) };
+      nodes = reassignSubnetHostIps(id, nodes, state.edges);
+      return { nodes };
     });
     return applied;
   },
@@ -229,6 +291,15 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
           .map((edge) => edge.target),
       );
 
+      for (const edge of state.edges) {
+        if (
+          edge.kind === "sql-subnet" &&
+          (edge.source === id || edge.target === id)
+        ) {
+          affectedSubnetIds.add(edge.target);
+        }
+      }
+
       const edges = state.edges.filter(
         (edge) => edge.source !== id && edge.target !== id,
       );
@@ -238,7 +309,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
       let nodes = state.nodes.filter((node) => node.id !== id);
       for (const subnetId of affectedSubnetIds) {
-        nodes = reassignSubnetVmIps(subnetId, nodes, edges);
+        nodes = reassignSubnetHostIps(subnetId, nodes, edges);
       }
 
       return {
@@ -271,6 +342,11 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
       if (next.kind === "vm-subnet") {
         nodes = assignIpToVm(next.source, next.target, nodes, edges);
+        nodes = reassignSubnetSqlIps(next.target, nodes, edges);
+      }
+
+      if (next.kind === "sql-subnet") {
+        nodes = reassignSubnetSqlIps(next.target, nodes, edges);
       }
 
       return { edges, nodes };
@@ -286,8 +362,13 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       if (removed?.kind === "vm-subnet") {
         nodes = clearVmIp(removed.source, nodes);
         if (removed.target) {
-          nodes = reassignSubnetVmIps(removed.target, nodes, edges);
+          nodes = reassignSubnetHostIps(removed.target, nodes, edges);
         }
+      }
+
+      if (removed?.kind === "sql-subnet") {
+        nodes = clearSqlPrivateNetwork(removed.source, nodes);
+        nodes = reassignSubnetSqlIps(removed.target, nodes, edges);
       }
 
       return {

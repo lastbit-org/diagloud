@@ -7,6 +7,7 @@ import type { DiagramEdge, DiagramNode } from "../types";
 export type DiagramIssueCode =
   | "orphan-vm"
   | "orphan-storage"
+  | "orphan-sql-private"
   | "subnet-without-vpc"
   | "subnet-invalid-cidr"
   | "subnet-cidr-overlap";
@@ -38,6 +39,12 @@ export function collectDiagramIssues(
       .map((edge) => edge.target),
   );
 
+  const sqlIdsOnSubnet = new Set(
+    edges
+      .filter((edge) => edge.kind === "sql-subnet")
+      .map((edge) => edge.source),
+  );
+
   for (const node of nodes) {
     if (node.kind === "vm" && !vmIdsOnSubnet.has(node.id)) {
       issues.push({
@@ -58,6 +65,19 @@ export function collectDiagramIssues(
         severity: "warning",
         nodeId: node.id,
         message: `Bucket "${node.data.name}" está em modo VM mas não está ligado a nenhuma VM.`,
+      });
+    }
+
+    if (
+      node.kind === "sql" &&
+      node.data.accessMode === "private" &&
+      !sqlIdsOnSubnet.has(node.id)
+    ) {
+      issues.push({
+        code: "orphan-sql-private",
+        severity: "warning",
+        nodeId: node.id,
+        message: `Cloud SQL "${node.data.name}" está em modo privado mas não está ligado a uma sub-rede.`,
       });
     }
   }

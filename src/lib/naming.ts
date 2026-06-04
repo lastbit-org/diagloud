@@ -93,6 +93,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `vm-${count}`;
     case "storage":
       return `bucket-${count}`;
+    case "sql":
+      return `sql-${count}`;
   }
 }
 

@@ -42,13 +42,26 @@ const storage: DiagramNode = {
   },
 };
 
-const nodes = [vpc, subnet, vm, storage];
+const sql: DiagramNode = {
+  id: "sql-1",
+  kind: "sql",
+  position: { x: 200, y: 50 },
+  data: {
+    name: "sql-1",
+    region: "southamerica-east1",
+    engine: "POSTGRES_15",
+    accessMode: "private",
+  },
+};
+
+const nodes = [vpc, subnet, vm, storage, sql];
 
 describe("getEdgeKind", () => {
   it("permite sub-rede → VPC, VM → sub-rede e VM → storage", () => {
     expect(getEdgeKind("subnet", "vpc")).toBe("subnet-vpc");
     expect(getEdgeKind("vm", "subnet")).toBe("vm-subnet");
     expect(getEdgeKind("vm", "storage")).toBe("vm-storage");
+    expect(getEdgeKind("sql", "subnet")).toBe("sql-subnet");
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {
@@ -117,6 +130,37 @@ describe("validateConnection", () => {
       { nodes, edges: [] },
     );
     expect(result).toEqual({ valid: true, edgeKind: "subnet-vpc" });
+  });
+
+  it("aceita Cloud SQL privado → sub-rede", () => {
+    const result = validateConnection(
+      {
+        source: sql.id,
+        target: subnet.id,
+        sourceHandle: HANDLE_IDS.sql.toSubnet,
+        targetHandle: HANDLE_IDS.subnet.fromSql,
+      },
+      { nodes, edges: [] },
+    );
+    expect(result).toEqual({ valid: true, edgeKind: "sql-subnet" });
+  });
+
+  it("rejeita Cloud SQL público → sub-rede", () => {
+    const publicSql: DiagramNode = {
+      ...sql,
+      id: "sql-public",
+      data: { ...sql.data, accessMode: "public" },
+    };
+    const result = validateConnection(
+      {
+        source: publicSql.id,
+        target: subnet.id,
+        sourceHandle: HANDLE_IDS.sql.toSubnet,
+        targetHandle: HANDLE_IDS.subnet.fromSql,
+      },
+      { nodes: [...nodes, publicSql], edges: [] },
+    );
+    expect(result).toEqual({ valid: false, reason: "sql-not-private" });
   });
 
   it("aceita VM → Cloud Storage com handles corretos", () => {

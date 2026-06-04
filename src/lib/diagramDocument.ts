@@ -1,4 +1,5 @@
 import { handlesForEdgeKind, validateConnection } from "../model/connections";
+import { migrateSqlVpcEdge } from "../model/sqlSubnet";
 import {
   isValidDiagramId,
   nodeIdMatchesKind,
@@ -12,6 +13,7 @@ import {
   type DiagramNamingMetadata,
   type DiagramNode,
   type LegacyDiagramDocument,
+  type SqlProps,
   type StorageProps,
   type SubnetProps,
   type VmProps,
@@ -116,6 +118,34 @@ function parseStorageData(raw: unknown): StorageProps {
   };
 }
 
+const SQL_ENGINES = new Set(["MYSQL_8_0", "POSTGRES_15"]);
+
+function parseSqlData(raw: unknown): SqlProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string" ||
+    typeof raw.engine !== "string" ||
+    !SQL_ENGINES.has(raw.engine)
+  ) {
+    throw new DiagramParseError("Dados de Cloud SQL inválidos.");
+  }
+  const accessMode =
+    raw.accessMode === "private" || raw.accessMode === "public"
+      ? raw.accessMode
+      : "public";
+  const data: SqlProps = {
+    name: raw.name,
+    region: raw.region,
+    engine: raw.engine as SqlProps["engine"],
+    accessMode,
+  };
+  if (typeof raw.internalIp === "string") {
+    data.internalIp = raw.internalIp;
+  }
+  return data;
+}
+
 function parseNode(raw: unknown): DiagramNode {
   if (!isRecord(raw)) {
     throw new DiagramParseError("Nó inválido no documento.");
@@ -172,6 +202,18 @@ function parseNode(raw: unknown): DiagramNode {
         position: parsedPosition,
         data: parseStorageData(data),
       };
+    case "sql":
+      if (!nodeIdMatchesKind(nodeId, "sql")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud SQL.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "sql",
+        position: parsedPosition,
+        data: parseSqlData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -198,11 +240,22 @@ function parseEdge(raw: unknown): DiagramEdge {
     throw new DiagramParseError("Aresta não pode ligar um nó a si mesmo.");
   }
 
-  if (kind !== "subnet-vpc" && kind !== "vm-subnet" && kind !== "vm-storage") {
+  if (
+    kind !== "subnet-vpc" &&
+    kind !== "vm-subnet" &&
+    kind !== "vm-storage" &&
+    kind !== "sql-subnet" &&
+    kind !== "sql-vpc"
+  ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
   }
 
-  return { id, source, target, kind };
+  return {
+    id,
+    source,
+    target,
+    kind: kind === "sql-vpc" ? "sql-vpc" : kind,
+  } as DiagramEdge;
 }
 
 function assertUniqueNodeIds(nodes: DiagramNode[]): void {
@@ -254,6 +307,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.storage === "string"
           ? patterns.storage
           : DEFAULT_NAMING_PATTERNS.storage,
+      sql:
+        typeof patterns.sql === "string"
+          ? patterns.sql
+          : DEFAULT_NAMING_PATTERNS.sql,
     },
   };
 }
@@ -330,10 +387,11 @@ export function normalizeLoadedDocument(
   const nodes = input.nodes.map((node) => structuredClone(node));
   assertUniqueNodeIds(nodes);
 
-  const referencedEdges = filterEdgesWithValidReferences(
-    nodes,
-    input.edges.map((edge) => structuredClone(edge)),
-  );
+  const clonedEdges = input.edges.map((edge) => structuredClone(edge));
+  const migratedEdges = clonedEdges
+    .map((edge) => migrateSqlVpcEdge(edge, nodes, clonedEdges))
+    .filter((edge): edge is DiagramEdge => edge !== null);
+  const referencedEdges = filterEdgesWithValidReferences(nodes, migratedEdges);
   const edges = sanitizeDocumentEdges(nodes, referencedEdges);
   const metadata =
     "metadata" in input && input.metadata
@@ -399,7 +457,8 @@ function namingMetadataEqual(
     a.patterns.vpc === b.patterns.vpc &&
     a.patterns.subnet === b.patterns.subnet &&
     a.patterns.vm === b.patterns.vm &&
-    a.patterns.storage === b.patterns.storage
+    a.patterns.storage === b.patterns.storage &&
+    a.patterns.sql === b.patterns.sql
   );
 }
 

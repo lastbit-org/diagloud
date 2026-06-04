@@ -8,12 +8,14 @@ import type { ResourceKind } from "./resources";
  * - Sub-rede → VPC (`subnet-vpc`): no máximo 1 VPC por sub-rede
  * - VM → Sub-rede (`vm-subnet`): no máximo 1 sub-rede por VM
  * - VM → Cloud Storage (`vm-storage`): acesso da VM ao bucket
+ * - Cloud SQL → Sub-rede (`sql-subnet`): IP privado na sub-rede (modo privado)
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
 export const EDGE_ENDPOINTS = {
   "subnet-vpc": { from: "subnet", to: "vpc" },
   "vm-subnet": { from: "vm", to: "subnet" },
   "vm-storage": { from: "vm", to: "storage" },
+  "sql-subnet": { from: "sql", to: "subnet" },
 } as const satisfies Record<
   DiagramEdge["kind"],
   { from: ResourceKind; to: ResourceKind }

@@ -1,5 +1,6 @@
 import { parseCidr } from "../lib/cidr";
 import { HANDLE_IDS } from "../lib/handles";
+import { canAttachSqlToSubnet } from "./sqlSubnet";
 import { canAttachVmToSubnet, getSubnetNode } from "./subnet";
 import { EDGE_ENDPOINTS } from "../types";
 import type { DiagramEdge, DiagramNode, ResourceKind } from "../types";
@@ -21,7 +22,10 @@ export type ConnectionInvalidReason =
   | "subnet-has-vpc"
   | "vm-has-subnet"
   | "subnet-invalid-cidr"
-  | "subnet-vm-capacity";
+  | "subnet-vm-capacity"
+  | "sql-has-subnet"
+  | "sql-not-private"
+  | "subnet-sql-capacity";
 
 /** Verifica se `toId` é alcançável a partir de `fromId` seguindo as arestas existentes. */
 export function canReachNode(
@@ -101,6 +105,11 @@ export function matchesHandleIds(
       return (
         sourceHandle === HANDLE_IDS.vm.toStorage &&
         targetHandle === HANDLE_IDS.storage.fromVm
+      );
+    case "sql-subnet":
+      return (
+        sourceHandle === HANDLE_IDS.sql.toSubnet &&
+        targetHandle === HANDLE_IDS.subnet.fromSql
       );
   }
 }
@@ -257,6 +266,32 @@ export function validateConnection(
     return { valid: false, reason: "vm-has-subnet" };
   }
 
+  if (
+    edgeKind === "sql-subnet" &&
+    context.edges.some(
+      (edge) => edge.kind === "sql-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "sql-has-subnet" };
+  }
+
+  if (edgeKind === "sql-subnet") {
+    const sqlNode = context.nodes.find((n) => n.id === directed.source);
+    if (!sqlNode || sqlNode.kind !== "sql") {
+      return { valid: false, reason: "unknown-node" };
+    }
+    if (sqlNode.data.accessMode !== "private") {
+      return { valid: false, reason: "sql-not-private" };
+    }
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+    if (!canAttachSqlToSubnet(directed.target, context.nodes, context.edges)) {
+      return { valid: false, reason: "subnet-sql-capacity" };
+    }
+  }
+
   if (edgeKind === "vm-subnet") {
     const subnet = getSubnetNode(directed.target, context.nodes);
     if (!subnet || !parseCidr(subnet.data.cidr)) {
@@ -300,6 +335,11 @@ export function handlesForEdgeKind(kind: DiagramEdge["kind"]): {
       return {
         sourceHandle: HANDLE_IDS.vm.toStorage,
         targetHandle: HANDLE_IDS.storage.fromVm,
+      };
+    case "sql-subnet":
+      return {
+        sourceHandle: HANDLE_IDS.sql.toSubnet,
+        targetHandle: HANDLE_IDS.subnet.fromSql,
       };
   }
 }

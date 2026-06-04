@@ -26,6 +26,27 @@
   color: var(--text);
 }
 
+.palette__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.palette__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.palette__group-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+
 .palette__list {
   display: flex;
   flex-direction: column;

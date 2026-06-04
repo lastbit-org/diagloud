@@ -1,5 +1,5 @@
 import type { NamingPatternByKind } from "./naming";
-import type { StorageProps, SubnetProps, VmProps, VpcProps } from "./resources";
+import type { SqlProps, StorageProps, SubnetProps, VmProps, VpcProps } from "./resources";
 
 export const DIAGRAM_DOCUMENT_VERSION = 1 as const;
 
@@ -15,13 +15,14 @@ export type DiagramNode =
   | (NodeBase & { kind: "vpc"; data: VpcProps })
   | (NodeBase & { kind: "subnet"; data: SubnetProps })
   | (NodeBase & { kind: "vm"; data: VmProps })
-  | (NodeBase & { kind: "storage"; data: StorageProps });
+  | (NodeBase & { kind: "storage"; data: StorageProps })
+  | (NodeBase & { kind: "sql"; data: SqlProps });
 
 export type DiagramEdge = {
   id: string;
   source: string;
   target: string;
-  kind: "subnet-vpc" | "vm-subnet" | "vm-storage";
+  kind: "subnet-vpc" | "vm-subnet" | "vm-storage" | "sql-subnet";
 };
 
 export type DiagramNamingMetadata = {

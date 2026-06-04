@@ -8,7 +8,13 @@ import {
   validateSubnetCidr,
 } from "../../model/subnet";
 import { useDiagramStore } from "../../store/diagramStore";
-import type { DiagramNode, StorageAccessMode, StorageClass } from "../../types";
+import type {
+  DiagramNode,
+  SqlAccessMode,
+  SqlEngine,
+  StorageAccessMode,
+  StorageClass,
+} from "../../types";
 import "./properties.css";
 
 function SubnetCidrEditor({
@@ -378,6 +384,98 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           />
         </>
       )}
+
+      {selectedNode?.kind === "sql" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="sql-name">Nome</label>
+            <input
+              id="sql-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="sql-access">Acesso</label>
+            <select
+              id="sql-access"
+              value={selectedNode.data.accessMode}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  accessMode: e.target.value as SqlAccessMode,
+                })
+              }
+            >
+              <option value="public">Público (IP público)</option>
+              <option value="private">Privado via VPC</option>
+            </select>
+            <span className="properties-field__hint">
+              Modo privado: ligue à sub-rede pelo handle superior do nó.
+            </span>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="sql-engine">Motor</label>
+            <select
+              id="sql-engine"
+              value={selectedNode.data.engine}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  engine: e.target.value as SqlEngine,
+                })
+              }
+            >
+              <option value="POSTGRES_15">PostgreSQL 15</option>
+              <option value="MYSQL_8_0">MySQL 8.0</option>
+            </select>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="sql-region">Região</label>
+            <input
+              id="sql-region"
+              value={
+                selectedNode.data.accessMode === "private" &&
+                selectedNode.data.internalIp
+                  ? (selectedNode.data.region ?? "—")
+                  : selectedNode.data.region
+              }
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+              readOnly={
+                selectedNode.data.accessMode === "private" &&
+                Boolean(selectedNode.data.internalIp)
+              }
+              aria-readonly={
+                selectedNode.data.accessMode === "private" &&
+                Boolean(selectedNode.data.internalIp)
+              }
+            />
+            {selectedNode.data.accessMode === "private" &&
+            selectedNode.data.internalIp ? (
+              <span className="properties-field__hint">
+                Região herdada da sub-rede ligada.
+              </span>
+            ) : null}
+          </div>
+          {selectedNode.data.accessMode === "private" && (
+            <div className="properties-field">
+              <label htmlFor="sql-ip">IP interno (sub-rede)</label>
+              <input
+                id="sql-ip"
+                value={selectedNode.data.internalIp ?? "—"}
+                readOnly
+                aria-readonly
+              />
+              <span className="properties-field__hint">
+                Atribuído ao ligar à sub-rede (após as VMs no mesmo bloco CIDR).
+              </span>
+            </div>
+          )}
+          <SqlSubnetInfo sql={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
     </>
   );
 
@@ -389,6 +487,45 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
     <aside className="properties-panel" aria-label="Propriedades">
       {content}
     </aside>
+  );
+}
+
+function SqlSubnetInfo({
+  sql,
+  edges,
+  nodes,
+}: {
+  sql: Extract<DiagramNode, { kind: "sql" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find(
+    (e) => e.kind === "sql-subnet" && e.source === sql.id,
+  );
+  if (sql.data.accessMode === "public") {
+    return (
+      <p className="properties-field__hint">
+        Acesso por IP público — não exige ligação à sub-rede.
+      </p>
+    );
+  }
+  if (!edge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue esta instância à sub-rede (handle superior) para obter IP interno privado.
+      </p>
+    );
+  }
+  const subnet = nodes.find((n) => n.id === edge.target && n.kind === "subnet");
+  if (!subnet || subnet.kind !== "subnet") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Sub-rede</dt>
+      <dd>
+        {subnet.data.name} ({subnet.data.cidr})
+      </dd>
+    </dl>
   );
 }
 

@@ -6,6 +6,7 @@ export const HANDLE_IDS = {
   subnet: {
     toVpc: "subnet-to-vpc",
     fromVm: "subnet-from-vm",
+    fromSql: "subnet-from-sql",
   },
   vm: {
     toSubnet: "vm-to-subnet",
@@ -13,5 +14,8 @@ export const HANDLE_IDS = {
   },
   storage: {
     fromVm: "storage-from-vm",
+  },
+  sql: {
+    toSubnet: "sql-to-subnet",
   },
 } as const;

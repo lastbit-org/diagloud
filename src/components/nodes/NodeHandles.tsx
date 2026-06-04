@@ -35,6 +35,13 @@ export function NodeHandles({ kind }: NodeHandlesProps) {
             className="gcp-handle gcp-handle--target"
             title="Recebe VM"
           />
+          <Handle
+            type="target"
+            position={Position.Left}
+            id={HANDLE_IDS.subnet.fromSql}
+            className="gcp-handle gcp-handle--target"
+            title="Recebe Cloud SQL (IP privado)"
+          />
         </>
       );
     case "vm":
@@ -64,6 +71,16 @@ export function NodeHandles({ kind }: NodeHandlesProps) {
           id={HANDLE_IDS.storage.fromVm}
           className="gcp-handle gcp-handle--target"
           title="Recebe VM"
+        />
+      );
+    case "sql":
+      return (
+        <Handle
+          type="source"
+          position={Position.Top}
+          id={HANDLE_IDS.sql.toSubnet}
+          className="gcp-handle gcp-handle--source"
+          title="Conectar à sub-rede (modo privado)"
         />
       );
   }

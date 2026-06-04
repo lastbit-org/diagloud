@@ -25,6 +25,7 @@ const sampleDocument: DiagramDocument = {
         subnet: "sub-AREA-AMBIENTE",
         vm: "vm-##-AREA-AMBIENTE",
         storage: "gcs-AREA-AMBIENTE",
+        sql: "sql-AREA-AMBIENTE",
       },
     },
   },

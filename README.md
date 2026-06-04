@@ -1,6 +1,6 @@
 # Diagloud
 
-Editor visual de arquitetura GCP (MVP: VPC, sub-rede, VM, Cloud Storage).
+Editor visual de arquitetura GCP (MVP: VPC, sub-rede, VM, Cloud Storage, Cloud SQL).
 
 ## Desenvolvimento
 

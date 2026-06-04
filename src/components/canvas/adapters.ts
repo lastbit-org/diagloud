@@ -17,6 +17,15 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     }
     return node.data.location;
   }
+  if (node.kind === "sql") {
+    if (node.data.accessMode === "public") {
+      return "IP público";
+    }
+    if (node.data.internalIp) {
+      return node.data.internalIp;
+    }
+    return "Privado (sub-rede)";
+  }
   return undefined;
 }
 

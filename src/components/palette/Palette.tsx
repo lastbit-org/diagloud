@@ -1,6 +1,6 @@
 import "./palette.css";
 import { PaletteItem } from "./PaletteItem";
-import { PALETTE_ITEMS } from "./paletteItems";
+import { PALETTE_CATEGORIES, paletteItemsByCategory } from "./paletteItems";
 
 export function Palette() {
   return (
@@ -9,11 +9,32 @@ export function Palette() {
       <p className="palette__hint">
         Clique ou arraste para o diagrama.
       </p>
-      <ul className="palette__list">
-        {PALETTE_ITEMS.map((item) => (
-          <PaletteItem key={item.kind} item={item} />
-        ))}
-      </ul>
+      <div className="palette__groups">
+        {PALETTE_CATEGORIES.map((category) => {
+          const items = paletteItemsByCategory(category.id);
+          if (items.length === 0) return null;
+
+          return (
+            <section
+              key={category.id}
+              className="palette__group"
+              aria-labelledby={`palette-category-${category.id}`}
+            >
+              <h3
+                id={`palette-category-${category.id}`}
+                className="palette__group-title"
+              >
+                {category.label}
+              </h3>
+              <ul className="palette__list">
+                {items.map((item) => (
+                  <PaletteItem key={item.kind} item={item} />
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
     </aside>
   );
 }

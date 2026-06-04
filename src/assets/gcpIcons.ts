@@ -1,5 +1,6 @@
 import type { ResourceKind } from "../types";
 import subnetIcon from "./google-cloud-legacy-icons/cloud_network/cloud_network.svg";
+import sqlIcon from "./google-cloud-legacy-icons/cloud_sql/cloud_sql.svg";
 import storageIcon from "./google-cloud-legacy-icons/cloud_storage/cloud_storage.svg";
 import vmIcon from "./google-cloud-legacy-icons/compute_engine/compute_engine.svg";
 import vpcIcon from "./google-cloud-legacy-icons/virtual_private_cloud/virtual_private_cloud.svg";
@@ -10,6 +11,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   subnet: subnetIcon,
   vm: vmIcon,
   storage: storageIcon,
+  sql: sqlIcon,
 };
 
 export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
@@ -17,4 +19,5 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   subnet: "Sub-rede",
   vm: "VM",
   storage: "Cloud Storage",
+  sql: "Cloud SQL",
 };

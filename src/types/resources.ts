@@ -1,4 +1,9 @@
-export type ResourceKind = "vpc" | "subnet" | "vm" | "storage";
+export type ResourceKind = "vpc" | "subnet" | "vm" | "storage" | "sql";
+
+export type SqlEngine = "MYSQL_8_0" | "POSTGRES_15";
+
+/** `public` = IP público; `private` = IP interno na VPC ligada. */
+export type SqlAccessMode = "public" | "private";
 
 export type StorageClass =
   | "STANDARD"
@@ -36,9 +41,19 @@ export type StorageProps = {
   accessMode: StorageAccessMode;
 };
 
+export type SqlProps = {
+  name: string;
+  region: string;
+  engine: SqlEngine;
+  accessMode: SqlAccessMode;
+  /** IP privado na VPC — atribuído ao ligar em modo privado. */
+  internalIp?: string;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
   vm: VmProps;
   storage: StorageProps;
+  sql: SqlProps;
 };

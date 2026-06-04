@@ -41,6 +41,24 @@ const storageVm: DiagramNode = {
   data: { ...storagePublic.data, name: "bucket-2", accessMode: "vm" },
 };
 
+const sqlPublic: DiagramNode = {
+  id: "sql-1",
+  kind: "sql",
+  position: { x: 0, y: 0 },
+  data: {
+    name: "sql-1",
+    region: "southamerica-east1",
+    engine: "POSTGRES_15",
+    accessMode: "public",
+  },
+};
+
+const sqlPrivate: DiagramNode = {
+  ...sqlPublic,
+  id: "sql-2",
+  data: { ...sqlPublic.data, name: "sql-2", accessMode: "private" },
+};
+
 describe("collectDiagramIssues", () => {
   it("detecta VM órfã", () => {
     const issues = collectDiagramIssues([vpc, subnet, vm], []);
@@ -62,6 +80,20 @@ describe("collectDiagramIssues", () => {
           i.code === "orphan-storage" &&
           i.nodeId === "storage-2" &&
           i.severity === "warning",
+      ),
+    ).toBe(true);
+  });
+
+  it("permite Cloud SQL público isolado", () => {
+    const issues = collectDiagramIssues([sqlPublic], []);
+    expect(issues.some((i) => i.code === "orphan-sql-private")).toBe(false);
+  });
+
+  it("avisa Cloud SQL privado sem VPC", () => {
+    const issues = collectDiagramIssues([sqlPrivate], []);
+    expect(
+      issues.some(
+        (i) => i.code === "orphan-sql-private" && i.nodeId === "sql-2",
       ),
     ).toBe(true);
   });
