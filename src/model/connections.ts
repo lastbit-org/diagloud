@@ -97,6 +97,11 @@ export function matchesHandleIds(
         sourceHandle === HANDLE_IDS.vm.toSubnet &&
         targetHandle === HANDLE_IDS.subnet.fromVm
       );
+    case "vm-storage":
+      return (
+        sourceHandle === HANDLE_IDS.vm.toStorage &&
+        targetHandle === HANDLE_IDS.storage.fromVm
+      );
   }
 }
 
@@ -290,6 +295,11 @@ export function handlesForEdgeKind(kind: DiagramEdge["kind"]): {
       return {
         sourceHandle: HANDLE_IDS.vm.toSubnet,
         targetHandle: HANDLE_IDS.subnet.fromVm,
+      };
+    case "vm-storage":
+      return {
+        sourceHandle: HANDLE_IDS.vm.toStorage,
+        targetHandle: HANDLE_IDS.storage.fromVm,
       };
   }
 }

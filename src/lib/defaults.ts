@@ -5,6 +5,7 @@ import type {
   DiagramNode,
   ResourceKind,
   ResourcePropsByKind,
+  StorageProps,
   SubnetProps,
   VmProps,
   VpcProps,
@@ -39,6 +40,13 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         machineType: "e2-micro",
       } as VmProps as ResourcePropsByKind[K];
+    case "storage":
+      return {
+        name,
+        location: "southamerica-east1",
+        storageClass: "STANDARD",
+        accessMode: "public",
+      } as StorageProps as ResourcePropsByKind[K];
   }
 }
 
@@ -51,5 +59,7 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `subnet-${count}`;
     case "vm":
       return `vm-${count}`;
+    case "storage":
+      return `bucket-${count}`;
   }
 }

@@ -9,5 +9,9 @@ export const HANDLE_IDS = {
   },
   vm: {
     toSubnet: "vm-to-subnet",
+    toStorage: "vm-to-storage",
+  },
+  storage: {
+    fromVm: "storage-from-vm",
   },
 } as const;

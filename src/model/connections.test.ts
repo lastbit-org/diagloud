@@ -30,12 +30,25 @@ const vm: DiagramNode = {
   data: { name: "vm-1", machineType: "e2-micro" },
 };
 
-const nodes = [vpc, subnet, vm];
+const storage: DiagramNode = {
+  id: "storage-1",
+  kind: "storage",
+  position: { x: 200, y: 200 },
+  data: {
+    name: "bucket-1",
+    location: "southamerica-east1",
+    storageClass: "STANDARD",
+    accessMode: "public",
+  },
+};
+
+const nodes = [vpc, subnet, vm, storage];
 
 describe("getEdgeKind", () => {
-  it("permite sub-rede → VPC e VM → sub-rede", () => {
+  it("permite sub-rede → VPC, VM → sub-rede e VM → storage", () => {
     expect(getEdgeKind("subnet", "vpc")).toBe("subnet-vpc");
     expect(getEdgeKind("vm", "subnet")).toBe("vm-subnet");
+    expect(getEdgeKind("vm", "storage")).toBe("vm-storage");
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {
@@ -44,6 +57,8 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vpc", "subnet")).toBeNull();
     expect(getEdgeKind("subnet", "vm")).toBeNull();
     expect(getEdgeKind("vm", "vm")).toBeNull();
+    expect(getEdgeKind("storage", "vm")).toBeNull();
+    expect(getEdgeKind("vpc", "storage")).toBeNull();
   });
 });
 
@@ -102,6 +117,19 @@ describe("validateConnection", () => {
       { nodes, edges: [] },
     );
     expect(result).toEqual({ valid: true, edgeKind: "subnet-vpc" });
+  });
+
+  it("aceita VM → Cloud Storage com handles corretos", () => {
+    const result = validateConnection(
+      {
+        source: vm.id,
+        target: storage.id,
+        sourceHandle: HANDLE_IDS.vm.toStorage,
+        targetHandle: HANDLE_IDS.storage.fromVm,
+      },
+      { nodes, edges: [] },
+    );
+    expect(result).toEqual({ valid: true, edgeKind: "vm-storage" });
   });
 
   it("rejeita VM → VPC com invalid-types", () => {

@@ -1,4 +1,13 @@
-export type ResourceKind = "vpc" | "subnet" | "vm";
+export type ResourceKind = "vpc" | "subnet" | "vm" | "storage";
+
+export type StorageClass =
+  | "STANDARD"
+  | "NEARLINE"
+  | "COLDLINE"
+  | "ARCHIVE";
+
+/** `public` = bucket isolado (acesso público / CLI); `vm` = acesso via VM ligada. */
+export type StorageAccessMode = "public" | "vm";
 
 export type VpcProps = {
   name: string;
@@ -19,8 +28,17 @@ export type VmProps = {
   internalIp?: string;
 };
 
+export type StorageProps = {
+  name: string;
+  /** Região ou localização multi-regional (ex.: southamerica-east1, US). */
+  location: string;
+  storageClass: StorageClass;
+  accessMode: StorageAccessMode;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
   vm: VmProps;
+  storage: StorageProps;
 };

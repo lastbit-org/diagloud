@@ -91,6 +91,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `subnet-${count}`;
     case "vm":
       return `vm-${count}`;
+    case "storage":
+      return `bucket-${count}`;
   }
 }
 

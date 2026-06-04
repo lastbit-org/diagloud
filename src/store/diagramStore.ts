@@ -21,6 +21,7 @@ import type {
   LegacyDiagramDocument,
   ResourceKind,
   ResourcePropsByKind,
+  StorageProps,
   SubnetProps,
   VmProps,
   VpcProps,
@@ -45,7 +46,11 @@ type DiagramActions = {
   ) => void;
   updateNodeData: (
     id: string,
-    data: Partial<VpcProps> | Partial<SubnetProps> | Partial<VmProps>,
+    data:
+      | Partial<VpcProps>
+      | Partial<SubnetProps>
+      | Partial<VmProps>
+      | Partial<StorageProps>,
   ) => void;
   setSubnetCidr: (id: string, cidr: string) => boolean;
   removeNode: (id: string) => void;
@@ -122,12 +127,22 @@ function buildNode<K extends ResourceKind>(
         kind: "vm",
         data: { ...defaultResourceData("vm", resourceContext), ...data },
       };
+    case "storage":
+      return {
+        ...base,
+        kind: "storage",
+        data: { ...defaultResourceData("storage", resourceContext), ...data },
+      };
   }
 }
 
 function mergeNodeData(
   node: DiagramNode,
-  patch: Partial<VpcProps> | Partial<SubnetProps> | Partial<VmProps>,
+  patch:
+    | Partial<VpcProps>
+    | Partial<SubnetProps>
+    | Partial<VmProps>
+    | Partial<StorageProps>,
 ): DiagramNode {
   switch (node.kind) {
     case "vpc":
@@ -135,6 +150,8 @@ function mergeNodeData(
     case "subnet":
       return { ...node, data: { ...node.data, ...patch } };
     case "vm":
+      return { ...node, data: { ...node.data, ...patch } };
+    case "storage":
       return { ...node, data: { ...node.data, ...patch } };
   }
 }

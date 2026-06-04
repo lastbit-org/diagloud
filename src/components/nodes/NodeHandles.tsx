@@ -39,12 +39,31 @@ export function NodeHandles({ kind }: NodeHandlesProps) {
       );
     case "vm":
       return (
+        <>
+          <Handle
+            type="source"
+            position={Position.Top}
+            id={HANDLE_IDS.vm.toSubnet}
+            className="gcp-handle gcp-handle--source"
+            title="Conectar à sub-rede"
+          />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id={HANDLE_IDS.vm.toStorage}
+            className="gcp-handle gcp-handle--source"
+            title="Conectar ao Cloud Storage"
+          />
+        </>
+      );
+    case "storage":
+      return (
         <Handle
-          type="source"
-          position={Position.Top}
-          id={HANDLE_IDS.vm.toSubnet}
-          className="gcp-handle gcp-handle--source"
-          title="Conectar à sub-rede"
+          type="target"
+          position={Position.Left}
+          id={HANDLE_IDS.storage.fromVm}
+          className="gcp-handle gcp-handle--target"
+          title="Recebe VM"
         />
       );
   }

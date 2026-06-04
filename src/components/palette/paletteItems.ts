@@ -14,7 +14,12 @@ export type PaletteItemConfig = {
 };
 
 export function isPaletteResourceKind(value: string): value is ResourceKind {
-  return value === "vpc" || value === "subnet" || value === "vm";
+  return (
+    value === "vpc" ||
+    value === "subnet" ||
+    value === "vm" ||
+    value === "storage"
+  );
 }
 
 export const PALETTE_ITEMS: PaletteItemConfig[] = [
@@ -35,5 +40,11 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.vm,
     description: "Máquina virtual Compute",
     icon: GCP_RESOURCE_ICONS.vm,
+  },
+  {
+    kind: "storage",
+    label: GCP_RESOURCE_LABELS.storage,
+    description: "Bucket de objetos",
+    icon: GCP_RESOURCE_ICONS.storage,
   },
 ];

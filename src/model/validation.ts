@@ -6,6 +6,7 @@ import type { DiagramEdge, DiagramNode } from "../types";
 
 export type DiagramIssueCode =
   | "orphan-vm"
+  | "orphan-storage"
   | "subnet-without-vpc"
   | "subnet-invalid-cidr"
   | "subnet-cidr-overlap";
@@ -31,6 +32,12 @@ export function collectDiagramIssues(
       .map((edge) => edge.source),
   );
 
+  const storageIdsOnVm = new Set(
+    edges
+      .filter((edge) => edge.kind === "vm-storage")
+      .map((edge) => edge.target),
+  );
+
   for (const node of nodes) {
     if (node.kind === "vm" && !vmIdsOnSubnet.has(node.id)) {
       issues.push({
@@ -38,6 +45,19 @@ export function collectDiagramIssues(
         severity: "error",
         nodeId: node.id,
         message: `VM "${node.data.name}" não está ligada a uma sub-rede.`,
+      });
+    }
+
+    if (
+      node.kind === "storage" &&
+      node.data.accessMode === "vm" &&
+      !storageIdsOnVm.has(node.id)
+    ) {
+      issues.push({
+        code: "orphan-storage",
+        severity: "warning",
+        nodeId: node.id,
+        message: `Bucket "${node.data.name}" está em modo VM mas não está ligado a nenhuma VM.`,
       });
     }
   }

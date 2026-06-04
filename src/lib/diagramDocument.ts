@@ -3,6 +3,7 @@ import {
   isValidDiagramId,
   nodeIdMatchesKind,
 } from "./id";
+import { DEFAULT_NAMING_PATTERNS } from "../types/naming";
 import {
   DIAGRAM_DOCUMENT_VERSION,
   type DiagramDocument,
@@ -11,6 +12,7 @@ import {
   type DiagramNamingMetadata,
   type DiagramNode,
   type LegacyDiagramDocument,
+  type StorageProps,
   type SubnetProps,
   type VmProps,
   type VpcProps,
@@ -84,6 +86,36 @@ function parseVmData(raw: unknown): VmProps {
   return data;
 }
 
+const STORAGE_CLASSES = new Set([
+  "STANDARD",
+  "NEARLINE",
+  "COLDLINE",
+  "ARCHIVE",
+]);
+
+function parseStorageData(raw: unknown): StorageProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string" ||
+    typeof raw.storageClass !== "string" ||
+    !STORAGE_CLASSES.has(raw.storageClass)
+  ) {
+    throw new DiagramParseError("Dados de Cloud Storage inválidos.");
+  }
+  const accessMode =
+    raw.accessMode === "vm" || raw.accessMode === "public"
+      ? raw.accessMode
+      : "public";
+
+  return {
+    name: raw.name,
+    location: raw.location,
+    storageClass: raw.storageClass as StorageProps["storageClass"],
+    accessMode,
+  };
+}
+
 function parseNode(raw: unknown): DiagramNode {
   if (!isRecord(raw)) {
     throw new DiagramParseError("Nó inválido no documento.");
@@ -128,6 +160,18 @@ function parseNode(raw: unknown): DiagramNode {
         position: parsedPosition,
         data: parseVmData(data),
       };
+    case "storage":
+      if (!nodeIdMatchesKind(nodeId, "storage")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Storage.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "storage",
+        position: parsedPosition,
+        data: parseStorageData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -154,7 +198,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     throw new DiagramParseError("Aresta não pode ligar um nó a si mesmo.");
   }
 
-  if (kind !== "subnet-vpc" && kind !== "vm-subnet") {
+  if (kind !== "subnet-vpc" && kind !== "vm-subnet" && kind !== "vm-storage") {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
   }
 
@@ -206,6 +250,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
       vpc: patterns.vpc,
       subnet: patterns.subnet,
       vm: patterns.vm,
+      storage:
+        typeof patterns.storage === "string"
+          ? patterns.storage
+          : DEFAULT_NAMING_PATTERNS.storage,
     },
   };
 }
@@ -350,7 +398,8 @@ function namingMetadataEqual(
     a.isActive === b.isActive &&
     a.patterns.vpc === b.patterns.vpc &&
     a.patterns.subnet === b.patterns.subnet &&
-    a.patterns.vm === b.patterns.vm
+    a.patterns.vm === b.patterns.vm &&
+    a.patterns.storage === b.patterns.storage
   );
 }
 

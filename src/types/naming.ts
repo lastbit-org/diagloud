@@ -11,6 +11,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   vpc: "vpc-AREA-AMBIENTE",
   subnet: "sub-AREA-AMBIENTE",
   vm: "vm-##-AREA-AMBIENTE",
+  storage: "gcs-AREA-AMBIENTE",
 };
 
 export const NAMING_TOKEN_HINTS = [

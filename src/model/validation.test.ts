@@ -23,12 +23,55 @@ const vm: DiagramNode = {
   data: { name: "vm-1", machineType: "e2-micro" },
 };
 
+const storagePublic: DiagramNode = {
+  id: "storage-1",
+  kind: "storage",
+  position: { x: 200, y: 200 },
+  data: {
+    name: "bucket-1",
+    location: "southamerica-east1",
+    storageClass: "STANDARD",
+    accessMode: "public",
+  },
+};
+
+const storageVm: DiagramNode = {
+  ...storagePublic,
+  id: "storage-2",
+  data: { ...storagePublic.data, name: "bucket-2", accessMode: "vm" },
+};
+
 describe("collectDiagramIssues", () => {
   it("detecta VM órfã", () => {
     const issues = collectDiagramIssues([vpc, subnet, vm], []);
     expect(issues.some((i) => i.code === "orphan-vm" && i.nodeId === "vm-1")).toBe(
       true,
     );
+  });
+
+  it("permite bucket público/CLI isolado sem aviso", () => {
+    const issues = collectDiagramIssues([storagePublic], []);
+    expect(issues.some((i) => i.code === "orphan-storage")).toBe(false);
+  });
+
+  it("avisa bucket em modo VM sem ligação", () => {
+    const issues = collectDiagramIssues([storageVm], []);
+    expect(
+      issues.some(
+        (i) =>
+          i.code === "orphan-storage" &&
+          i.nodeId === "storage-2" &&
+          i.severity === "warning",
+      ),
+    ).toBe(true);
+  });
+
+  it("não avisa bucket em modo VM quando ligado", () => {
+    const edges: DiagramEdge[] = [
+      { id: "e3", source: "vm-1", target: "storage-2", kind: "vm-storage" },
+    ];
+    const issues = collectDiagramIssues([vpc, subnet, vm, storageVm], edges);
+    expect(issues.some((i) => i.code === "orphan-storage")).toBe(false);
   });
 
   it("detecta sub-rede sem VPC", () => {

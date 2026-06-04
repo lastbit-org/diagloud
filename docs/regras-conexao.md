@@ -1,6 +1,6 @@
 # Regras mínimas de conexão (MVP)
 
-Diagrama hierárquico GCP: **VPC ← Sub-rede ← VM**.  
+Diagrama hierárquico GCP: **VPC ← Sub-rede ← VM**; **VM → Cloud Storage**.  
 A seta indica a direção da aresta no editor (origem → destino).
 
 ```
@@ -21,11 +21,12 @@ A seta indica a direção da aresta no editor (origem → destino).
 
 Linha = **origem** (source). Coluna = **destino** (target).
 
-| Origem \ Destino | VPC | Sub-rede | VM |
-|------------------|:---:|:--------:|:--:|
-| **VPC**          | —   | ✗        | ✗  |
-| **Sub-rede**     | ✓   | —        | ✗  |
-| **VM**           | ✗   | ✓        | —  |
+| Origem \ Destino | VPC | Sub-rede | VM | Cloud Storage |
+|------------------|:---:|:--------:|:--:|:-------------:|
+| **VPC**          | —   | ✗        | ✗  | ✗             |
+| **Sub-rede**     | ✓   | —        | ✗  | ✗             |
+| **VM**           | ✗   | ✓        | —  | ✓             |
+| **Cloud Storage**| ✗   | ✗        | ✗  | —             |
 
 Legenda: **✓** permitido · **✗** bloqueado (`invalid-types`)
 
@@ -54,6 +55,8 @@ Legenda: **✓** permitido · **✗** bloqueado (`invalid-types`)
 | Sub-rede  | `subnet-to-vpc`    | source | superior | Liga à VPC                   |
 | Sub-rede  | `subnet-from-vm`   | target | inferior | Recebe VM                    |
 | VM        | `vm-to-subnet`     | source | superior | Liga à sub-rede              |
+| VM        | `vm-to-storage`    | source | direita  | Liga ao Cloud Storage        |
+| Cloud Storage | `storage-from-vm` | target | esquerda | Recebe VM              |
 
 Aresta só é válida se usar o par de handles correto (`invalid-handles` caso contrário).
 
@@ -63,6 +66,16 @@ Aresta só é válida se usar o par de handles correto (`invalid-handles` caso c
 |---------------|------------------|----------------------------------|
 | `subnet-vpc`  | Sub-rede → VPC   | Sub-rede pertence à VPC          |
 | `vm-subnet`   | VM → Sub-rede    | VM na sub-rede                   |
+| `vm-storage`  | VM → Cloud Storage | VM com acesso ao bucket        |
+
+## Cloud Storage — modos de acesso
+
+| `accessMode` | VM ligada? | Validação |
+|--------------|------------|-----------|
+| `public` (padrão) | Não | OK — acesso público / CLI (`gsutil`), bucket pode ficar isolado |
+| `public` | Sim | OK — opcional documentar VMs que também usam o bucket |
+| `vm` | Não | Aviso `orphan-storage` |
+| `vm` | Sim | OK |
 
 Definição em código: `src/types/connections.ts` (`EDGE_ENDPOINTS`).
 

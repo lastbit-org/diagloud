@@ -53,6 +53,14 @@ export const useNamingStore = create<NamingStore>()(
     }),
     {
       name: "diagloud-naming",
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted as Partial<NamingState>),
+        patterns: {
+          ...DEFAULT_NAMING_PATTERNS,
+          ...(persisted as Partial<NamingState> | undefined)?.patterns,
+        },
+      }),
       partialize: (state) => ({
         area: state.area,
         ambiente: state.ambiente,

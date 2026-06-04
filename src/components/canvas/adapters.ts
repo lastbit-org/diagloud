@@ -11,6 +11,12 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "subnet") {
     return node.data.cidr;
   }
+  if (node.kind === "storage") {
+    if (node.data.accessMode === "public") {
+      return "Público / CLI";
+    }
+    return node.data.location;
+  }
   return undefined;
 }
 

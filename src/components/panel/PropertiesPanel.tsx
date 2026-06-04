@@ -8,7 +8,7 @@ import {
   validateSubnetCidr,
 } from "../../model/subnet";
 import { useDiagramStore } from "../../store/diagramStore";
-import type { DiagramNode } from "../../types";
+import type { DiagramNode, StorageAccessMode, StorageClass } from "../../types";
 import "./properties.css";
 
 function SubnetCidrEditor({
@@ -309,6 +309,73 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             </span>
           </div>
           <VmSubnetInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
+          <VmStorageInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
+        </>
+      )}
+
+      {selectedNode?.kind === "storage" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="storage-name">Nome</label>
+            <input
+              id="storage-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="storage-location">Localização</label>
+            <input
+              id="storage-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1 ou US"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="storage-access">Acesso</label>
+            <select
+              id="storage-access"
+              value={selectedNode.data.accessMode}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  accessMode: e.target.value as StorageAccessMode,
+                })
+              }
+            >
+              <option value="public">Público / CLI (sem VM)</option>
+              <option value="vm">Via VM</option>
+            </select>
+            <span className="properties-field__hint">
+              Em modo público o bucket pode ficar isolado no diagrama.
+            </span>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="storage-class">Classe de armazenamento</label>
+            <select
+              id="storage-class"
+              value={selectedNode.data.storageClass}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  storageClass: e.target.value as StorageClass,
+                })
+              }
+            >
+              <option value="STANDARD">Standard</option>
+              <option value="NEARLINE">Nearline</option>
+              <option value="COLDLINE">Coldline</option>
+              <option value="ARCHIVE">Archive</option>
+            </select>
+          </div>
+          <StorageVmInfo
+            storage={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
         </>
       )}
     </>
@@ -322,6 +389,70 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
     <aside className="properties-panel" aria-label="Propriedades">
       {content}
     </aside>
+  );
+}
+
+function VmStorageInfo({
+  vmId,
+  edges,
+  nodes,
+}: {
+  vmId: string;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "vm-storage" && e.source === vmId)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+
+  if (linked.length === 0) return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Buckets (Cloud Storage)</dt>
+      <dd>
+        {linked.map((bucket) => bucket.data.name).join(", ")}
+      </dd>
+    </dl>
+  );
+}
+
+function StorageVmInfo({
+  storage,
+  edges,
+  nodes,
+}: {
+  storage: Extract<DiagramNode, { kind: "storage" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "vm-storage" && e.target === storage.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+
+  if (storage.data.accessMode === "public" && linked.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Acesso público ou via CLI/gsutil — não exige ligação a VM.
+      </p>
+    );
+  }
+
+  if (linked.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue uma ou mais VMs a este bucket pelo handle lateral da VM.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>VMs com acesso</dt>
+      <dd>{linked.map((vm) => vm.data.name).join(", ")}</dd>
+    </dl>
   );
 }
 

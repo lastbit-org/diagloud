@@ -5,7 +5,7 @@ import { useNamingStore } from "../../store/namingStore";
 import { NAMING_TOKEN_HINTS } from "../../types/naming";
 import type { ResourceKind } from "../../types";
 
-const RESOURCE_ORDER: ResourceKind[] = ["vpc", "subnet", "vm"];
+const RESOURCE_ORDER: ResourceKind[] = ["vpc", "subnet", "vm", "storage"];
 
 export function NamingSettingsPanel() {
   const nodes = useDiagramStore((s) => s.nodes);

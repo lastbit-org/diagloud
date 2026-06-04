@@ -4,7 +4,7 @@ import type { ResourceKind } from "../types";
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const ID_PREFIXES = ["vpc", "subnet", "vm", "edge"] as const;
+const ID_PREFIXES = ["vpc", "subnet", "vm", "storage", "edge"] as const;
 
 export type DiagramIdPrefix = (typeof ID_PREFIXES)[number];
 
@@ -21,7 +21,12 @@ export function createEdgeId(): string {
 /** @deprecated Use createNodeId / createEdgeId. */
 export function createId(prefix = "node"): string {
   if (prefix === "edge") return createEdgeId();
-  if (prefix === "vpc" || prefix === "subnet" || prefix === "vm") {
+  if (
+    prefix === "vpc" ||
+    prefix === "subnet" ||
+    prefix === "vm" ||
+    prefix === "storage"
+  ) {
     return createNodeId(prefix);
   }
   return `${prefix}-${crypto.randomUUID()}`;
@@ -31,7 +36,7 @@ export function isUuid(value: string): boolean {
   return UUID_V4.test(value);
 }
 
-const ID_PREFIX_PATTERN = /^(vpc|subnet|vm|edge)-(.+)$/;
+const ID_PREFIX_PATTERN = /^(vpc|subnet|vm|storage|edge)-(.+)$/;
 
 function parsePrefixedId(
   id: string,
