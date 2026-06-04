@@ -1,5 +1,6 @@
 import { getUsableHostAddress, parseCidr } from "../lib/cidr";
-import { getSubnetNode, getVmIdsOnSubnet } from "./subnet";
+import { sqlHostIndexOffset } from "./subnetHosts";
+import { getSubnetNode } from "./subnet";
 import type { DiagramEdge, DiagramNode, SqlProps } from "../types";
 
 export function getSqlIdsOnSubnet(subnetId: string, edges: DiagramEdge[]): string[] {
@@ -35,13 +36,13 @@ export function reassignSubnetSqlIps(
     return nodes;
   }
 
-  const vmCount = getVmIdsOnSubnet(subnetId, edges).length;
+  const baseIndex = sqlHostIndexOffset(subnetId, edges);
   const sqlIds = getSqlIdsOnSubnet(subnetId, edges);
   let next = nodes;
 
   for (let i = 0; i < sqlIds.length; i += 1) {
     const sqlId = sqlIds[i];
-    const ip = getUsableHostAddress(subnet.data.cidr, vmCount + i);
+    const ip = getUsableHostAddress(subnet.data.cidr, baseIndex + i);
     next = next.map((node) => {
       if (node.id !== sqlId || node.kind !== "sql") return node;
       if (!ip) {
@@ -69,9 +70,9 @@ export function canAttachSqlToSubnet(
   const subnet = getSubnetNode(subnetId, nodes);
   if (!subnet || !parseCidr(subnet.data.cidr)) return false;
 
-  const vmCount = getVmIdsOnSubnet(subnetId, edges).length;
+  const baseIndex = sqlHostIndexOffset(subnetId, edges);
   const sqlCount = getSqlIdsOnSubnet(subnetId, edges).length;
-  return getUsableHostAddress(subnet.data.cidr, vmCount + sqlCount) !== null;
+  return getUsableHostAddress(subnet.data.cidr, baseIndex + sqlCount) !== null;
 }
 
 export function getSubnetIdForSql(

@@ -13,6 +13,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   vm: "vm-##-AREA-AMBIENTE",
   storage: "gcs-AREA-AMBIENTE",
   sql: "sql-AREA-AMBIENTE",
+  gke: "gke-AREA-AMBIENTE",
 };
 
 export const NAMING_TOKEN_HINTS = [

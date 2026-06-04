@@ -60,6 +60,19 @@ const sqlPrivate: DiagramNode = {
 };
 
 describe("collectDiagramIssues", () => {
+  it("detecta GKE órfão", () => {
+    const gke: DiagramNode = {
+      id: "gke-1",
+      kind: "gke",
+      position: { x: 0, y: 0 },
+      data: { name: "gke-1", nodeCount: 3, machineType: "e2-medium" },
+    };
+    const issues = collectDiagramIssues([gke], []);
+    expect(
+      issues.some((i) => i.code === "orphan-gke" && i.nodeId === "gke-1"),
+    ).toBe(true);
+  });
+
   it("detecta VM órfã", () => {
     const issues = collectDiagramIssues([vpc, subnet, vm], []);
     expect(issues.some((i) => i.code === "orphan-vm" && i.nodeId === "vm-1")).toBe(

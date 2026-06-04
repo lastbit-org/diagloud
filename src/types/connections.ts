@@ -16,6 +16,7 @@ export const EDGE_ENDPOINTS = {
   "vm-subnet": { from: "vm", to: "subnet" },
   "vm-storage": { from: "vm", to: "storage" },
   "sql-subnet": { from: "sql", to: "subnet" },
+  "gke-subnet": { from: "gke", to: "subnet" },
 } as const satisfies Record<
   DiagramEdge["kind"],
   { from: ResourceKind; to: ResourceKind }

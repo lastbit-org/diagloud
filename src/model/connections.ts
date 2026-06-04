@@ -1,7 +1,9 @@
 import { parseCidr } from "../lib/cidr";
 import { HANDLE_IDS } from "../lib/handles";
+import { canAttachGkeToSubnet } from "./gkeSubnet";
 import { canAttachSqlToSubnet } from "./sqlSubnet";
-import { canAttachVmToSubnet, getSubnetNode } from "./subnet";
+import { canAttachHostToSubnet } from "./subnetHosts";
+import { getSubnetNode } from "./subnet";
 import { EDGE_ENDPOINTS } from "../types";
 import type { DiagramEdge, DiagramNode, ResourceKind } from "../types";
 
@@ -25,7 +27,9 @@ export type ConnectionInvalidReason =
   | "subnet-vm-capacity"
   | "sql-has-subnet"
   | "sql-not-private"
-  | "subnet-sql-capacity";
+  | "subnet-sql-capacity"
+  | "gke-has-subnet"
+  | "subnet-gke-capacity";
 
 /** Verifica se `toId` é alcançável a partir de `fromId` seguindo as arestas existentes. */
 export function canReachNode(
@@ -111,6 +115,11 @@ export function matchesHandleIds(
         sourceHandle === HANDLE_IDS.sql.toSubnet &&
         targetHandle === HANDLE_IDS.subnet.fromSql
       );
+    case "gke-subnet":
+      return (
+        sourceHandle === HANDLE_IDS.gke.toSubnet &&
+        targetHandle === HANDLE_IDS.subnet.fromGke
+      );
   }
 }
 
@@ -149,7 +158,7 @@ export function detectSubnetVmCapacityReason(
   if (
     subnet &&
     parseCidr(subnet.data.cidr) &&
-    !canAttachVmToSubnet(subnet, context.edges)
+    !canAttachHostToSubnet(pair.subnetId, context.nodes, context.edges)
   ) {
     return "subnet-vm-capacity";
   }
@@ -292,12 +301,31 @@ export function validateConnection(
     }
   }
 
+  if (
+    edgeKind === "gke-subnet" &&
+    context.edges.some(
+      (edge) => edge.kind === "gke-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "gke-has-subnet" };
+  }
+
+  if (edgeKind === "gke-subnet") {
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+    if (!canAttachGkeToSubnet(directed.target, context.nodes, context.edges)) {
+      return { valid: false, reason: "subnet-gke-capacity" };
+    }
+  }
+
   if (edgeKind === "vm-subnet") {
     const subnet = getSubnetNode(directed.target, context.nodes);
     if (!subnet || !parseCidr(subnet.data.cidr)) {
       return { valid: false, reason: "subnet-invalid-cidr" };
     }
-    if (!canAttachVmToSubnet(subnet, context.edges)) {
+    if (!canAttachHostToSubnet(directed.target, context.nodes, context.edges)) {
       return { valid: false, reason: "subnet-vm-capacity" };
     }
   }
@@ -340,6 +368,11 @@ export function handlesForEdgeKind(kind: DiagramEdge["kind"]): {
       return {
         sourceHandle: HANDLE_IDS.sql.toSubnet,
         targetHandle: HANDLE_IDS.subnet.fromSql,
+      };
+    case "gke-subnet":
+      return {
+        sourceHandle: HANDLE_IDS.gke.toSubnet,
+        targetHandle: HANDLE_IDS.subnet.fromGke,
       };
   }
 }

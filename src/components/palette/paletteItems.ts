@@ -6,10 +6,20 @@ import type { ResourceKind } from "../../types";
 
 export const PALETTE_DRAG_MIME = "application/diagloud.resource";
 
-export type PaletteCategoryId = "network" | "compute" | "data";
+/**
+ * Categorias alinhadas ao menu do console GCP (All products / Ver todos os produtos).
+ * @see https://console.cloud.google.com/products
+ * @see https://cloud.google.com/docs/product-list
+ */
+export type PaletteCategoryId =
+  | "networking"
+  | "compute"
+  | "storage"
+  | "databases";
 
 export type PaletteCategoryConfig = {
   id: PaletteCategoryId;
+  /** Rótulo exibido na paleta (equivalente PT do console). */
   label: string;
 };
 
@@ -21,10 +31,12 @@ export type PaletteItemConfig = {
   icon: string;
 };
 
+/** Ordem do painel lateral do console: Networking → Compute → Storage → Databases. */
 export const PALETTE_CATEGORIES: PaletteCategoryConfig[] = [
-  { id: "network", label: "Rede" },
-  { id: "compute", label: "Computação" },
-  { id: "data", label: "Armazenamento e dados" },
+  { id: "networking", label: "Rede (Networking)" },
+  { id: "compute", label: "Computação (Compute)" },
+  { id: "storage", label: "Armazenamento (Storage)" },
+  { id: "databases", label: "Bancos de dados (Databases)" },
 ];
 
 export function isPaletteResourceKind(value: string): value is ResourceKind {
@@ -33,21 +45,22 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "subnet" ||
     value === "vm" ||
     value === "storage" ||
-    value === "sql"
+    value === "sql" ||
+    value === "gke"
   );
 }
 
 export const PALETTE_ITEMS: PaletteItemConfig[] = [
   {
     kind: "vpc",
-    category: "network",
+    category: "networking",
     label: GCP_RESOURCE_LABELS.vpc,
     description: "Rede virtual privada",
     icon: GCP_RESOURCE_ICONS.vpc,
   },
   {
     kind: "subnet",
-    category: "network",
+    category: "networking",
     label: GCP_RESOURCE_LABELS.subnet,
     description: "Segmento de IP na VPC",
     icon: GCP_RESOURCE_ICONS.subnet,
@@ -60,15 +73,22 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.vm,
   },
   {
+    kind: "gke",
+    category: "compute",
+    label: GCP_RESOURCE_LABELS.gke,
+    description: "Cluster Kubernetes gerenciado",
+    icon: GCP_RESOURCE_ICONS.gke,
+  },
+  {
     kind: "storage",
-    category: "data",
+    category: "storage",
     label: GCP_RESOURCE_LABELS.storage,
     description: "Bucket de objetos",
     icon: GCP_RESOURCE_ICONS.storage,
   },
   {
     kind: "sql",
-    category: "data",
+    category: "databases",
     label: GCP_RESOURCE_LABELS.sql,
     description: "Banco gerenciado (MySQL / PostgreSQL)",
     icon: GCP_RESOURCE_ICONS.sql,

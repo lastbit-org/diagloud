@@ -26,6 +26,15 @@
   color: var(--text);
 }
 
+.palette__hint-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.palette__hint-link:hover {
+  text-decoration: underline;
+}
+
 .palette__groups {
   display: flex;
   flex-direction: column;

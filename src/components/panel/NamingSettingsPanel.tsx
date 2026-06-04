@@ -11,6 +11,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "vm",
   "storage",
   "sql",
+  "gke",
 ];
 
 export function NamingSettingsPanel() {

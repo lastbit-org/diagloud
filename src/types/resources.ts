@@ -1,4 +1,4 @@
-export type ResourceKind = "vpc" | "subnet" | "vm" | "storage" | "sql";
+export type ResourceKind = "vpc" | "subnet" | "vm" | "storage" | "sql" | "gke";
 
 export type SqlEngine = "MYSQL_8_0" | "POSTGRES_15";
 
@@ -50,10 +50,22 @@ export type SqlProps = {
   internalIp?: string;
 };
 
+export type GkeProps = {
+  name: string;
+  /** Nós do pool padrão. */
+  nodeCount: number;
+  machineType: string;
+  /** Região — herdada da sub-rede ao conectar. */
+  region?: string;
+  /** IP interno representativo na sub-rede (control plane / endpoint). */
+  internalIp?: string;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
   vm: VmProps;
   storage: StorageProps;
   sql: SqlProps;
+  gke: GkeProps;
 };

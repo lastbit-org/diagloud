@@ -26,6 +26,7 @@ const sampleDocument: DiagramDocument = {
         vm: "vm-##-AREA-AMBIENTE",
         storage: "gcs-AREA-AMBIENTE",
         sql: "sql-AREA-AMBIENTE",
+        gke: "gke-AREA-AMBIENTE",
       },
     },
   },

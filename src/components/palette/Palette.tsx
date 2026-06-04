@@ -7,7 +7,16 @@ export function Palette() {
     <aside className="palette" aria-label="Recursos GCP">
       <h2 className="palette__title">Recursos</h2>
       <p className="palette__hint">
-        Clique ou arraste para o diagrama.
+        Categorias como no{" "}
+        <a
+          href="https://console.cloud.google.com/products"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="palette__hint-link"
+        >
+          console GCP
+        </a>
+        . Clique ou arraste para o diagrama.
       </p>
       <div className="palette__groups">
         {PALETTE_CATEGORIES.map((category) => {

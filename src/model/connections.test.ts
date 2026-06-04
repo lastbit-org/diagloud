@@ -163,6 +163,24 @@ describe("validateConnection", () => {
     expect(result).toEqual({ valid: false, reason: "sql-not-private" });
   });
 
+  it("aceita GKE → sub-rede", () => {
+    const result = validateConnection(
+      {
+        source: "gke-1",
+        target: subnet.id,
+        sourceHandle: HANDLE_IDS.gke.toSubnet,
+        targetHandle: HANDLE_IDS.subnet.fromGke,
+      },
+      { nodes: [...nodes, {
+        id: "gke-1",
+        kind: "gke",
+        position: { x: 0, y: 0 },
+        data: { name: "gke-1", nodeCount: 3, machineType: "e2-medium" },
+      }], edges: [] },
+    );
+    expect(result).toEqual({ valid: true, edgeKind: "gke-subnet" });
+  });
+
   it("aceita VM → Cloud Storage com handles corretos", () => {
     const result = validateConnection(
       {

@@ -95,6 +95,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `bucket-${count}`;
     case "sql":
       return `sql-${count}`;
+    case "gke":
+      return `gke-${count}`;
   }
 }
 

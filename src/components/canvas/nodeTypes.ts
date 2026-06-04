@@ -1,4 +1,11 @@
-import { SqlNode, StorageNode, SubnetNode, VmNode, VpcNode } from "../nodes";
+import {
+  GkeNode,
+  SqlNode,
+  StorageNode,
+  SubnetNode,
+  VmNode,
+  VpcNode,
+} from "../nodes";
 
 export const nodeTypes = {
   vpc: VpcNode,
@@ -6,4 +13,5 @@ export const nodeTypes = {
   vm: VmNode,
   storage: StorageNode,
   sql: SqlNode,
+  gke: GkeNode,
 };

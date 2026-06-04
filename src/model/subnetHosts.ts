@@ -1,0 +1,60 @@
+import { getUsableHostAddress, parseCidr } from "../lib/cidr";
+import { getSubnetNode, getVmIdsOnSubnet } from "./subnet";
+import type { DiagramEdge, DiagramNode } from "../types";
+
+function getSqlIdsOnSubnet(subnetId: string, edges: DiagramEdge[]): string[] {
+  return edges
+    .filter((edge) => edge.kind === "sql-subnet" && edge.target === subnetId)
+    .map((edge) => edge.source);
+}
+
+function getGkeIdsOnSubnet(subnetId: string, edges: DiagramEdge[]): string[] {
+  return edges
+    .filter((edge) => edge.kind === "gke-subnet" && edge.target === subnetId)
+    .map((edge) => edge.source);
+}
+
+export type SubnetHostCounts = {
+  vm: number;
+  sql: number;
+  gke: number;
+};
+
+export function countSubnetAttachedHosts(
+  subnetId: string,
+  edges: DiagramEdge[],
+): SubnetHostCounts {
+  return {
+    vm: getVmIdsOnSubnet(subnetId, edges).length,
+    sql: getSqlIdsOnSubnet(subnetId, edges).length,
+    gke: getGkeIdsOnSubnet(subnetId, edges).length,
+  };
+}
+
+export function totalSubnetAttachedHosts(counts: SubnetHostCounts): number {
+  return counts.vm + counts.sql + counts.gke;
+}
+
+/** Há IP disponível na sub-rede para mais um recurso (VM, SQL ou GKE). */
+export function canAttachHostToSubnet(
+  subnetId: string,
+  nodes: DiagramNode[],
+  edges: DiagramEdge[],
+): boolean {
+  const subnet = getSubnetNode(subnetId, nodes);
+  if (!subnet || !parseCidr(subnet.data.cidr)) return false;
+
+  const total = totalSubnetAttachedHosts(
+    countSubnetAttachedHosts(subnetId, edges),
+  );
+  return getUsableHostAddress(subnet.data.cidr, total) !== null;
+}
+
+export function sqlHostIndexOffset(subnetId: string, edges: DiagramEdge[]): number {
+  return countSubnetAttachedHosts(subnetId, edges).vm;
+}
+
+export function gkeHostIndexOffset(subnetId: string, edges: DiagramEdge[]): number {
+  const counts = countSubnetAttachedHosts(subnetId, edges);
+  return counts.vm + counts.sql;
+}

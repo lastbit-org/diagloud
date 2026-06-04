@@ -42,6 +42,13 @@ export function NodeHandles({ kind }: NodeHandlesProps) {
             className="gcp-handle gcp-handle--target"
             title="Recebe Cloud SQL (IP privado)"
           />
+          <Handle
+            type="target"
+            position={Position.Right}
+            id={HANDLE_IDS.subnet.fromGke}
+            className="gcp-handle gcp-handle--target"
+            title="Recebe cluster GKE"
+          />
         </>
       );
     case "vm":
@@ -81,6 +88,16 @@ export function NodeHandles({ kind }: NodeHandlesProps) {
           id={HANDLE_IDS.sql.toSubnet}
           className="gcp-handle gcp-handle--source"
           title="Conectar à sub-rede (modo privado)"
+        />
+      );
+    case "gke":
+      return (
+        <Handle
+          type="source"
+          position={Position.Top}
+          id={HANDLE_IDS.gke.toSubnet}
+          className="gcp-handle gcp-handle--source"
+          title="Conectar à sub-rede"
         />
       );
   }

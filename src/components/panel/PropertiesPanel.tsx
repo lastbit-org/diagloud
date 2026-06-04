@@ -476,6 +476,73 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           <SqlSubnetInfo sql={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
+
+      {selectedNode?.kind === "gke" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="gke-name">Nome</label>
+            <input
+              id="gke-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="gke-nodes">Nós do cluster</label>
+            <input
+              id="gke-nodes"
+              type="number"
+              min={1}
+              value={selectedNode.data.nodeCount}
+              onChange={(e) => {
+                const nodeCount = Number.parseInt(e.target.value, 10);
+                if (nodeCount >= 1) {
+                  updateNodeData(selectedNode.id, { nodeCount });
+                }
+              }}
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="gke-machine">Machine type (nós)</label>
+            <input
+              id="gke-machine"
+              value={selectedNode.data.machineType}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  machineType: e.target.value,
+                })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="gke-region">Região</label>
+            <input
+              id="gke-region"
+              value={selectedNode.data.region ?? "—"}
+              readOnly
+              aria-readonly
+            />
+            <span className="properties-field__hint">
+              Preenchida automaticamente com a região da sub-rede ligada.
+            </span>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="gke-ip">IP interno (sub-rede)</label>
+            <input
+              id="gke-ip"
+              value={selectedNode.data.internalIp ?? "—"}
+              readOnly
+              aria-readonly
+            />
+            <span className="properties-field__hint">
+              Atribuído ao ligar à sub-rede (após VMs e SQL no CIDR).
+            </span>
+          </div>
+          <GkeSubnetInfo gke={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
     </>
   );
 
@@ -487,6 +554,38 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
     <aside className="properties-panel" aria-label="Propriedades">
       {content}
     </aside>
+  );
+}
+
+function GkeSubnetInfo({
+  gke,
+  edges,
+  nodes,
+}: {
+  gke: Extract<DiagramNode, { kind: "gke" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find(
+    (e) => e.kind === "gke-subnet" && e.source === gke.id,
+  );
+  if (!edge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue o cluster à sub-rede (handle superior) para obter região e IP interno.
+      </p>
+    );
+  }
+  const subnet = nodes.find((n) => n.id === edge.target && n.kind === "subnet");
+  if (!subnet || subnet.kind !== "subnet") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Sub-rede</dt>
+      <dd>
+        {subnet.data.name} ({subnet.data.cidr})
+      </dd>
+    </dl>
   );
 }
 

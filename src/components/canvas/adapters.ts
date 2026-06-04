@@ -5,7 +5,10 @@ import type { DiagramEdge, DiagramNode } from "../../types";
 import type { GcpNodeData } from "../nodes";
 
 function nodeSubtitle(node: DiagramNode): string | undefined {
-  if (node.kind === "vm" && node.data.internalIp) {
+  if (
+    (node.kind === "vm" || node.kind === "gke") &&
+    node.data.internalIp
+  ) {
     return node.data.internalIp;
   }
   if (node.kind === "subnet") {

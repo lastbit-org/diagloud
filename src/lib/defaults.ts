@@ -5,6 +5,7 @@ import type {
   DiagramNode,
   ResourceKind,
   ResourcePropsByKind,
+  GkeProps,
   SqlProps,
   StorageProps,
   SubnetProps,
@@ -55,6 +56,12 @@ export function defaultResourceData<K extends ResourceKind>(
         engine: "POSTGRES_15",
         accessMode: "public",
       } as SqlProps as ResourcePropsByKind[K];
+    case "gke":
+      return {
+        name,
+        nodeCount: 3,
+        machineType: "e2-medium",
+      } as GkeProps as ResourcePropsByKind[K];
   }
 }
 
@@ -71,5 +78,7 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `bucket-${count}`;
     case "sql":
       return `sql-${count}`;
+    case "gke":
+      return `gke-${count}`;
   }
 }

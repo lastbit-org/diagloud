@@ -18,6 +18,9 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Cloud SQL em modo público não se liga à sub-rede. Altere o acesso para privado.",
   "subnet-sql-capacity":
     "Não há mais endereços de IP na sub-rede para Cloud SQL privado (após as VMs).",
+  "gke-has-subnet": "Este cluster GKE já está ligado a uma sub-rede.",
+  "subnet-gke-capacity":
+    "Não há mais endereços de IP na sub-rede para o cluster GKE.",
 };
 
 export function connectionErrorMessage(reason: ConnectionInvalidReason): string {

@@ -6,6 +6,7 @@ import type { DiagramEdge, DiagramNode } from "../types";
 
 export type DiagramIssueCode =
   | "orphan-vm"
+  | "orphan-gke"
   | "orphan-storage"
   | "orphan-sql-private"
   | "subnet-without-vpc"
@@ -45,6 +46,12 @@ export function collectDiagramIssues(
       .map((edge) => edge.source),
   );
 
+  const gkeIdsOnSubnet = new Set(
+    edges
+      .filter((edge) => edge.kind === "gke-subnet")
+      .map((edge) => edge.source),
+  );
+
   for (const node of nodes) {
     if (node.kind === "vm" && !vmIdsOnSubnet.has(node.id)) {
       issues.push({
@@ -65,6 +72,15 @@ export function collectDiagramIssues(
         severity: "warning",
         nodeId: node.id,
         message: `Bucket "${node.data.name}" está em modo VM mas não está ligado a nenhuma VM.`,
+      });
+    }
+
+    if (node.kind === "gke" && !gkeIdsOnSubnet.has(node.id)) {
+      issues.push({
+        code: "orphan-gke",
+        severity: "error",
+        nodeId: node.id,
+        message: `Cluster GKE "${node.data.name}" não está ligado a uma sub-rede.`,
       });
     }
 

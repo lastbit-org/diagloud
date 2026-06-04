@@ -13,6 +13,7 @@ import {
   type DiagramNamingMetadata,
   type DiagramNode,
   type LegacyDiagramDocument,
+  type GkeProps,
   type SqlProps,
   type StorageProps,
   type SubnetProps,
@@ -146,6 +147,31 @@ function parseSqlData(raw: unknown): SqlProps {
   return data;
 }
 
+function parseGkeData(raw: unknown): GkeProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.machineType !== "string" ||
+    typeof raw.nodeCount !== "number" ||
+    !Number.isInteger(raw.nodeCount) ||
+    raw.nodeCount < 1
+  ) {
+    throw new DiagramParseError("Dados de GKE inválidos.");
+  }
+  const data: GkeProps = {
+    name: raw.name,
+    nodeCount: raw.nodeCount,
+    machineType: raw.machineType,
+  };
+  if (typeof raw.region === "string") {
+    data.region = raw.region;
+  }
+  if (typeof raw.internalIp === "string") {
+    data.internalIp = raw.internalIp;
+  }
+  return data;
+}
+
 function parseNode(raw: unknown): DiagramNode {
   if (!isRecord(raw)) {
     throw new DiagramParseError("Nó inválido no documento.");
@@ -214,6 +240,16 @@ function parseNode(raw: unknown): DiagramNode {
         position: parsedPosition,
         data: parseSqlData(data),
       };
+    case "gke":
+      if (!nodeIdMatchesKind(nodeId, "gke")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo GKE.`);
+      }
+      return {
+        id: nodeId,
+        kind: "gke",
+        position: parsedPosition,
+        data: parseGkeData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -245,6 +281,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "vm-subnet" &&
     kind !== "vm-storage" &&
     kind !== "sql-subnet" &&
+    kind !== "gke-subnet" &&
     kind !== "sql-vpc"
   ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
@@ -311,6 +348,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.sql === "string"
           ? patterns.sql
           : DEFAULT_NAMING_PATTERNS.sql,
+      gke:
+        typeof patterns.gke === "string"
+          ? patterns.gke
+          : DEFAULT_NAMING_PATTERNS.gke,
     },
   };
 }
@@ -458,7 +499,8 @@ function namingMetadataEqual(
     a.patterns.subnet === b.patterns.subnet &&
     a.patterns.vm === b.patterns.vm &&
     a.patterns.storage === b.patterns.storage &&
-    a.patterns.sql === b.patterns.sql
+    a.patterns.sql === b.patterns.sql &&
+    a.patterns.gke === b.patterns.gke
   );
 }
 

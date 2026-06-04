@@ -1,6 +1,17 @@
 # Diagloud
 
-Editor visual de arquitetura GCP (MVP: VPC, sub-rede, VM, Cloud Storage, Cloud SQL).
+Editor visual de arquitetura GCP (MVP: VPC, sub-rede, VM, GKE, Cloud Storage, Cloud SQL).
+
+## Paleta de recursos
+
+Os recursos na barra lateral seguem as categorias do [console GCP (All products)](https://console.cloud.google.com/products), como na [lista de produtos](https://cloud.google.com/docs/product-list):
+
+| Categoria (console) | Recursos no Diagloud |
+|---------------------|---------------------|
+| **Networking** | VPC, Sub-rede |
+| **Compute** | VM (Compute Engine), GKE |
+| **Storage** | Cloud Storage |
+| **Databases** | Cloud SQL |
 
 ## Desenvolvimento
 

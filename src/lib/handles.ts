@@ -7,6 +7,7 @@ export const HANDLE_IDS = {
     toVpc: "subnet-to-vpc",
     fromVm: "subnet-from-vm",
     fromSql: "subnet-from-sql",
+    fromGke: "subnet-from-gke",
   },
   vm: {
     toSubnet: "vm-to-subnet",
@@ -17,5 +18,8 @@ export const HANDLE_IDS = {
   },
   sql: {
     toSubnet: "sql-to-subnet",
+  },
+  gke: {
+    toSubnet: "gke-to-subnet",
   },
 } as const;
