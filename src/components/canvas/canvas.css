@@ -112,3 +112,27 @@
 .connection-feedback__text {
   text-align: left;
 }
+
+/* Exportação PNG/SVG: arestas não cortadas e sem destaque de seleção */
+.diagram-canvas--exporting .react-flow__viewport svg {
+  overflow: visible;
+}
+
+.diagram-canvas--exporting .gcp-node--selected {
+  border-color: var(--border);
+  background: var(--code-bg);
+  box-shadow: var(--shadow);
+}
+
+.diagram-canvas--exporting .gcp-node--has-issues:not(.gcp-node--selected) {
+  border-color: #e57373;
+}
+
+.diagram-canvas--exporting .react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--border);
+  stroke-width: 2;
+}
+
+.diagram-canvas--exporting .react-flow__controls {
+  visibility: hidden;
+}

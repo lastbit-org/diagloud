@@ -25,6 +25,7 @@ import { useDiagramStore } from "../../store/diagramStore";
 import { toFlowEdge, toFlowNode } from "./adapters";
 import { ConnectionFeedback } from "./ConnectionFeedback";
 import { CustomConnectionLine } from "./CustomConnectionLine";
+import { DiagramImageExporter } from "./DiagramImageExporter";
 import "./canvas.css";
 import { nodeTypes } from "./nodeTypes";
 
@@ -235,6 +236,7 @@ export function DiagramCanvas() {
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
         <Controls showInteractive={false} />
+        <DiagramImageExporter />
       </ReactFlow>
     </div>
   );

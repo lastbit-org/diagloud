@@ -1,46 +1,60 @@
 import { useEffect, useRef } from "react";
 import {
-  DIAGRAM_STORAGE_KEY,
-  parseDiagramDocument,
-  serializeDiagramDocument,
-} from "../lib/diagramDocument";
+  loadDiagramFromLocalStorage,
+  saveDiagramToLocalStorage,
+} from "../lib/diagramPersistence";
 import { useDiagramStore } from "../store/diagramStore";
 import { useNamingStore } from "../store/namingStore";
 
-/** Carrega do localStorage na montagem e persiste alterações (round-trip). */
+const AUTOSAVE_DEBOUNCE_MS = 400;
+
+/**
+ * Autosave no localStorage (`diagloud-diagram`) e restauração ao recarregar a página.
+ */
 export function useDiagramPersistence() {
   const hydratedRef = useRef(false);
+  const saveTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const loadFromStorage = () => {
-      const raw = localStorage.getItem(DIAGRAM_STORAGE_KEY);
-      if (raw) {
-        try {
-          const document = parseDiagramDocument(raw);
-          useDiagramStore.getState().loadDocument(document);
-        } catch {
-          localStorage.removeItem(DIAGRAM_STORAGE_KEY);
-        }
-      }
+    const hydrate = () => {
+      loadDiagramFromLocalStorage();
       hydratedRef.current = true;
     };
 
     if (useNamingStore.persist.hasHydrated()) {
-      loadFromStorage();
+      hydrate();
       return;
     }
 
-    return useNamingStore.persist.onFinishHydration(loadFromStorage);
+    return useNamingStore.persist.onFinishHydration(hydrate);
   }, []);
 
   useEffect(() => {
-    return useDiagramStore.subscribe((state, previous) => {
+    const scheduleSave = () => {
       if (!hydratedRef.current) return;
+
+      if (saveTimerRef.current !== null) {
+        window.clearTimeout(saveTimerRef.current);
+      }
+      saveTimerRef.current = window.setTimeout(() => {
+        saveDiagramToLocalStorage();
+        saveTimerRef.current = null;
+      }, AUTOSAVE_DEBOUNCE_MS);
+    };
+
+    return useDiagramStore.subscribe((state, previous) => {
       if (state.nodes === previous.nodes && state.edges === previous.edges) {
         return;
       }
-      const document = useDiagramStore.getState().getDocument();
-      localStorage.setItem(DIAGRAM_STORAGE_KEY, serializeDiagramDocument(document));
+      scheduleSave();
     });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current !== null) {
+        window.clearTimeout(saveTimerRef.current);
+      }
+    };
   }, []);
 }
