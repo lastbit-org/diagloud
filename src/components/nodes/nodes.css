@@ -19,6 +19,31 @@
     var(--shadow);
 }
 
+.gcp-node--has-issues:not(.gcp-node--selected) {
+  border-color: #e57373;
+  box-shadow:
+    0 0 0 1px rgba(229, 115, 115, 0.35),
+    var(--shadow);
+}
+
+.gcp-node__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #e53935;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
 .diagram-canvas .react-flow__node.selected {
   outline: none;
 }

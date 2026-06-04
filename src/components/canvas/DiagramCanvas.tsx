@@ -19,6 +19,7 @@ import {
 } from "../palette/paletteItems";
 import { isEditableTarget } from "../../lib/keyboard";
 import { useInvalidConnectionFeedback } from "../../hooks/useInvalidConnectionFeedback";
+import { useDiagramValidation } from "../../hooks/useDiagramValidation";
 import { validateConnection } from "../../model/connections";
 import { useDiagramStore } from "../../store/diagramStore";
 import { toFlowEdge, toFlowNode } from "./adapters";
@@ -54,9 +55,11 @@ export function DiagramCanvas() {
     handleInvalidConnectEnd,
   } = useInvalidConnectionFeedback(validationContext);
 
+  const { issues } = useDiagramValidation();
+
   const flowNodes = useMemo(
-    () => nodes.map((node) => toFlowNode(node, node.id === selectedNodeId)),
-    [nodes, selectedNodeId],
+    () => nodes.map((node) => toFlowNode(node, node.id === selectedNodeId, issues)),
+    [nodes, selectedNodeId, issues],
   );
   const flowEdges = useMemo(() => {
     const diagramEdges = edges.map((edge) =>

@@ -1,4 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
+import { issueCountForNode, type DiagramIssue } from "../../model/validation";
 import { handlesForEdgeKind } from "../../model/connections";
 import type { DiagramEdge, DiagramNode } from "../../types";
 import type { GcpNodeData } from "../nodes";
@@ -16,7 +17,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
 export function toFlowNode(
   node: DiagramNode,
   selected = false,
+  issues: DiagramIssue[] = [],
 ): Node<GcpNodeData> {
+  const issueCount = issueCountForNode(node.id, issues);
   return {
     id: node.id,
     type: node.kind,
@@ -26,6 +29,7 @@ export function toFlowNode(
       kind: node.kind,
       label: node.data.name,
       subtitle: nodeSubtitle(node),
+      issueCount: issueCount > 0 ? issueCount : undefined,
     },
   };
 }
