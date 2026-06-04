@@ -1,0 +1,75 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100svh;
+  min-height: 100svh;
+  text-align: left;
+}
+
+.app__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.app__title {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.app__selection {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.app__selection--active {
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.delete-selection {
+  font: inherit;
+  font-size: 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.delete-selection:hover:not(:disabled) {
+  border-color: #e57373;
+  background: rgba(229, 115, 115, 0.12);
+  color: #c62828;
+}
+
+.delete-selection:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.app__meta {
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.app__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.app__main {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+}

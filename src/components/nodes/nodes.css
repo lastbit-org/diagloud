@@ -1,0 +1,82 @@
+.gcp-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  min-width: 148px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  box-shadow: var(--shadow);
+}
+
+.gcp-node--selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  box-shadow:
+    0 0 0 2px var(--accent-border),
+    var(--shadow);
+}
+
+.diagram-canvas .react-flow__node.selected {
+  outline: none;
+}
+
+.gcp-node__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.gcp-node__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+
+.gcp-node__type {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.gcp-node__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gcp-node__subtitle {
+  font-size: 11px;
+  color: var(--text);
+  font-family: var(--mono);
+}
+
+.gcp-handle {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--bg);
+  background: var(--accent);
+}
+
+.gcp-handle--source {
+  background: var(--accent);
+}
+
+.gcp-handle--target {
+  background: #669df6;
+}
+
+.gcp-handle:hover {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 1px;
+}

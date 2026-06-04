@@ -1,0 +1,23 @@
+import type { ResourceKind } from "./resources";
+
+export type NamingPatternByKind = Record<ResourceKind, string>;
+
+export type NamingPlaceholders = {
+  area: string;
+  ambiente: string;
+};
+
+export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
+  vpc: "vpc-AREA-AMBIENTE",
+  subnet: "sub-AREA-AMBIENTE",
+  vm: "vm-##-AREA-AMBIENTE",
+};
+
+export const NAMING_TOKEN_HINTS = [
+  { token: "AREA", description: "Área de negócio (ex.: financeiro)" },
+  { token: "AMBIENTE", description: "Ambiente (ex.: prd, hml, dev)" },
+  {
+    token: "##",
+    description: "Sequência numérica com zeros à esquerda (## → 01, ### → 001)",
+  },
+] as const;

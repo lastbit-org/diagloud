@@ -1,0 +1,54 @@
+# Dependências
+node_modules/
+
+# Build (Vite)
+dist/
+dist-ssr/
+build/
+
+# Vite / Vitest
+.vite/
+*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Testes e cobertura
+coverage/
+
+# Variáveis de ambiente (nunca versionar segredos)
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Cache de ferramentas
+.eslintcache
+.cache/
+
+# Editores e IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# SO
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Opcional: artefatos locais do Cursor (descomente se não quiser versionar)
+# .cursor/

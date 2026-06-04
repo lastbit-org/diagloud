@@ -1,0 +1,17 @@
+import type { ResourceKind } from "../types";
+import subnetIcon from "./google-cloud-legacy-icons/cloud_network/cloud_network.svg";
+import vmIcon from "./google-cloud-legacy-icons/compute_engine/compute_engine.svg";
+import vpcIcon from "./google-cloud-legacy-icons/virtual_private_cloud/virtual_private_cloud.svg";
+
+/** Ícones oficiais GCP (legacy 24px). Sub-rede usa Cloud Network (sem ícone subnet no pacote). */
+export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
+  vpc: vpcIcon,
+  subnet: subnetIcon,
+  vm: vmIcon,
+};
+
+export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
+  vpc: "VPC",
+  subnet: "Sub-rede",
+  vm: "VM",
+};

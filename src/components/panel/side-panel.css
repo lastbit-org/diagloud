@@ -1,0 +1,133 @@
+.side-panel {
+  flex-shrink: 0;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--bg);
+  min-height: 0;
+}
+
+.side-panel__tabs {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.side-panel__tab {
+  flex: 1;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 8px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.side-panel__tab:hover {
+  color: var(--text-h);
+  background: var(--code-bg);
+}
+
+.side-panel__tab--active {
+  color: var(--text-h);
+  border-bottom-color: var(--accent);
+}
+
+.side-panel__panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.side-panel__panel[hidden] {
+  display: none;
+}
+
+.properties-panel--embedded {
+  padding: 0;
+  width: auto;
+  border: none;
+  overflow: visible;
+}
+
+.naming-settings__intro {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.naming-settings__status {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  border-radius: 6px;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  border: 1px solid var(--accent-border);
+}
+
+.naming-settings__preview code {
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.naming-settings__tokens {
+  margin: 8px 0 16px;
+  padding: 10px;
+  border-radius: 6px;
+  background: var(--code-bg);
+}
+
+.naming-settings__tokens-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.naming-settings__token-list {
+  margin: 0;
+  padding: 0 0 0 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-h);
+}
+
+.naming-settings__token-list code {
+  font-size: 11px;
+}
+
+.naming-settings__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.naming-settings__btn {
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.naming-settings__btn:hover {
+  border-color: var(--accent-border);
+}
+
+.naming-settings__btn--primary {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  font-weight: 600;
+}
