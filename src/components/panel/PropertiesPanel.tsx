@@ -589,6 +589,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             </span>
           </div>
           <GkeSubnetInfo gke={selectedNode} edges={edges} nodes={nodes} />
+          <GkeEventarcInfo gke={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
 
@@ -683,6 +684,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           )}
           <RunSubnetInfo run={selectedNode} edges={edges} nodes={nodes} />
           <RunArtifactInfo run={selectedNode} edges={edges} nodes={nodes} />
+          <RunEventarcInfo run={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
 
@@ -700,6 +702,37 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <PubsubDestinationsInfo
             pubsub={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "eventarc" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="eventarc-name">Nome do trigger</label>
+            <input
+              id="eventarc-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="eventarc-location">Região</label>
+            <input
+              id="eventarc-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <EventarcConnectionsInfo
+            eventarc={selectedNode}
             edges={edges}
             nodes={nodes}
           />
@@ -1176,6 +1209,142 @@ function RunArtifactInfo({
   );
 }
 
+function RunEventarcInfo({
+  run,
+  edges,
+  nodes,
+}: {
+  run: Extract<DiagramNode, { kind: "run" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const pubsubTopics = edges
+    .filter((e) => e.kind === "pubsub-run" && e.target === run.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const eventarcTriggers = edges
+    .filter((e) => e.kind === "eventarc-run" && e.target === run.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "eventarc"))
+    .filter((n): n is Extract<DiagramNode, { kind: "eventarc" }> => n != null);
+
+  if (pubsubTopics.length === 0 && eventarcTriggers.length === 0) {
+    return null;
+  }
+
+  return (
+    <dl className="properties-stats">
+      {pubsubTopics.length > 0 ? (
+        <>
+          <dt>Pub/Sub (push)</dt>
+          <dd>{pubsubTopics.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {eventarcTriggers.length > 0 ? (
+        <>
+          <dt>Eventarc</dt>
+          <dd>{eventarcTriggers.map((e) => e.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function GkeEventarcInfo({
+  gke,
+  edges,
+  nodes,
+}: {
+  gke: Extract<DiagramNode, { kind: "gke" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const eventarcTriggers = edges
+    .filter((e) => e.kind === "eventarc-gke" && e.target === gke.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "eventarc"))
+    .filter((n): n is Extract<DiagramNode, { kind: "eventarc" }> => n != null);
+
+  if (eventarcTriggers.length === 0) {
+    return null;
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>Eventarc</dt>
+      <dd>{eventarcTriggers.map((e) => e.data.name).join(", ")}</dd>
+    </dl>
+  );
+}
+
+function EventarcConnectionsInfo({
+  eventarc,
+  edges,
+  nodes,
+}: {
+  eventarc: Extract<DiagramNode, { kind: "eventarc" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const pubsubTopics = edges
+    .filter((e) => e.kind === "pubsub-eventarc" && e.target === eventarc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const buckets = edges
+    .filter((e) => e.kind === "storage-eventarc" && e.target === eventarc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "eventarc-run" && e.source === eventarc.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "eventarc-gke" && e.source === eventarc.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+
+  if (
+    pubsubTopics.length === 0 &&
+    buckets.length === 0 &&
+    runs.length === 0 &&
+    clusters.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue fontes (Pub/Sub, Cloud Storage) e destinos (Cloud Run, GKE) para
+        documentar o fluxo de eventos.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {pubsubTopics.length > 0 ? (
+        <>
+          <dt>Pub/Sub (fonte)</dt>
+          <dd>{pubsubTopics.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {buckets.length > 0 ? (
+        <>
+          <dt>Cloud Storage (fonte)</dt>
+          <dd>{buckets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run (destino)</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE (destino)</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function PubsubDestinationsInfo({
   pubsub,
   edges,
@@ -1205,18 +1374,23 @@ function PubsubDestinationsInfo({
     .filter((e) => e.kind === "pubsub-firestore" && e.source === pubsub.id)
     .map((e) => nodes.find((n) => n.id === e.target && n.kind === "firestore"))
     .filter((n): n is Extract<DiagramNode, { kind: "firestore" }> => n != null);
+  const eventarcTriggers = edges
+    .filter((e) => e.kind === "pubsub-eventarc" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "eventarc"))
+    .filter((n): n is Extract<DiagramNode, { kind: "eventarc" }> => n != null);
 
   if (
     runs.length === 0 &&
     buckets.length === 0 &&
     datasets.length === 0 &&
     spanners.length === 0 &&
-    firestores.length === 0
+    firestores.length === 0 &&
+    eventarcTriggers.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue a Cloud Run, Cloud Storage, BigQuery, Cloud Spanner ou Firestore
-        para documentar subscriptions e exportações.
+        Ligue a Cloud Run, Cloud Storage, BigQuery, Cloud Spanner, Firestore ou
+        Eventarc para documentar subscriptions e exportações.
       </p>
     );
   }
@@ -1251,6 +1425,12 @@ function PubsubDestinationsInfo({
         <>
           <dt>Firestore</dt>
           <dd>{firestores.map((f) => f.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {eventarcTriggers.length > 0 ? (
+        <>
+          <dt>Eventarc</dt>
+          <dd>{eventarcTriggers.map((e) => e.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
@@ -2037,6 +2217,10 @@ function StorageVmInfo({
     .filter((e) => e.kind === "pubsub-storage" && e.target === storage.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
     .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const eventarcTriggers = edges
+    .filter((e) => e.kind === "storage-eventarc" && e.source === storage.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "eventarc"))
+    .filter((n): n is Extract<DiagramNode, { kind: "eventarc" }> => n != null);
   const workbenches = edges
     .filter((e) => e.kind === "workbench-storage" && e.target === storage.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "workbench"))
@@ -2048,6 +2232,7 @@ function StorageVmInfo({
     storage.data.accessMode === "public" &&
     vms.length === 0 &&
     pubsubTopics.length === 0 &&
+    eventarcTriggers.length === 0 &&
     workbenches.length === 0
   ) {
     return (
@@ -2057,10 +2242,15 @@ function StorageVmInfo({
     );
   }
 
-  if (vms.length === 0 && pubsubTopics.length === 0 && workbenches.length === 0) {
+  if (
+    vms.length === 0 &&
+    pubsubTopics.length === 0 &&
+    eventarcTriggers.length === 0 &&
+    workbenches.length === 0
+  ) {
     return (
       <p className="properties-field__hint">
-        Ligue VMs, Workbench ou tópicos Pub/Sub a este bucket.
+        Ligue VMs, Workbench, Pub/Sub ou Eventarc a este bucket.
       </p>
     );
   }
@@ -2083,6 +2273,12 @@ function StorageVmInfo({
         <>
           <dt>Pub/Sub (exportação)</dt>
           <dd>{pubsubTopics.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {eventarcTriggers.length > 0 ? (
+        <>
+          <dt>Eventarc (eventos)</dt>
+          <dd>{eventarcTriggers.map((e) => e.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

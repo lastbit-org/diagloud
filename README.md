@@ -40,7 +40,7 @@ Categorias espelham o menu *All products* do GCP:
 | **Armazenamento** | Cloud Storage |
 | **Bancos de dados** | Cloud SQL, BigQuery, Cloud Spanner, Firestore |
 | **IA** | Vertex AI Workbench |
-| **Integração** | Pub/Sub |
+| **Integração** | Pub/Sub, Eventarc |
 | **Ferramentas** | Artifact Registry |
 
 Ícones oficiais GCP (pacote legacy) onde disponíveis.
@@ -54,7 +54,8 @@ VPC ← Sub-rede ← VM / GKE / Cloud Run (VPC)
 VM → Cloud Storage
 Cloud SQL (privado) → Sub-rede
 Cloud NAT / VPN / Firewall / Peering → VPC
-Pub/Sub → Cloud Run, Storage, BigQuery, Spanner, Firestore
+Pub/Sub → Cloud Run, Storage, BigQuery, Spanner, Firestore, Eventarc
+Pub/Sub / Cloud Storage → Eventarc → Cloud Run, GKE
 ```
 
 Detalhes completos em [`docs/regras-conexao.md`](docs/regras-conexao.md).

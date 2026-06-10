@@ -23,6 +23,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "firestore",
   "workbench",
   "pubsub",
+  "eventarc",
   "artifact",
 ];
 

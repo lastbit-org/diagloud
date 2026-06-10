@@ -26,6 +26,8 @@ import type { ResourceKind } from "./resources";
  * - Vertex AI Workbench → Sub-rede (`workbench-subnet`): notebook na VPC
  * - VM / GKE / Cloud Run → Firestore: acesso de aplicações NoSQL
  * - Pub/Sub → Firestore (`pubsub-firestore`): eventos e sincronização
+ * - Pub/Sub / Cloud Storage → Eventarc: fontes de eventos
+ * - Eventarc → Cloud Run / GKE (`eventarc-run`, `eventarc-gke`): destinos do roteamento
  * - Vertex AI Workbench → Storage / BigQuery / Spanner / Firestore: acesso a dados
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
@@ -62,6 +64,10 @@ export const EDGE_ENDPOINTS = {
   "run-firestore": { from: "run", to: "firestore" },
   "pubsub-firestore": { from: "pubsub", to: "firestore" },
   "workbench-firestore": { from: "workbench", to: "firestore" },
+  "pubsub-eventarc": { from: "pubsub", to: "eventarc" },
+  "storage-eventarc": { from: "storage", to: "eventarc" },
+  "eventarc-run": { from: "eventarc", to: "run" },
+  "eventarc-gke": { from: "eventarc", to: "gke" },
 } as const satisfies Record<
   DiagramEdge["kind"],
   { from: ResourceKind; to: ResourceKind }

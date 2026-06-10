@@ -63,6 +63,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "internet" ||
     value === "run" ||
     value === "pubsub" ||
+    value === "eventarc" ||
     value === "bigquery" ||
     value === "spanner" ||
     value === "firestore" ||
@@ -197,6 +198,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.pubsub,
     description: "Mensageria assíncrona (tópicos)",
     icon: GCP_RESOURCE_ICONS.pubsub,
+  },
+  {
+    kind: "eventarc",
+    category: "integration",
+    label: GCP_RESOURCE_LABELS.eventarc,
+    description: "Roteamento de eventos para destinos gerenciados",
+    icon: GCP_RESOURCE_ICONS.eventarc,
   },
   {
     kind: "artifact",

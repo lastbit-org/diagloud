@@ -11,6 +11,7 @@ import subnetIcon from "./google-cloud-legacy-icons/cloud_network/cloud_network.
 import runIcon from "./google-cloud-legacy-icons/cloud_run/cloud_run.svg";
 import gkeIcon from "./google-cloud-legacy-icons/google_kubernetes_engine/google_kubernetes_engine.svg";
 import pubsubIcon from "./google-cloud-legacy-icons/pubsub/pubsub.svg";
+import eventarcIcon from "./google-cloud-legacy-icons/eventarc/eventarc.svg";
 import sqlIcon from "./google-cloud-legacy-icons/cloud_sql/cloud_sql.svg";
 import storageIcon from "./google-cloud-legacy-icons/cloud_storage/cloud_storage.svg";
 import vmIcon from "./google-cloud-legacy-icons/compute_engine/compute_engine.svg";
@@ -35,6 +36,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   internet: internetIcon,
   run: runIcon,
   pubsub: pubsubIcon,
+  eventarc: eventarcIcon,
   bigquery: bigqueryIcon,
   spanner: spannerIcon,
   firestore: firestoreIcon,
@@ -57,6 +59,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   internet: "Internet",
   run: "Cloud Run",
   pubsub: "Pub/Sub",
+  eventarc: "Eventarc",
   bigquery: "BigQuery",
   spanner: "Cloud Spanner",
   firestore: "Firestore",

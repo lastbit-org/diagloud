@@ -20,6 +20,7 @@ import type {
   InternetProps,
   RunProps,
   PubsubProps,
+  EventarcProps,
   BigqueryProps,
   SpannerProps,
   FirestoreProps,
@@ -117,6 +118,11 @@ export function defaultResourceData<K extends ResourceKind>(
       return {
         name,
       } as PubsubProps as ResourcePropsByKind[K];
+    case "eventarc":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as EventarcProps as ResourcePropsByKind[K];
     case "bigquery":
       return {
         name,
@@ -180,6 +186,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `run-${count}`;
     case "pubsub":
       return `topic-${count}`;
+    case "eventarc":
+      return `ea-${count}`;
     case "bigquery":
       return `bq-${count}`;
     case "spanner":

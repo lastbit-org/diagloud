@@ -15,6 +15,7 @@ export type ResourceKind =
   | "internet"
   | "run"
   | "pubsub"
+  | "eventarc"
   | "bigquery"
   | "spanner"
   | "firestore"
@@ -135,6 +136,12 @@ export type PubsubProps = {
   name: string;
 };
 
+export type EventarcProps = {
+  /** Nome do canal ou trigger. */
+  name: string;
+  location: string;
+};
+
 export type BigqueryProps = {
   /** Nome do dataset. */
   name: string;
@@ -186,6 +193,7 @@ export type ResourcePropsByKind = {
   internet: InternetProps;
   run: RunProps;
   pubsub: PubsubProps;
+  eventarc: EventarcProps;
   bigquery: BigqueryProps;
   spanner: SpannerProps;
   firestore: FirestoreProps;

@@ -12,6 +12,7 @@ import type {
   FirestoreProps,
   WorkbenchProps,
   PubsubProps,
+  EventarcProps,
   RunProps,
   SqlProps,
   StorageProps,
@@ -48,6 +49,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "internet"; data: InternetProps })
   | (NodeBase & { kind: "run"; data: RunProps })
   | (NodeBase & { kind: "pubsub"; data: PubsubProps })
+  | (NodeBase & { kind: "eventarc"; data: EventarcProps })
   | (NodeBase & { kind: "bigquery"; data: BigqueryProps })
   | (NodeBase & { kind: "spanner"; data: SpannerProps })
   | (NodeBase & { kind: "firestore"; data: FirestoreProps })
@@ -92,7 +94,11 @@ export type DiagramEdge = {
     | "gke-firestore"
     | "run-firestore"
     | "pubsub-firestore"
-    | "workbench-firestore";
+    | "workbench-firestore"
+    | "pubsub-eventarc"
+    | "storage-eventarc"
+    | "eventarc-run"
+    | "eventarc-gke";
 };
 
 export type DiagramNamingMetadata = {

@@ -57,6 +57,7 @@ import type {
   InternetProps,
   RunProps,
   PubsubProps,
+  EventarcProps,
   BigqueryProps,
   SpannerProps,
   FirestoreProps,
@@ -252,6 +253,12 @@ function buildNode<K extends ResourceKind>(
         kind: "pubsub",
         data: { ...defaultResourceData("pubsub", resourceContext), ...data },
       };
+    case "eventarc":
+      return {
+        ...base,
+        kind: "eventarc",
+        data: { ...defaultResourceData("eventarc", resourceContext), ...data },
+      };
     case "bigquery":
       return {
         ...base,
@@ -301,6 +308,7 @@ function mergeNodeData(
     | Partial<InternetProps>
     | Partial<RunProps>
     | Partial<PubsubProps>
+    | Partial<EventarcProps>
     | Partial<BigqueryProps>
     | Partial<SpannerProps>
     | Partial<WorkbenchProps>
@@ -376,6 +384,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<PubsubProps>) },
+      };
+    case "eventarc":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<EventarcProps>) },
       };
     case "bigquery":
       return {

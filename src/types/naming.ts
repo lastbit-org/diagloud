@@ -22,6 +22,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   internet: "Internet",
   run: "run-AREA-AMBIENTE",
   pubsub: "topic-AREA-AMBIENTE",
+  eventarc: "ea-AREA-AMBIENTE",
   bigquery: "bq-AREA-AMBIENTE",
   spanner: "spanner-AREA-AMBIENTE",
   firestore: "fs-AREA-AMBIENTE",

@@ -11,6 +11,7 @@ export { PeeringNode } from "./PeeringNode";
 export { VpnNode } from "./VpnNode";
 export { FirewallNode } from "./FirewallNode";
 export { PubsubNode } from "./PubsubNode";
+export { EventarcNode } from "./EventarcNode";
 export { RunNode } from "./RunNode";
 export { SqlNode } from "./SqlNode";
 export { StorageNode } from "./StorageNode";

@@ -96,6 +96,10 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vm", "firestore")).toBe("vm-firestore");
     expect(getEdgeKind("pubsub", "firestore")).toBe("pubsub-firestore");
     expect(getEdgeKind("workbench", "firestore")).toBe("workbench-firestore");
+    expect(getEdgeKind("pubsub", "eventarc")).toBe("pubsub-eventarc");
+    expect(getEdgeKind("storage", "eventarc")).toBe("storage-eventarc");
+    expect(getEdgeKind("eventarc", "run")).toBe("eventarc-run");
+    expect(getEdgeKind("eventarc", "gke")).toBe("eventarc-gke");
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {

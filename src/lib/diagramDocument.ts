@@ -30,6 +30,7 @@ import {
   type InternetProps,
   type RunProps,
   type PubsubProps,
+  type EventarcProps,
   type BigqueryProps,
   type SpannerProps,
   type FirestoreProps,
@@ -297,6 +298,20 @@ function parsePubsubData(raw: unknown): PubsubProps {
     throw new DiagramParseError("Dados de Pub/Sub inválidos.");
   }
   return { name: raw.name };
+}
+
+function parseEventarcData(raw: unknown): EventarcProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Eventarc inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
+  };
 }
 
 function parseBigqueryData(raw: unknown): BigqueryProps {
@@ -583,6 +598,17 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parsePubsubData(data),
       };
+    case "eventarc":
+      if (!nodeIdMatchesKind(nodeId, "eventarc")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Eventarc.`);
+      }
+      return {
+        id: nodeId,
+        kind: "eventarc",
+        position: parsedPosition,
+        zIndex,
+        data: parseEventarcData(data),
+      };
     case "bigquery":
       if (!nodeIdMatchesKind(nodeId, "bigquery")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo BigQuery.`);
@@ -703,6 +729,10 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "run-firestore" &&
     kind !== "pubsub-firestore" &&
     kind !== "workbench-firestore" &&
+    kind !== "pubsub-eventarc" &&
+    kind !== "storage-eventarc" &&
+    kind !== "eventarc-run" &&
+    kind !== "eventarc-gke" &&
     kind !== "sql-vpc"
   ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
@@ -814,6 +844,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.pubsub === "string"
           ? patterns.pubsub
           : DEFAULT_NAMING_PATTERNS.pubsub,
+      eventarc:
+        typeof patterns.eventarc === "string"
+          ? patterns.eventarc
+          : DEFAULT_NAMING_PATTERNS.eventarc,
       bigquery:
         typeof patterns.bigquery === "string"
           ? patterns.bigquery
@@ -1000,6 +1034,7 @@ function namingMetadataEqual(
     a.patterns.internet === b.patterns.internet &&
     a.patterns.run === b.patterns.run &&
     a.patterns.pubsub === b.patterns.pubsub &&
+    a.patterns.eventarc === b.patterns.eventarc &&
     a.patterns.bigquery === b.patterns.bigquery &&
     a.patterns.spanner === b.patterns.spanner &&
     a.patterns.firestore === b.patterns.firestore &&

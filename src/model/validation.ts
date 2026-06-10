@@ -16,6 +16,7 @@ export type DiagramIssueCode =
   | "orphan-peering"
   | "orphan-peering-incomplete"
   | "orphan-run-vpc"
+  | "orphan-eventarc"
   | "subnet-without-vpc"
   | "subnet-invalid-cidr"
   | "subnet-cidr-overlap";
@@ -87,6 +88,14 @@ export function collectDiagramIssues(
   const runIdsOnSubnet = new Set(
     edges
       .filter((edge) => edge.kind === "run-subnet")
+      .map((edge) => edge.source),
+  );
+
+  const eventarcIdsWithDestination = new Set(
+    edges
+      .filter(
+        (edge) => edge.kind === "eventarc-run" || edge.kind === "eventarc-gke",
+      )
       .map((edge) => edge.source),
   );
 
@@ -191,6 +200,15 @@ export function collectDiagramIssues(
         severity: "warning",
         nodeId: node.id,
         message: `Cloud Run "${node.data.name}" está em modo VPC mas não está ligado a uma sub-rede.`,
+      });
+    }
+
+    if (node.kind === "eventarc" && !eventarcIdsWithDestination.has(node.id)) {
+      issues.push({
+        code: "orphan-eventarc",
+        severity: "warning",
+        nodeId: node.id,
+        message: `Eventarc "${node.data.name}" não tem destino (Cloud Run ou GKE).`,
       });
     }
   }
