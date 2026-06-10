@@ -99,6 +99,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `gke-${count}`;
     case "nat":
       return `nat-${count}`;
+    case "peering":
+      return `peer-${count}`;
     case "artifact":
       return `gar-${count}`;
     case "internet":

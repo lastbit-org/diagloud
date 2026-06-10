@@ -8,6 +8,7 @@ export type ResourceKind =
   | "sql"
   | "gke"
   | "nat"
+  | "peering"
   | "artifact"
   | "internet"
   | "run"
@@ -87,6 +88,10 @@ export type NatProps = {
   region: string;
 };
 
+export type PeeringProps = {
+  name: string;
+};
+
 export type ArtifactProps = {
   name: string;
   location: string;
@@ -135,6 +140,7 @@ export type ResourcePropsByKind = {
   sql: SqlProps;
   gke: GkeProps;
   nat: NatProps;
+  peering: PeeringProps;
   artifact: ArtifactProps;
   internet: InternetProps;
   run: RunProps;

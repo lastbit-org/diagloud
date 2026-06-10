@@ -47,6 +47,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "nat") {
     return node.data.region;
   }
+  if (node.kind === "peering") {
+    return "Peering";
+  }
   if (node.kind === "artifact") {
     return `${node.data.format} · ${node.data.location}`;
   }

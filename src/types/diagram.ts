@@ -4,6 +4,7 @@ import type {
   GkeProps,
   InternetProps,
   NatProps,
+  PeeringProps,
   BigqueryProps,
   PubsubProps,
   RunProps,
@@ -35,6 +36,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "sql"; data: SqlProps })
   | (NodeBase & { kind: "gke"; data: GkeProps })
   | (NodeBase & { kind: "nat"; data: NatProps })
+  | (NodeBase & { kind: "peering"; data: PeeringProps })
   | (NodeBase & { kind: "artifact"; data: ArtifactProps })
   | (NodeBase & { kind: "internet"; data: InternetProps })
   | (NodeBase & { kind: "run"; data: RunProps })
@@ -55,6 +57,7 @@ export type DiagramEdge = {
     | "sql-subnet"
     | "gke-subnet"
     | "nat-vpc"
+    | "peering-vpc"
     | "internet-nat"
     | "subnet-nat"
     | "gke-artifact"

@@ -11,6 +11,7 @@ import storageIcon from "./google-cloud-legacy-icons/cloud_storage/cloud_storage
 import vmIcon from "./google-cloud-legacy-icons/compute_engine/compute_engine.svg";
 import vpcIcon from "./google-cloud-legacy-icons/virtual_private_cloud/virtual_private_cloud.svg";
 import internetIcon from "./icons/internet.svg";
+import peeringIcon from "./icons/vpc-peering.svg";
 import zoneIcon from "./icons/zone.svg";
 
 /** Ícones oficiais GCP (legacy 24px). Sub-rede usa Cloud Network (sem ícone subnet no pacote). */
@@ -22,6 +23,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   sql: sqlIcon,
   gke: gkeIcon,
   nat: natIcon,
+  peering: peeringIcon,
   artifact: artifactIcon,
   internet: internetIcon,
   run: runIcon,
@@ -38,6 +40,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   sql: "Cloud SQL",
   gke: "GKE",
   nat: "Cloud NAT",
+  peering: "VPC Peering",
   artifact: "Artifact Registry",
   internet: "Internet",
   run: "Cloud Run",

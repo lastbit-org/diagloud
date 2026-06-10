@@ -10,6 +10,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "subnet",
   "internet",
   "nat",
+  "peering",
   "vm",
   "gke",
   "run",

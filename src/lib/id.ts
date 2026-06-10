@@ -12,6 +12,7 @@ const ID_PREFIXES = [
   "sql",
   "gke",
   "nat",
+  "peering",
   "artifact",
   "internet",
   "run",
@@ -44,6 +45,7 @@ export function createId(prefix = "node"): string {
     prefix === "sql" ||
     prefix === "gke" ||
     prefix === "nat" ||
+    prefix === "peering" ||
     prefix === "artifact" ||
     prefix === "internet" ||
     prefix === "run" ||
@@ -61,7 +63,7 @@ export function isUuid(value: string): boolean {
 }
 
 const ID_PREFIX_PATTERN =
-  /^(vpc|subnet|vm|storage|sql|gke|nat|artifact|internet|run|pubsub|bigquery|zone|edge)-(.+)$/;
+  /^(vpc|subnet|vm|storage|sql|gke|nat|peering|artifact|internet|run|pubsub|bigquery|zone|edge)-(.+)$/;
 
 function parsePrefixedId(
   id: string,

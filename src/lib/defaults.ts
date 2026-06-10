@@ -12,6 +12,7 @@ import type {
   VmProps,
   VpcProps,
   NatProps,
+  PeeringProps,
   ArtifactProps,
   InternetProps,
   RunProps,
@@ -74,6 +75,10 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         region: "southamerica-east1",
       } as NatProps as ResourcePropsByKind[K];
+    case "peering":
+      return {
+        name,
+      } as PeeringProps as ResourcePropsByKind[K];
     case "artifact":
       return {
         name,
@@ -129,6 +134,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `gke-${count}`;
     case "nat":
       return `nat-${count}`;
+    case "peering":
+      return `peer-${count}`;
     case "artifact":
       return `gar-${count}`;
     case "internet":

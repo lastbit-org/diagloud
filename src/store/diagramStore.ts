@@ -46,6 +46,7 @@ import type {
   VmProps,
   VpcProps,
   NatProps,
+  PeeringProps,
   ArtifactProps,
   InternetProps,
   RunProps,
@@ -81,6 +82,7 @@ type DiagramActions = {
       | Partial<SqlProps>
       | Partial<GkeProps>
       | Partial<NatProps>
+      | Partial<PeeringProps>
       | Partial<ArtifactProps>
       | Partial<InternetProps>
       | Partial<RunProps>
@@ -194,6 +196,12 @@ function buildNode<K extends ResourceKind>(
         kind: "nat",
         data: { ...defaultResourceData("nat", resourceContext), ...data },
       };
+    case "peering":
+      return {
+        ...base,
+        kind: "peering",
+        data: { ...defaultResourceData("peering", resourceContext), ...data },
+      };
     case "artifact":
       return {
         ...base,
@@ -285,6 +293,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<NatProps>) },
+      };
+    case "peering":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<PeeringProps>) },
       };
     case "artifact":
       return {

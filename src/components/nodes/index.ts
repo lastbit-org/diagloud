@@ -4,6 +4,7 @@ export { BigqueryNode } from "./BigqueryNode";
 export { GkeNode } from "./GkeNode";
 export { InternetNode } from "./InternetNode";
 export { NatNode } from "./NatNode";
+export { PeeringNode } from "./PeeringNode";
 export { PubsubNode } from "./PubsubNode";
 export { RunNode } from "./RunNode";
 export { SqlNode } from "./SqlNode";

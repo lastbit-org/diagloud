@@ -11,6 +11,8 @@ export type DiagramIssueCode =
   | "orphan-storage"
   | "orphan-sql-private"
   | "orphan-nat"
+  | "orphan-peering"
+  | "orphan-peering-incomplete"
   | "orphan-run-vpc"
   | "subnet-without-vpc"
   | "subnet-invalid-cidr"
@@ -61,6 +63,13 @@ export function collectDiagramIssues(
       .map((edge) => edge.source),
   );
 
+  const peeringVpcCounts = new Map<string, number>();
+  for (const edge of edges) {
+    if (edge.kind !== "peering-vpc") continue;
+    const { source } = canonicalizeEdgeEndpoints(edge, nodes);
+    peeringVpcCounts.set(source, (peeringVpcCounts.get(source) ?? 0) + 1);
+  }
+
   const runIdsOnSubnet = new Set(
     edges
       .filter((edge) => edge.kind === "run-subnet")
@@ -106,6 +115,25 @@ export function collectDiagramIssues(
         nodeId: node.id,
         message: `Cloud NAT "${node.data.name}" não está ligado a uma VPC.`,
       });
+    }
+
+    if (node.kind === "peering") {
+      const vpcCount = peeringVpcCounts.get(node.id) ?? 0;
+      if (vpcCount === 0) {
+        issues.push({
+          code: "orphan-peering",
+          severity: "warning",
+          nodeId: node.id,
+          message: `VPC Peering "${node.data.name}" não está ligado a nenhuma VPC.`,
+        });
+      } else if (vpcCount === 1) {
+        issues.push({
+          code: "orphan-peering-incomplete",
+          severity: "warning",
+          nodeId: node.id,
+          message: `VPC Peering "${node.data.name}" precisa ligar duas VPCs.`,
+        });
+      }
     }
 
     if (

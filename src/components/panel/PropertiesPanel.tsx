@@ -751,6 +751,26 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "peering" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="peering-name">Nome</label>
+            <input
+              id="peering-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <p className="properties-field__hint">
+            Ligue o peering a duas VPCs para documentar conectividade privada
+            entre redes.
+          </p>
+          <PeeringVpcInfo peering={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
       {selectedNode?.kind === "artifact" && (
         <>
           <div className="properties-field">
@@ -1142,6 +1162,45 @@ function VmStorageInfo({
       <dd>
         {linked.map((bucket) => bucket.data.name).join(", ")}
       </dd>
+    </dl>
+  );
+}
+
+function PeeringVpcInfo({
+  peering,
+  edges,
+  nodes,
+}: {
+  peering: Extract<DiagramNode, { kind: "peering" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vpcEdges = edges.filter(
+    (e) => e.kind === "peering-vpc" && e.source === peering.id,
+  );
+
+  if (vpcEdges.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Nenhuma VPC ligada. Conecte duas VPCs a este peering.
+      </p>
+    );
+  }
+
+  const vpcs = vpcEdges
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vpc"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vpc" }> => n != null);
+
+  return (
+    <dl className="properties-stats">
+      <dt>VPCs em peering</dt>
+      <dd>
+        {vpcs.length > 0
+          ? vpcs.map((vpc) => vpc.data.name).join(" ↔ ")
+          : "—"}
+      </dd>
+      <dt>Progresso</dt>
+      <dd>{vpcEdges.length} / 2</dd>
     </dl>
   );
 }

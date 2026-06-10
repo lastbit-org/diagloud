@@ -32,6 +32,7 @@ export type ConnectionInvalidReason =
   | "gke-has-subnet"
   | "subnet-gke-capacity"
   | "nat-has-vpc"
+  | "peering-has-max-vpcs"
   | "subnet-has-nat"
   | "run-has-subnet"
   | "run-not-vpc"
@@ -358,6 +359,18 @@ export function validateConnection(
     )
   ) {
     return { valid: false, reason: "nat-has-vpc" };
+  }
+
+  if (edgeKind === "peering-vpc") {
+    const peeringVpcEdges = context.edges.filter(
+      (edge) => edge.kind === "peering-vpc" && edge.source === directed.source,
+    );
+    if (peeringVpcEdges.length >= 2) {
+      return { valid: false, reason: "peering-has-max-vpcs" };
+    }
+    if (peeringVpcEdges.some((edge) => edge.target === directed.target)) {
+      return { valid: false, reason: "duplicate-edge" };
+    }
   }
 
   if (

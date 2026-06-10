@@ -72,6 +72,7 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vm", "storage")).toBe("vm-storage");
     expect(getEdgeKind("sql", "subnet")).toBe("sql-subnet");
     expect(getEdgeKind("nat", "vpc")).toBe("nat-vpc");
+    expect(getEdgeKind("peering", "vpc")).toBe("peering-vpc");
     expect(getEdgeKind("internet", "nat")).toBe("internet-nat");
     expect(getEdgeKind("subnet", "nat")).toBe("subnet-nat");
     expect(getEdgeKind("gke", "artifact")).toBe("gke-artifact");
@@ -85,6 +86,7 @@ describe("getEdgeKind", () => {
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {
     expect(getEdgeKind("vm", "vpc")).toBeNull();
+    expect(getEdgeKind("vpc", "peering")).toBeNull();
     expect(getEdgeKind("vpc", "vm")).toBeNull();
     expect(getEdgeKind("vpc", "subnet")).toBeNull();
     expect(getEdgeKind("subnet", "vm")).toBeNull();
@@ -509,5 +511,88 @@ describe("validateConnection", () => {
       { nodes, edges: [] },
     );
     expect(result).toMatchObject({ valid: true, edgeKind: "subnet-vpc" });
+  });
+
+  it("aceita VPC Peering → VPC e normaliza VPC → peering", () => {
+    const peering: DiagramNode = {
+      id: "peering-1",
+      kind: "peering",
+      position: { x: 200, y: 0 },
+      data: { name: "peer-1" },
+    };
+    const vpcB: DiagramNode = {
+      id: "vpc-2",
+      kind: "vpc",
+      position: { x: 400, y: 0 },
+      data: { name: "vpc-2" },
+    };
+    const diagramNodes = [vpc, vpcB, peering];
+
+    const forward = validateConnection(
+      {
+        source: peering.id,
+        target: vpc.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: diagramNodes, edges: [] },
+    );
+    expect(forward).toMatchObject({
+      valid: true,
+      edgeKind: "peering-vpc",
+      source: peering.id,
+      target: vpc.id,
+    });
+
+    const reversed = validateConnection(
+      {
+        source: vpcB.id,
+        target: peering.id,
+        sourceHandle: egress("left"),
+        targetHandle: ingress("right"),
+      },
+      { nodes: diagramNodes, edges: [] },
+    );
+    expect(reversed).toMatchObject({
+      valid: true,
+      edgeKind: "peering-vpc",
+      source: peering.id,
+      target: vpcB.id,
+    });
+  });
+
+  it("rejeita terceira VPC no mesmo peering", () => {
+    const peering: DiagramNode = {
+      id: "peering-1",
+      kind: "peering",
+      position: { x: 200, y: 0 },
+      data: { name: "peer-1" },
+    };
+    const vpcB: DiagramNode = {
+      id: "vpc-2",
+      kind: "vpc",
+      position: { x: 400, y: 0 },
+      data: { name: "vpc-2" },
+    };
+    const vpcC: DiagramNode = {
+      id: "vpc-3",
+      kind: "vpc",
+      position: { x: 600, y: 0 },
+      data: { name: "vpc-3" },
+    };
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: peering.id, target: vpc.id, kind: "peering-vpc" },
+      { id: "e2", source: peering.id, target: vpcB.id, kind: "peering-vpc" },
+    ];
+    const result = validateConnection(
+      {
+        source: peering.id,
+        target: vpcC.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [vpc, vpcB, vpcC, peering], edges },
+    );
+    expect(result).toEqual({ valid: false, reason: "peering-has-max-vpcs" });
   });
 });

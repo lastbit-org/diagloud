@@ -33,6 +33,7 @@ const sampleDocument: DiagramDocument = {
         sql: "sql-AREA-AMBIENTE",
         gke: "gke-AREA-AMBIENTE",
         nat: "nat-AREA-AMBIENTE",
+        peering: "peer-AREA-AMBIENTE",
         artifact: "gar-AREA-AMBIENTE",
         internet: "Internet",
         run: "run-AREA-AMBIENTE",

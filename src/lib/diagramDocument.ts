@@ -23,6 +23,7 @@ import {
   type VmProps,
   type VpcProps,
   type NatProps,
+  type PeeringProps,
   type ArtifactProps,
   type InternetProps,
   type RunProps,
@@ -214,6 +215,13 @@ function parseArtifactData(raw: unknown): ArtifactProps {
     location: raw.location,
     format: raw.format as ArtifactProps["format"],
   };
+}
+
+function parsePeeringData(raw: unknown): PeeringProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de VPC Peering inválidos.");
+  }
+  return { name: raw.name };
 }
 
 function parseInternetData(raw: unknown): InternetProps {
@@ -413,6 +421,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseNatData(data),
       };
+    case "peering":
+      if (!nodeIdMatchesKind(nodeId, "peering")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo VPC Peering.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "peering",
+        position: parsedPosition,
+        zIndex,
+        data: parsePeeringData(data),
+      };
     case "artifact":
       if (!nodeIdMatchesKind(nodeId, "artifact")) {
         throw new DiagramParseError(
@@ -514,6 +535,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "sql-subnet" &&
     kind !== "gke-subnet" &&
     kind !== "nat-vpc" &&
+    kind !== "peering-vpc" &&
     kind !== "internet-nat" &&
     kind !== "subnet-nat" &&
     kind !== "gke-artifact" &&
@@ -606,6 +628,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.nat === "string"
           ? patterns.nat
           : DEFAULT_NAMING_PATTERNS.nat,
+      peering:
+        typeof patterns.peering === "string"
+          ? patterns.peering
+          : DEFAULT_NAMING_PATTERNS.peering,
       artifact:
         typeof patterns.artifact === "string"
           ? patterns.artifact
@@ -789,6 +815,7 @@ function namingMetadataEqual(
     a.patterns.sql === b.patterns.sql &&
     a.patterns.gke === b.patterns.gke &&
     a.patterns.nat === b.patterns.nat &&
+    a.patterns.peering === b.patterns.peering &&
     a.patterns.artifact === b.patterns.artifact &&
     a.patterns.internet === b.patterns.internet &&
     a.patterns.run === b.patterns.run &&
