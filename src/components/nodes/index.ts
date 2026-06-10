@@ -8,6 +8,7 @@ export { InternetNode } from "./InternetNode";
 export { NatNode } from "./NatNode";
 export { PeeringNode } from "./PeeringNode";
 export { VpnNode } from "./VpnNode";
+export { FirewallNode } from "./FirewallNode";
 export { PubsubNode } from "./PubsubNode";
 export { RunNode } from "./RunNode";
 export { SqlNode } from "./SqlNode";

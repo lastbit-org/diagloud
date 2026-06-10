@@ -34,6 +34,7 @@ export type ConnectionInvalidReason =
   | "subnet-gke-capacity"
   | "nat-has-vpc"
   | "vpn-has-vpc"
+  | "firewall-has-vpc"
   | "peering-has-max-vpcs"
   | "subnet-has-nat"
   | "run-has-subnet"
@@ -372,6 +373,15 @@ export function validateConnection(
     )
   ) {
     return { valid: false, reason: "vpn-has-vpc" };
+  }
+
+  if (
+    edgeKind === "firewall-vpc" &&
+    context.edges.some(
+      (edge) => edge.kind === "firewall-vpc" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "firewall-has-vpc" };
   }
 
   if (edgeKind === "peering-vpc") {

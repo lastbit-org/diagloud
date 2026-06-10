@@ -52,6 +52,7 @@ import type {
   NatProps,
   PeeringProps,
   VpnProps,
+  FirewallProps,
   ArtifactProps,
   InternetProps,
   RunProps,
@@ -91,6 +92,7 @@ type DiagramActions = {
       | Partial<NatProps>
       | Partial<PeeringProps>
       | Partial<VpnProps>
+      | Partial<FirewallProps>
       | Partial<ArtifactProps>
       | Partial<InternetProps>
       | Partial<RunProps>
@@ -218,6 +220,12 @@ function buildNode<K extends ResourceKind>(
         kind: "vpn",
         data: { ...defaultResourceData("vpn", resourceContext), ...data },
       };
+    case "firewall":
+      return {
+        ...base,
+        kind: "firewall",
+        data: { ...defaultResourceData("firewall", resourceContext), ...data },
+      };
     case "artifact":
       return {
         ...base,
@@ -335,6 +343,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<VpnProps>) },
+      };
+    case "firewall":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<FirewallProps>) },
       };
     case "artifact":
       return {

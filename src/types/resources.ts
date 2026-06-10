@@ -10,6 +10,7 @@ export type ResourceKind =
   | "nat"
   | "peering"
   | "vpn"
+  | "firewall"
   | "artifact"
   | "internet"
   | "run"
@@ -100,6 +101,13 @@ export type VpnProps = {
   region: string;
 };
 
+export type FirewallDirection = "ingress" | "egress";
+
+export type FirewallProps = {
+  name: string;
+  direction: FirewallDirection;
+};
+
 export type ArtifactProps = {
   name: string;
   location: string;
@@ -166,6 +174,7 @@ export type ResourcePropsByKind = {
   nat: NatProps;
   peering: PeeringProps;
   vpn: VpnProps;
+  firewall: FirewallProps;
   artifact: ArtifactProps;
   internet: InternetProps;
   run: RunProps;

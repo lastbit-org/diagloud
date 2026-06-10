@@ -74,6 +74,7 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("nat", "vpc")).toBe("nat-vpc");
     expect(getEdgeKind("peering", "vpc")).toBe("peering-vpc");
     expect(getEdgeKind("vpn", "vpc")).toBe("vpn-vpc");
+    expect(getEdgeKind("firewall", "vpc")).toBe("firewall-vpc");
     expect(getEdgeKind("internet", "nat")).toBe("internet-nat");
     expect(getEdgeKind("internet", "vpn")).toBe("internet-vpn");
     expect(getEdgeKind("subnet", "nat")).toBe("subnet-nat");
@@ -718,6 +719,104 @@ describe("validateConnection", () => {
       { nodes: [vpc, vpcB, vpn], edges },
     );
     expect(result).toEqual({ valid: false, reason: "vpn-has-vpc" });
+  });
+
+  it("aceita Firewall → VPC e normaliza VPC → firewall", () => {
+    const firewall: DiagramNode = {
+      id: "firewall-1",
+      kind: "firewall",
+      position: { x: 200, y: 0 },
+      data: { name: "fw-allow-ssh", direction: "ingress" },
+    };
+    const diagramNodes = [vpc, firewall];
+
+    const forward = validateConnection(
+      {
+        source: firewall.id,
+        target: vpc.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: diagramNodes, edges: [] },
+    );
+    expect(forward).toMatchObject({
+      valid: true,
+      edgeKind: "firewall-vpc",
+      source: firewall.id,
+      target: vpc.id,
+    });
+
+    const reversed = validateConnection(
+      {
+        source: vpc.id,
+        target: firewall.id,
+        sourceHandle: egress("left"),
+        targetHandle: ingress("right"),
+      },
+      { nodes: diagramNodes, edges: [] },
+    );
+    expect(reversed).toMatchObject({
+      valid: true,
+      edgeKind: "firewall-vpc",
+      source: firewall.id,
+      target: vpc.id,
+    });
+  });
+
+  it("rejeita segunda VPC na mesma regra de firewall", () => {
+    const firewall: DiagramNode = {
+      id: "firewall-1",
+      kind: "firewall",
+      position: { x: 200, y: 0 },
+      data: { name: "fw-1", direction: "ingress" },
+    };
+    const vpcB: DiagramNode = {
+      id: "vpc-2",
+      kind: "vpc",
+      position: { x: 400, y: 0 },
+      data: { name: "vpc-2" },
+    };
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: firewall.id, target: vpc.id, kind: "firewall-vpc" },
+    ];
+    const result = validateConnection(
+      {
+        source: firewall.id,
+        target: vpcB.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [vpc, vpcB, firewall], edges },
+    );
+    expect(result).toEqual({ valid: false, reason: "firewall-has-vpc" });
+  });
+
+  it("permite várias regras de firewall na mesma VPC", () => {
+    const firewallA: DiagramNode = {
+      id: "firewall-1",
+      kind: "firewall",
+      position: { x: 200, y: 0 },
+      data: { name: "fw-a", direction: "ingress" },
+    };
+    const firewallB: DiagramNode = {
+      id: "firewall-2",
+      kind: "firewall",
+      position: { x: 300, y: 0 },
+      data: { name: "fw-b", direction: "egress" },
+    };
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: firewallA.id, target: vpc.id, kind: "firewall-vpc" },
+    ];
+    const result = validateConnection(
+      {
+        source: firewallB.id,
+        target: vpc.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [vpc, firewallA, firewallB], edges },
+    );
+    expect(result).toMatchObject({ valid: true, edgeKind: "firewall-vpc" });
   });
 
   it("aceita Vertex AI Workbench → sub-rede e dados", () => {

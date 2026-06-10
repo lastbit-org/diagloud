@@ -53,6 +53,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "peering") {
     return "Peering";
   }
+  if (node.kind === "firewall") {
+    return node.data.direction === "ingress" ? "Entrada" : "Saída";
+  }
   if (node.kind === "artifact") {
     return `${node.data.format} · ${node.data.location}`;
   }

@@ -23,6 +23,7 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Não há mais endereços de IP na sub-rede para o cluster GKE.",
   "nat-has-vpc": "Este Cloud NAT já está ligado a uma VPC.",
   "vpn-has-vpc": "Este Cloud VPN já está ligado a uma VPC.",
+  "firewall-has-vpc": "Esta regra de firewall já está ligada a uma VPC.",
   "peering-has-max-vpcs":
     "Este VPC Peering já está ligado a duas VPCs (máximo permitido).",
   "subnet-has-nat": "Esta sub-rede já está ligada a um Cloud NAT.",

@@ -6,6 +6,7 @@ import type {
   NatProps,
   PeeringProps,
   VpnProps,
+  FirewallProps,
   BigqueryProps,
   SpannerProps,
   WorkbenchProps,
@@ -41,6 +42,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "nat"; data: NatProps })
   | (NodeBase & { kind: "peering"; data: PeeringProps })
   | (NodeBase & { kind: "vpn"; data: VpnProps })
+  | (NodeBase & { kind: "firewall"; data: FirewallProps })
   | (NodeBase & { kind: "artifact"; data: ArtifactProps })
   | (NodeBase & { kind: "internet"; data: InternetProps })
   | (NodeBase & { kind: "run"; data: RunProps })
@@ -65,6 +67,7 @@ export type DiagramEdge = {
     | "nat-vpc"
     | "peering-vpc"
     | "vpn-vpc"
+    | "firewall-vpc"
     | "internet-nat"
     | "internet-vpn"
     | "subnet-nat"

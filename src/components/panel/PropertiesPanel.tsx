@@ -21,6 +21,7 @@ import type {
   RunAccessMode,
   SqlAccessMode,
   SqlEngine,
+  FirewallDirection,
   StorageAccessMode,
   StorageClass,
   ZonePurpose,
@@ -268,16 +269,23 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
       )}
 
       {selectedNode?.kind === "vpc" && (
-        <div className="properties-field">
-          <label htmlFor="vpc-name">Nome</label>
-          <input
-            id="vpc-name"
-            value={selectedNode.data.name}
-            onChange={(e) =>
-              updateNodeData(selectedNode.id, { name: e.target.value })
-            }
+        <>
+          <div className="properties-field">
+            <label htmlFor="vpc-name">Nome</label>
+            <input
+              id="vpc-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <VpcFirewallRulesInfo
+            vpc={selectedNode}
+            edges={edges}
+            nodes={nodes}
           />
-        </div>
+        </>
       )}
 
       {selectedNode?.kind === "subnet" && (
@@ -882,6 +890,41 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             />
           </div>
           <VpnVpcInfo vpn={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
+      {selectedNode?.kind === "firewall" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="firewall-name">Nome</label>
+            <input
+              id="firewall-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="firewall-direction">Direção</label>
+            <select
+              id="firewall-direction"
+              value={selectedNode.data.direction}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  direction: e.target.value as FirewallDirection,
+                })
+              }
+            >
+              <option value="ingress">Entrada (ingress)</option>
+              <option value="egress">Saída (egress)</option>
+            </select>
+          </div>
+          <FirewallVpcInfo
+            firewall={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
         </>
       )}
 
@@ -1543,6 +1586,78 @@ function PeeringVpcInfo({
       </dd>
       <dt>Progresso</dt>
       <dd>{vpcEdges.length} / 2</dd>
+    </dl>
+  );
+}
+
+function VpcFirewallRulesInfo({
+  vpc,
+  edges,
+  nodes,
+}: {
+  vpc: Extract<DiagramNode, { kind: "vpc" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const rules = edges
+    .filter((e) => e.kind === "firewall-vpc" && e.target === vpc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "firewall"))
+    .filter((n): n is Extract<DiagramNode, { kind: "firewall" }> => n != null);
+
+  if (rules.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue regras de firewall a esta VPC para documentar políticas de rede.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>Regras de firewall</dt>
+      <dd>
+        {rules
+          .map(
+            (rule) =>
+              `${rule.data.name} (${rule.data.direction === "ingress" ? "entrada" : "saída"})`,
+          )
+          .join(", ")}
+      </dd>
+    </dl>
+  );
+}
+
+function FirewallVpcInfo({
+  firewall,
+  edges,
+  nodes,
+}: {
+  firewall: Extract<DiagramNode, { kind: "firewall" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vpcEdge = edges.find(
+    (e) => e.kind === "firewall-vpc" && e.source === firewall.id,
+  );
+
+  if (!vpcEdge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à VPC (handle inferior) para documentar onde a regra se aplica.
+      </p>
+    );
+  }
+
+  const vpc = nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc");
+
+  return (
+    <dl className="properties-stats">
+      {vpc && vpc.kind === "vpc" ? (
+        <>
+          <dt>VPC</dt>
+          <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }

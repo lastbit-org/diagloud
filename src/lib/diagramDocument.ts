@@ -25,6 +25,7 @@ import {
   type NatProps,
   type PeeringProps,
   type VpnProps,
+  type FirewallProps,
   type ArtifactProps,
   type InternetProps,
   type RunProps,
@@ -225,6 +226,16 @@ function parsePeeringData(raw: unknown): PeeringProps {
     throw new DiagramParseError("Dados de VPC Peering inválidos.");
   }
   return { name: raw.name };
+}
+
+function parseFirewallData(raw: unknown): FirewallProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Firewall inválidos.");
+  }
+  return {
+    name: raw.name,
+    direction: raw.direction === "egress" ? "egress" : "ingress",
+  };
 }
 
 function parseVpnData(raw: unknown): VpnProps {
@@ -498,6 +509,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseVpnData(data),
       };
+    case "firewall":
+      if (!nodeIdMatchesKind(nodeId, "firewall")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Firewall.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "firewall",
+        position: parsedPosition,
+        zIndex,
+        data: parseFirewallData(data),
+      };
     case "artifact":
       if (!nodeIdMatchesKind(nodeId, "artifact")) {
         throw new DiagramParseError(
@@ -627,6 +651,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "nat-vpc" &&
     kind !== "peering-vpc" &&
     kind !== "vpn-vpc" &&
+    kind !== "firewall-vpc" &&
     kind !== "internet-nat" &&
     kind !== "internet-vpn" &&
     kind !== "subnet-nat" &&
@@ -736,6 +761,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.vpn === "string"
           ? patterns.vpn
           : DEFAULT_NAMING_PATTERNS.vpn,
+      firewall:
+        typeof patterns.firewall === "string"
+          ? patterns.firewall
+          : DEFAULT_NAMING_PATTERNS.firewall,
       artifact:
         typeof patterns.artifact === "string"
           ? patterns.artifact
@@ -929,6 +958,7 @@ function namingMetadataEqual(
     a.patterns.nat === b.patterns.nat &&
     a.patterns.peering === b.patterns.peering &&
     a.patterns.vpn === b.patterns.vpn &&
+    a.patterns.firewall === b.patterns.firewall &&
     a.patterns.artifact === b.patterns.artifact &&
     a.patterns.internet === b.patterns.internet &&
     a.patterns.run === b.patterns.run &&

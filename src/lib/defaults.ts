@@ -15,6 +15,7 @@ import type {
   NatProps,
   PeeringProps,
   VpnProps,
+  FirewallProps,
   ArtifactProps,
   InternetProps,
   RunProps,
@@ -88,6 +89,11 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         region: "southamerica-east1",
       } as VpnProps as ResourcePropsByKind[K];
+    case "firewall":
+      return {
+        name,
+        direction: "ingress",
+      } as FirewallProps as ResourcePropsByKind[K];
     case "artifact":
       return {
         name,
@@ -158,6 +164,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `peer-${count}`;
     case "vpn":
       return `vpn-${count}`;
+    case "firewall":
+      return `fw-${count}`;
     case "artifact":
       return `gar-${count}`;
     case "internet":
