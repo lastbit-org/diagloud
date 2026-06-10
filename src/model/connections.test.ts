@@ -93,6 +93,9 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("workbench", "storage")).toBe("workbench-storage");
     expect(getEdgeKind("workbench", "bigquery")).toBe("workbench-bigquery");
     expect(getEdgeKind("workbench", "spanner")).toBe("workbench-spanner");
+    expect(getEdgeKind("vm", "firestore")).toBe("vm-firestore");
+    expect(getEdgeKind("pubsub", "firestore")).toBe("pubsub-firestore");
+    expect(getEdgeKind("workbench", "firestore")).toBe("workbench-firestore");
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {
@@ -484,6 +487,25 @@ describe("validateConnection", () => {
       { nodes: [...nodes, pubsub], edges: [] },
     );
     expect(result).toMatchObject({ valid: true, edgeKind: "pubsub-storage" });
+  });
+
+  it("aceita VM → Firestore", () => {
+    const firestore: DiagramNode = {
+      id: "firestore-1",
+      kind: "firestore",
+      position: { x: 200, y: 0 },
+      data: { name: "fs-app", location: "southamerica-east1" },
+    };
+    const result = validateConnection(
+      {
+        source: vm.id,
+        target: firestore.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: [...nodes, firestore], edges: [] },
+    );
+    expect(result).toMatchObject({ valid: true, edgeKind: "vm-firestore" });
   });
 
   it("aceita VM → Cloud Spanner", () => {

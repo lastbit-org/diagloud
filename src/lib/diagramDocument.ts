@@ -32,6 +32,7 @@ import {
   type PubsubProps,
   type BigqueryProps,
   type SpannerProps,
+  type FirestoreProps,
   type WorkbenchProps,
   type ZoneProps,
   type ZonePurpose,
@@ -326,6 +327,20 @@ function parseSpannerData(raw: unknown): SpannerProps {
   };
 }
 
+function parseFirestoreData(raw: unknown): FirestoreProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Firestore inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
+  };
+}
+
 function parseWorkbenchData(raw: unknown): WorkbenchProps {
   if (
     !isRecord(raw) ||
@@ -592,6 +607,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseSpannerData(data),
       };
+    case "firestore":
+      if (!nodeIdMatchesKind(nodeId, "firestore")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Firestore.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "firestore",
+        position: parsedPosition,
+        zIndex,
+        data: parseFirestoreData(data),
+      };
     case "workbench":
       if (!nodeIdMatchesKind(nodeId, "workbench")) {
         throw new DiagramParseError(
@@ -670,6 +698,11 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "workbench-storage" &&
     kind !== "workbench-bigquery" &&
     kind !== "workbench-spanner" &&
+    kind !== "vm-firestore" &&
+    kind !== "gke-firestore" &&
+    kind !== "run-firestore" &&
+    kind !== "pubsub-firestore" &&
+    kind !== "workbench-firestore" &&
     kind !== "sql-vpc"
   ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
@@ -789,6 +822,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.spanner === "string"
           ? patterns.spanner
           : DEFAULT_NAMING_PATTERNS.spanner,
+      firestore:
+        typeof patterns.firestore === "string"
+          ? patterns.firestore
+          : DEFAULT_NAMING_PATTERNS.firestore,
       workbench:
         typeof patterns.workbench === "string"
           ? patterns.workbench
@@ -965,6 +1002,7 @@ function namingMetadataEqual(
     a.patterns.pubsub === b.patterns.pubsub &&
     a.patterns.bigquery === b.patterns.bigquery &&
     a.patterns.spanner === b.patterns.spanner &&
+    a.patterns.firestore === b.patterns.firestore &&
     a.patterns.workbench === b.patterns.workbench
   );
 }

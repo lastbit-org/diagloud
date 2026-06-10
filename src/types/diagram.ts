@@ -9,6 +9,7 @@ import type {
   FirewallProps,
   BigqueryProps,
   SpannerProps,
+  FirestoreProps,
   WorkbenchProps,
   PubsubProps,
   RunProps,
@@ -49,6 +50,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "pubsub"; data: PubsubProps })
   | (NodeBase & { kind: "bigquery"; data: BigqueryProps })
   | (NodeBase & { kind: "spanner"; data: SpannerProps })
+  | (NodeBase & { kind: "firestore"; data: FirestoreProps })
   | (NodeBase & { kind: "workbench"; data: WorkbenchProps })
   | (NodeBase & { kind: "zone"; data: ZoneProps });
 
@@ -85,7 +87,12 @@ export type DiagramEdge = {
     | "workbench-subnet"
     | "workbench-storage"
     | "workbench-bigquery"
-    | "workbench-spanner";
+    | "workbench-spanner"
+    | "vm-firestore"
+    | "gke-firestore"
+    | "run-firestore"
+    | "pubsub-firestore"
+    | "workbench-firestore";
 };
 
 export type DiagramNamingMetadata = {

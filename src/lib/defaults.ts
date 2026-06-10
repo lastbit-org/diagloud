@@ -22,6 +22,7 @@ import type {
   PubsubProps,
   BigqueryProps,
   SpannerProps,
+  FirestoreProps,
   WorkbenchProps,
   ZoneProps,
 } from "../types";
@@ -126,6 +127,11 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         config: "regional-southamerica-east1",
       } as SpannerProps as ResourcePropsByKind[K];
+    case "firestore":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as FirestoreProps as ResourcePropsByKind[K];
     case "workbench":
       return {
         name,
@@ -178,6 +184,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `bq-${count}`;
     case "spanner":
       return `spanner-${count}`;
+    case "firestore":
+      return `fs-${count}`;
     case "workbench":
       return `wb-${count}`;
     case "zone":

@@ -65,6 +65,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "pubsub" ||
     value === "bigquery" ||
     value === "spanner" ||
+    value === "firestore" ||
     value === "workbench" ||
     value === "zone"
   );
@@ -175,6 +176,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.spanner,
     description: "Banco relacional globalmente distribuído",
     icon: GCP_RESOURCE_ICONS.spanner,
+  },
+  {
+    kind: "firestore",
+    category: "databases",
+    label: GCP_RESOURCE_LABELS.firestore,
+    description: "Banco de documentos NoSQL",
+    icon: GCP_RESOURCE_ICONS.firestore,
   },
   {
     kind: "workbench",

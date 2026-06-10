@@ -768,6 +768,37 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "firestore" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="firestore-name">Banco de dados</label>
+            <input
+              id="firestore-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="firestore-location">Localização</label>
+            <input
+              id="firestore-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1 ou nam5"
+            />
+          </div>
+          <FirestoreClientsInfo
+            firestore={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "workbench" && (
         <>
           <div className="properties-field">
@@ -1170,17 +1201,22 @@ function PubsubDestinationsInfo({
     .filter((e) => e.kind === "pubsub-spanner" && e.source === pubsub.id)
     .map((e) => nodes.find((n) => n.id === e.target && n.kind === "spanner"))
     .filter((n): n is Extract<DiagramNode, { kind: "spanner" }> => n != null);
+  const firestores = edges
+    .filter((e) => e.kind === "pubsub-firestore" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "firestore"))
+    .filter((n): n is Extract<DiagramNode, { kind: "firestore" }> => n != null);
 
   if (
     runs.length === 0 &&
     buckets.length === 0 &&
     datasets.length === 0 &&
-    spanners.length === 0
+    spanners.length === 0 &&
+    firestores.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue a Cloud Run, Cloud Storage, BigQuery ou Cloud Spanner para
-        documentar subscriptions e exportações.
+        Ligue a Cloud Run, Cloud Storage, BigQuery, Cloud Spanner ou Firestore
+        para documentar subscriptions e exportações.
       </p>
     );
   }
@@ -1211,6 +1247,12 @@ function PubsubDestinationsInfo({
           <dd>{spanners.map((s) => s.data.name).join(", ")}</dd>
         </>
       ) : null}
+      {firestores.length > 0 ? (
+        <>
+          <dt>Firestore</dt>
+          <dd>{firestores.map((f) => f.data.name).join(", ")}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }
@@ -1236,17 +1278,21 @@ function WorkbenchConnectionsInfo({
   const spannerEdges = edges.filter(
     (e) => e.kind === "workbench-spanner" && e.source === workbench.id,
   );
+  const firestoreEdges = edges.filter(
+    (e) => e.kind === "workbench-firestore" && e.source === workbench.id,
+  );
 
   if (
     !subnetEdge &&
     storageEdges.length === 0 &&
     bigqueryEdges.length === 0 &&
-    spannerEdges.length === 0
+    spannerEdges.length === 0 &&
+    firestoreEdges.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue à sub-rede (VPC), Cloud Storage, BigQuery ou Cloud Spanner para
-        documentar o ambiente de notebooks.
+        Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud Spanner ou
+        Firestore para documentar o ambiente de notebooks.
       </p>
     );
   }
@@ -1318,6 +1364,106 @@ function WorkbenchConnectionsInfo({
               .map((s) => s.data.name)
               .join(", ")}
           </dd>
+        </>
+      ) : null}
+      {firestoreEdges.length > 0 ? (
+        <>
+          <dt>Firestore</dt>
+          <dd>
+            {firestoreEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "firestore"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "firestore" }> =>
+                  n != null,
+              )
+              .map((f) => f.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function FirestoreClientsInfo({
+  firestore,
+  edges,
+  nodes,
+}: {
+  firestore: Extract<DiagramNode, { kind: "firestore" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vms = edges
+    .filter((e) => e.kind === "vm-firestore" && e.target === firestore.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "gke-firestore" && e.target === firestore.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "run-firestore" && e.target === firestore.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const topics = edges
+    .filter((e) => e.kind === "pubsub-firestore" && e.target === firestore.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const workbenches = edges
+    .filter((e) => e.kind === "workbench-firestore" && e.target === firestore.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "workbench"))
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
+    );
+
+  if (
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    topics.length === 0 &&
+    workbenches.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue VMs, GKE, Cloud Run, Workbench ou Pub/Sub para documentar
+        clientes deste banco.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {topics.length > 0 ? (
+        <>
+          <dt>Pub/Sub</dt>
+          <dd>{topics.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {workbenches.length > 0 ? (
+        <>
+          <dt>Vertex AI Workbench</dt>
+          <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

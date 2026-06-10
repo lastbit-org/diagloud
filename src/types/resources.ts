@@ -17,6 +17,7 @@ export type ResourceKind =
   | "pubsub"
   | "bigquery"
   | "spanner"
+  | "firestore"
   | "workbench"
   | "zone";
 
@@ -147,6 +148,12 @@ export type SpannerProps = {
   config: string;
 };
 
+export type FirestoreProps = {
+  /** Nome do banco de dados. */
+  name: string;
+  location: string;
+};
+
 export type WorkbenchProps = {
   /** Nome da instância de notebook. */
   name: string;
@@ -181,6 +188,7 @@ export type ResourcePropsByKind = {
   pubsub: PubsubProps;
   bigquery: BigqueryProps;
   spanner: SpannerProps;
+  firestore: FirestoreProps;
   workbench: WorkbenchProps;
   zone: ZoneProps;
 };

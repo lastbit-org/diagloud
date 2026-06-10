@@ -2,6 +2,7 @@ import type { ResourceKind } from "../types";
 import artifactIcon from "./google-cloud-legacy-icons/artifact_registry/artifact_registry.svg";
 import bigqueryIcon from "./google-cloud-legacy-icons/bigquery/bigquery.svg";
 import spannerIcon from "./google-cloud-legacy-icons/cloud_spanner/cloud_spanner.svg";
+import firestoreIcon from "./google-cloud-legacy-icons/firestore/firestore.svg";
 import workbenchIcon from "./google-cloud-legacy-icons/vertexai/vertexai.svg";
 import natIcon from "./google-cloud-legacy-icons/cloud_nat/cloud_nat.svg";
 import vpnIcon from "./google-cloud-legacy-icons/cloud_vpn/cloud_vpn.svg";
@@ -36,6 +37,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   pubsub: pubsubIcon,
   bigquery: bigqueryIcon,
   spanner: spannerIcon,
+  firestore: firestoreIcon,
   workbench: workbenchIcon,
   zone: zoneIcon,
 };
@@ -57,6 +59,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   pubsub: "Pub/Sub",
   bigquery: "BigQuery",
   spanner: "Cloud Spanner",
+  firestore: "Firestore",
   workbench: "Vertex AI Workbench",
   zone: "Zona",
 };

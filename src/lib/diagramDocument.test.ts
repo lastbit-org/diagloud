@@ -42,6 +42,7 @@ const sampleDocument: DiagramDocument = {
         pubsub: "topic-AREA-AMBIENTE",
         bigquery: "bq-AREA-AMBIENTE",
         spanner: "spanner-AREA-AMBIENTE",
+        firestore: "fs-AREA-AMBIENTE",
         workbench: "wb-AREA-AMBIENTE",
         zone: "zona-AREA-AMBIENTE",
       },

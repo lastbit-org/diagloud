@@ -62,7 +62,7 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "internet") {
     return "Rede pública";
   }
-  if (node.kind === "bigquery") {
+  if (node.kind === "bigquery" || node.kind === "firestore") {
     return node.data.location;
   }
   if (node.kind === "spanner") {

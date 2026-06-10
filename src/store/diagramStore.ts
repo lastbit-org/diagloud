@@ -59,6 +59,7 @@ import type {
   PubsubProps,
   BigqueryProps,
   SpannerProps,
+  FirestoreProps,
   WorkbenchProps,
   ZoneProps,
 } from "../types";
@@ -99,6 +100,7 @@ type DiagramActions = {
       | Partial<PubsubProps>
       | Partial<BigqueryProps>
       | Partial<SpannerProps>
+      | Partial<FirestoreProps>
       | Partial<WorkbenchProps>
       | Partial<ZoneProps>,
   ) => void;
@@ -262,6 +264,12 @@ function buildNode<K extends ResourceKind>(
         kind: "spanner",
         data: { ...defaultResourceData("spanner", resourceContext), ...data },
       };
+    case "firestore":
+      return {
+        ...base,
+        kind: "firestore",
+        data: { ...defaultResourceData("firestore", resourceContext), ...data },
+      };
     case "workbench":
       return {
         ...base,
@@ -378,6 +386,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<SpannerProps>) },
+      };
+    case "firestore":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<FirestoreProps>) },
       };
     case "workbench":
       return {
