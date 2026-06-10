@@ -1,52 +1,57 @@
 .theme-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
+  padding-left: 4px;
+  border-left: 1px solid var(--border);
 }
 
 .theme-controls__btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font: inherit;
-  font-size: 14px;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
   border-radius: 6px;
-  background: var(--code-bg);
-  color: var(--text-h);
+  background: transparent;
+  color: var(--text);
+  opacity: 0.55;
   cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .theme-controls__btn:hover {
-  border-color: var(--accent-border);
-  background: var(--accent-bg);
+  opacity: 1;
+  background: var(--code-bg);
+  color: var(--text-h);
 }
 
-.theme-controls__btn--accent {
-  padding-right: 8px;
+.theme-controls__btn:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--accent-border);
+  outline-offset: 1px;
 }
 
 .theme-controls__icon {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1;
 }
 
-.theme-controls__label {
-  font-size: 13px;
-}
-
 .theme-controls__swatch {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   flex-shrink: 0;
 }
 
-.theme-controls__caret {
-  font-size: 10px;
-  opacity: 0.75;
+[data-theme="dark"] .theme-controls__swatch {
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .theme-controls__accent {
@@ -55,10 +60,10 @@
 
 .theme-controls__menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   right: 0;
   z-index: 30;
-  min-width: 160px;
+  min-width: 152px;
   margin: 0;
   padding: 4px;
   list-style: none;
@@ -74,8 +79,8 @@
   gap: 10px;
   width: 100%;
   font: inherit;
-  font-size: 14px;
-  padding: 8px 10px;
+  font-size: 13px;
+  padding: 7px 10px;
   border: none;
   border-radius: 6px;
   background: transparent;
@@ -94,8 +99,8 @@
 }
 
 .theme-controls__option-swatch {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   border: 1px solid var(--border);
   flex-shrink: 0;

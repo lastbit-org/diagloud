@@ -29,19 +29,16 @@ export function ThemeControls() {
   const isDark = colorScheme === "dark";
 
   return (
-    <div className="theme-controls">
+    <div className="theme-controls" aria-label="Aparência">
       <button
         type="button"
         className="theme-controls__btn"
         onClick={toggleColorScheme}
-        title={isDark ? "Usar tema claro" : "Usar tema escuro"}
+        title={isDark ? "Tema claro" : "Tema escuro"}
         aria-label={isDark ? "Alternar para tema claro" : "Alternar para tema escuro"}
       >
         <span className="theme-controls__icon" aria-hidden>
           {isDark ? "☀" : "☾"}
-        </span>
-        <span className="theme-controls__label">
-          {isDark ? "Claro" : "Escuro"}
         </span>
       </button>
 
@@ -60,10 +57,6 @@ export function ThemeControls() {
             style={{ backgroundColor: currentAccent }}
             aria-hidden
           />
-          <span className="theme-controls__label">Destaque</span>
-          <span className="theme-controls__caret" aria-hidden>
-            ▾
-          </span>
         </button>
 
         {accentOpen && (

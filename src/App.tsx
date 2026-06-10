@@ -23,16 +23,20 @@ function AppContent() {
   return (
     <div className="app">
       <header className="app__header">
-        <h1 className="app__title">Diagloud</h1>
-        <span
-          className={`app__selection${selectedNode ? " app__selection--active" : ""}`}
-        >
-          {selectionLabel}
-        </span>
-        <DeleteSelectionButton />
-        <ThemeControls />
-        <DocumentActions />
-        <span className="app__meta">{nodes.length} nó(s)</span>
+        <div className="app__header-start">
+          <h1 className="app__title">Diagloud</h1>
+          <span
+            className={`app__selection${selectedNode ? " app__selection--active" : ""}`}
+          >
+            {selectionLabel}
+          </span>
+          <DeleteSelectionButton />
+          <DocumentActions />
+        </div>
+        <div className="app__header-end">
+          <span className="app__meta">{nodes.length} nó(s)</span>
+          <ThemeControls />
+        </div>
       </header>
       <div className="app__body">
         <Palette />
