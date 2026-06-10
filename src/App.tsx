@@ -1,5 +1,6 @@
 import { ReactFlowProvider } from "@xyflow/react";
 import { DocumentActions } from "./components/DocumentActions";
+import { ThemeControls } from "./components/ThemeControls";
 import { DeleteSelectionButton } from "./components/DeleteSelectionButton";
 import { DiagramCanvas } from "./components/canvas/DiagramCanvas";
 import { SidePanel } from "./components/panel/SidePanel";
@@ -29,6 +30,7 @@ function AppContent() {
           {selectionLabel}
         </span>
         <DeleteSelectionButton />
+        <ThemeControls />
         <DocumentActions />
         <span className="app__meta">{nodes.length} nó(s)</span>
       </header>
