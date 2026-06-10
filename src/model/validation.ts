@@ -1,3 +1,4 @@
+import { canonicalizeEdgeEndpoints } from "./connections";
 import {
   subnetCidrErrorMessage,
   validateSubnetCidr,
@@ -137,7 +138,7 @@ export function collectDiagramIssues(
   const subnetIdsOnVpc = new Set(
     edges
       .filter((edge) => edge.kind === "subnet-vpc")
-      .map((edge) => edge.source),
+      .map((edge) => canonicalizeEdgeEndpoints(edge, nodes).source),
   );
 
   for (const node of nodes) {

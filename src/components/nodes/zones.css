@@ -6,11 +6,13 @@
   border: 3px solid var(--zone-border);
   border-radius: 10px;
   background: var(--zone-bg);
+  pointer-events: none;
 }
 
 .gcp-zone--selected {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-border);
+  pointer-events: auto;
 }
 
 .gcp-zone__label {
@@ -27,7 +29,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  pointer-events: none;
+  pointer-events: all;
+  cursor: pointer;
 }
 
 .gcp-zone--slate {

@@ -37,19 +37,45 @@ export type ConnectionInvalidReason =
   | "run-not-vpc"
   | "subnet-run-capacity";
 
+export function canonicalizeEdgeEndpoints(
+  edge: Pick<DiagramEdge, "source" | "target" | "kind">,
+  nodes: DiagramNode[],
+): { source: string; target: string } {
+  const sourceNode = nodes.find((node) => node.id === edge.source);
+  const targetNode = nodes.find((node) => node.id === edge.target);
+  if (!sourceNode || !targetNode) {
+    return { source: edge.source, target: edge.target };
+  }
+
+  const spec = EDGE_ENDPOINTS[edge.kind];
+  if (sourceNode.kind === spec.from && targetNode.kind === spec.to) {
+    return { source: edge.source, target: edge.target };
+  }
+  if (sourceNode.kind === spec.to && targetNode.kind === spec.from) {
+    return { source: edge.target, target: edge.source };
+  }
+
+  return { source: edge.source, target: edge.target };
+}
+
 /** Verifica se `toId` é alcançável a partir de `fromId` seguindo as arestas existentes. */
 export function canReachNode(
   fromId: string,
   toId: string,
   edges: DiagramEdge[],
+  nodes: DiagramNode[] = [],
 ): boolean {
   if (fromId === toId) return true;
 
   const adjacency = new Map<string, string[]>();
   for (const edge of edges) {
-    const neighbors = adjacency.get(edge.source);
-    if (neighbors) neighbors.push(edge.target);
-    else adjacency.set(edge.source, [edge.target]);
+    const { source, target } =
+      nodes.length > 0
+        ? canonicalizeEdgeEndpoints(edge, nodes)
+        : { source: edge.source, target: edge.target };
+    const neighbors = adjacency.get(source);
+    if (neighbors) neighbors.push(target);
+    else adjacency.set(source, [target]);
   }
 
   const visited = new Set<string>();
@@ -71,13 +97,21 @@ export function wouldCreateDirectedCycle(
   source: string,
   target: string,
   edges: DiagramEdge[],
+  nodes: DiagramNode[] = [],
 ): boolean {
   if (source === target) return true;
-  return canReachNode(target, source, edges);
+  return canReachNode(target, source, edges, nodes);
 }
 
 export type ConnectionValidationResult =
-  | { valid: true; edgeKind: DiagramEdge["kind"] }
+  | {
+      valid: true;
+      edgeKind: DiagramEdge["kind"];
+      source: string;
+      target: string;
+      sourceHandle?: string;
+      targetHandle?: string;
+    }
   | { valid: false; reason: ConnectionInvalidReason };
 
 export function getEdgeKind(
@@ -230,7 +264,14 @@ export function validateConnection(
     return { valid: false, reason: "duplicate-edge" };
   }
 
-  if (wouldCreateDirectedCycle(directed.source, directed.target, context.edges)) {
+  if (
+    wouldCreateDirectedCycle(
+      directed.source,
+      directed.target,
+      context.edges,
+      context.nodes,
+    )
+  ) {
     return {
       valid: false,
       reason: directed.source === directed.target ? "same-node" : "cycle",
@@ -354,7 +395,14 @@ export function validateConnection(
     }
   }
 
-  return { valid: true, edgeKind };
+  return {
+    valid: true,
+    edgeKind,
+    source: directed.source,
+    target: directed.target,
+    sourceHandle: directed.sourceHandle ?? undefined,
+    targetHandle: directed.targetHandle ?? undefined,
+  };
 }
 
 export function isValidConnection(

@@ -14,6 +14,20 @@
   --xy-edge-stroke: var(--edge-stroke);
 }
 
+/* Zona não selecionada deixa cliques passarem para arestas/recursos abaixo */
+.diagram-canvas .react-flow__node-zone:not(.selected) {
+  pointer-events: none;
+}
+
+.diagram-canvas .react-flow__node-zone:not(.selected) .gcp-zone__label {
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.diagram-canvas .react-flow__node-zone.selected {
+  pointer-events: all;
+}
+
 .diagram-canvas .react-flow__edge-path {
   stroke: var(--edge-stroke);
   stroke-width: 1.75;

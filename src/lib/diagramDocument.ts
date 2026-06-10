@@ -694,7 +694,14 @@ export function sanitizeDocumentEdges(
       { nodes, edges: accepted },
     );
     if (result.valid) {
-      accepted.push({ ...edge, sourceHandle, targetHandle });
+      accepted.push({
+        ...edge,
+        kind: result.edgeKind,
+        source: result.source,
+        target: result.target,
+        sourceHandle: result.sourceHandle ?? sourceHandle,
+        targetHandle: result.targetHandle ?? targetHandle,
+      });
     }
   }
   return accepted;

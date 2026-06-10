@@ -204,10 +204,10 @@ export function DiagramCanvas() {
       }
 
       addEdge({
-        source: connection.source!,
-        target: connection.target!,
-        sourceHandle: connection.sourceHandle ?? undefined,
-        targetHandle: connection.targetHandle ?? undefined,
+        source: result.source,
+        target: result.target,
+        sourceHandle: result.sourceHandle,
+        targetHandle: result.targetHandle,
         kind: result.edgeKind,
       });
     },

@@ -545,8 +545,11 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       const next: DiagramEdge = {
         ...edge,
         id: edge.id ?? createEdgeId(),
-        sourceHandle,
-        targetHandle,
+        kind: result.edgeKind,
+        source: result.source,
+        target: result.target,
+        sourceHandle: result.sourceHandle ?? sourceHandle,
+        targetHandle: result.targetHandle ?? targetHandle,
       };
       const edges = [...state.edges, next];
       let nodes = state.nodes;

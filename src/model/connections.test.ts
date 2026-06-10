@@ -122,20 +122,20 @@ describe("validateConnection", () => {
     expect(result).toEqual({ valid: false, reason: "same-node" });
   });
 
-  it("rejeita aresta que fecharia ciclo", () => {
+  it("rejeita ligação duplicada mesmo com direção invertida no gesto", () => {
     const edges: DiagramEdge[] = [
-      { id: "e1", source: vpc.id, target: subnet.id, kind: "subnet-vpc" },
+      { id: "e1", source: subnet.id, target: vpc.id, kind: "subnet-vpc" },
     ];
     const result = validateConnection(
       {
-        source: subnet.id,
-        target: vpc.id,
+        source: vpc.id,
+        target: subnet.id,
         sourceHandle: egress(),
         targetHandle: ingress(),
       },
       { nodes, edges },
     );
-    expect(result).toEqual({ valid: false, reason: "cycle" });
+    expect(result).toEqual({ valid: false, reason: "duplicate-edge" });
   });
 
   it("aceita sub-rede → VPC com handles em qualquer lado", () => {
@@ -148,7 +148,30 @@ describe("validateConnection", () => {
       },
       { nodes, edges: [] },
     );
-    expect(result).toEqual({ valid: true, edgeKind: "subnet-vpc" });
+    expect(result).toMatchObject({
+      valid: true,
+      edgeKind: "subnet-vpc",
+      source: subnet.id,
+      target: vpc.id,
+    });
+  });
+
+  it("normaliza VPC → sub-rede para sub-rede → VPC ao validar", () => {
+    const result = validateConnection(
+      {
+        source: vpc.id,
+        target: subnet.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes, edges: [] },
+    );
+    expect(result).toMatchObject({
+      valid: true,
+      edgeKind: "subnet-vpc",
+      source: subnet.id,
+      target: vpc.id,
+    });
   });
 
   it("aceita Cloud SQL privado → sub-rede", () => {
@@ -161,7 +184,7 @@ describe("validateConnection", () => {
       },
       { nodes, edges: [] },
     );
-    expect(result).toEqual({ valid: true, edgeKind: "sql-subnet" });
+    expect(result).toMatchObject({ valid: true, edgeKind: "sql-subnet" });
   });
 
   it("rejeita Cloud SQL público → sub-rede", () => {
@@ -203,7 +226,7 @@ describe("validateConnection", () => {
         edges: [],
       },
     );
-    expect(result).toEqual({ valid: true, edgeKind: "gke-subnet" });
+    expect(result).toMatchObject({ valid: true, edgeKind: "gke-subnet" });
   });
 
   it("aceita VM → Cloud Storage com handles corretos", () => {
@@ -216,7 +239,7 @@ describe("validateConnection", () => {
       },
       { nodes, edges: [] },
     );
-    expect(result).toEqual({ valid: true, edgeKind: "vm-storage" });
+    expect(result).toMatchObject({ valid: true, edgeKind: "vm-storage" });
   });
 
   it("rejeita ligação com handle inválido", () => {
@@ -372,7 +395,7 @@ describe("validateConnection", () => {
       },
       { nodes: [...nodes, run], edges: [] },
     );
-    expect(result).toEqual({ valid: true, edgeKind: "run-subnet" });
+    expect(result).toMatchObject({ valid: true, edgeKind: "run-subnet" });
   });
 
   it("rejeita Cloud Run público → sub-rede", () => {
@@ -428,7 +451,7 @@ describe("validateConnection", () => {
       },
       { nodes: [...nodes, run, pubsub], edges: [] },
     );
-    expect(result).toEqual({ valid: true, edgeKind: "pubsub-run" });
+    expect(result).toMatchObject({ valid: true, edgeKind: "pubsub-run" });
   });
 
   it("aceita Pub/Sub → Cloud Storage", () => {
@@ -447,7 +470,7 @@ describe("validateConnection", () => {
       },
       { nodes: [...nodes, pubsub], edges: [] },
     );
-    expect(result).toEqual({ valid: true, edgeKind: "pubsub-storage" });
+    expect(result).toMatchObject({ valid: true, edgeKind: "pubsub-storage" });
   });
 
   it("aceita Pub/Sub → BigQuery", () => {
@@ -472,7 +495,7 @@ describe("validateConnection", () => {
       },
       { nodes: [...nodes, pubsub, bigquery], edges: [] },
     );
-    expect(result).toEqual({ valid: true, edgeKind: "pubsub-bigquery" });
+    expect(result).toMatchObject({ valid: true, edgeKind: "pubsub-bigquery" });
   });
 
   it("aceita handles padrão", () => {
@@ -485,6 +508,6 @@ describe("validateConnection", () => {
       },
       { nodes, edges: [] },
     );
-    expect(result).toEqual({ valid: true, edgeKind: "subnet-vpc" });
+    expect(result).toMatchObject({ valid: true, edgeKind: "subnet-vpc" });
   });
 });
