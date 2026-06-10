@@ -20,7 +20,8 @@ import {
   clearSqlPrivateNetwork,
   reassignSubnetSqlIps,
 } from "../model/sqlSubnet";
-import { handlesForEdgeKind, validateConnection } from "../model/connections";
+import { resolveEdgeHandles } from "../lib/dynamicHandles";
+import { validateConnection } from "../model/connections";
 import { validateSubnetCidr } from "../model/subnet";
 import type {
   DiagramDocument,
@@ -35,6 +36,9 @@ import type {
   SubnetProps,
   VmProps,
   VpcProps,
+  NatProps,
+  ArtifactProps,
+  InternetProps,
 } from "../types";
 
 type DiagramState = {
@@ -62,7 +66,10 @@ type DiagramActions = {
       | Partial<VmProps>
       | Partial<StorageProps>
       | Partial<SqlProps>
-      | Partial<GkeProps>,
+      | Partial<GkeProps>
+      | Partial<NatProps>
+      | Partial<ArtifactProps>
+      | Partial<InternetProps>,
   ) => void;
   setSubnetCidr: (id: string, cidr: string) => boolean;
   removeNode: (id: string) => void;
@@ -157,6 +164,24 @@ function buildNode<K extends ResourceKind>(
         kind: "gke",
         data: { ...defaultResourceData("gke", resourceContext), ...data },
       };
+    case "nat":
+      return {
+        ...base,
+        kind: "nat",
+        data: { ...defaultResourceData("nat", resourceContext), ...data },
+      };
+    case "artifact":
+      return {
+        ...base,
+        kind: "artifact",
+        data: { ...defaultResourceData("artifact", resourceContext), ...data },
+      };
+    case "internet":
+      return {
+        ...base,
+        kind: "internet",
+        data: { ...defaultResourceData("internet", resourceContext), ...data },
+      };
   }
 }
 
@@ -168,7 +193,10 @@ function mergeNodeData(
     | Partial<VmProps>
     | Partial<StorageProps>
     | Partial<SqlProps>
-    | Partial<GkeProps>,
+    | Partial<GkeProps>
+    | Partial<NatProps>
+    | Partial<ArtifactProps>
+    | Partial<InternetProps>,
 ): DiagramNode {
   switch (node.kind) {
     case "vpc":
@@ -200,6 +228,21 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<GkeProps>) },
+      };
+    case "nat":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<NatProps>) },
+      };
+    case "artifact":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<ArtifactProps>) },
+      };
+    case "internet":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<InternetProps>) },
       };
   }
 }
@@ -336,7 +379,9 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
   addEdge: (edge) => {
     set((state) => {
-      const { sourceHandle, targetHandle } = handlesForEdgeKind(edge.kind);
+      const resolved = resolveEdgeHandles(edge);
+      const sourceHandle = edge.sourceHandle ?? resolved.sourceHandle;
+      const targetHandle = edge.targetHandle ?? resolved.targetHandle;
       const result = validateConnection(
         {
           source: edge.source,
@@ -348,7 +393,12 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       );
       if (!result.valid) return state;
 
-      const next: DiagramEdge = { ...edge, id: edge.id ?? createEdgeId() };
+      const next: DiagramEdge = {
+        ...edge,
+        id: edge.id ?? createEdgeId(),
+        sourceHandle,
+        targetHandle,
+      };
       const edges = [...state.edges, next];
       let nodes = state.nodes;
 

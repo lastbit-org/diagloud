@@ -187,6 +187,8 @@ export function DiagramCanvas() {
       addEdge({
         source: connection.source!,
         target: connection.target!,
+        sourceHandle: connection.sourceHandle ?? undefined,
+        targetHandle: connection.targetHandle ?? undefined,
         kind: result.edgeKind,
       });
     },
@@ -215,7 +217,7 @@ export function DiagramCanvas() {
         onConnectEnd={onConnectEnd}
         isValidConnection={isValidConnection}
         connectionLineComponent={CustomConnectionLine}
-        connectionMode={ConnectionMode.Strict}
+        connectionMode={ConnectionMode.Loose}
         onNodeClick={(_, node) => selectNode(node.id)}
         onEdgeClick={(_, edge) => selectEdge(edge.id)}
         onPaneClick={clearSelection}

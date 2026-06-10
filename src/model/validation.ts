@@ -9,6 +9,7 @@ export type DiagramIssueCode =
   | "orphan-gke"
   | "orphan-storage"
   | "orphan-sql-private"
+  | "orphan-nat"
   | "subnet-without-vpc"
   | "subnet-invalid-cidr"
   | "subnet-cidr-overlap";
@@ -52,6 +53,12 @@ export function collectDiagramIssues(
       .map((edge) => edge.source),
   );
 
+  const natIdsOnVpc = new Set(
+    edges
+      .filter((edge) => edge.kind === "nat-vpc")
+      .map((edge) => edge.source),
+  );
+
   for (const node of nodes) {
     if (node.kind === "vm" && !vmIdsOnSubnet.has(node.id)) {
       issues.push({
@@ -81,6 +88,15 @@ export function collectDiagramIssues(
         severity: "error",
         nodeId: node.id,
         message: `Cluster GKE "${node.data.name}" não está ligado a uma sub-rede.`,
+      });
+    }
+
+    if (node.kind === "nat" && !natIdsOnVpc.has(node.id)) {
+      issues.push({
+        code: "orphan-nat",
+        severity: "warning",
+        nodeId: node.id,
+        message: `Cloud NAT "${node.data.name}" não está ligado a uma VPC.`,
       });
     }
 

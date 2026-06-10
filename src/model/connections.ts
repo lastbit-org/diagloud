@@ -1,5 +1,5 @@
 import { parseCidr } from "../lib/cidr";
-import { HANDLE_IDS } from "../lib/handles";
+import { matchesHandleRoles } from "../lib/dynamicHandles";
 import { canAttachGkeToSubnet } from "./gkeSubnet";
 import { canAttachSqlToSubnet } from "./sqlSubnet";
 import { canAttachHostToSubnet } from "./subnetHosts";
@@ -29,7 +29,9 @@ export type ConnectionInvalidReason =
   | "sql-not-private"
   | "subnet-sql-capacity"
   | "gke-has-subnet"
-  | "subnet-gke-capacity";
+  | "subnet-gke-capacity"
+  | "nat-has-vpc"
+  | "subnet-has-nat";
 
 /** Verifica se `toId` é alcançável a partir de `fromId` seguindo as arestas existentes. */
 export function canReachNode(
@@ -90,37 +92,11 @@ export function getEdgeKind(
 }
 
 export function matchesHandleIds(
-  edgeKind: DiagramEdge["kind"],
+  _edgeKind: DiagramEdge["kind"],
   sourceHandle: string | null | undefined,
   targetHandle: string | null | undefined,
 ): boolean {
-  switch (edgeKind) {
-    case "subnet-vpc":
-      return (
-        sourceHandle === HANDLE_IDS.subnet.toVpc &&
-        targetHandle === HANDLE_IDS.vpc.in
-      );
-    case "vm-subnet":
-      return (
-        sourceHandle === HANDLE_IDS.vm.toSubnet &&
-        targetHandle === HANDLE_IDS.subnet.fromVm
-      );
-    case "vm-storage":
-      return (
-        sourceHandle === HANDLE_IDS.vm.toStorage &&
-        targetHandle === HANDLE_IDS.storage.fromVm
-      );
-    case "sql-subnet":
-      return (
-        sourceHandle === HANDLE_IDS.sql.toSubnet &&
-        targetHandle === HANDLE_IDS.subnet.fromSql
-      );
-    case "gke-subnet":
-      return (
-        sourceHandle === HANDLE_IDS.gke.toSubnet &&
-        targetHandle === HANDLE_IDS.subnet.fromGke
-      );
-  }
+  return matchesHandleRoles(sourceHandle, targetHandle);
 }
 
 function resolveVmSubnetPair(
@@ -330,6 +306,24 @@ export function validateConnection(
     }
   }
 
+  if (
+    edgeKind === "nat-vpc" &&
+    context.edges.some(
+      (edge) => edge.kind === "nat-vpc" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "nat-has-vpc" };
+  }
+
+  if (
+    edgeKind === "subnet-nat" &&
+    context.edges.some(
+      (edge) => edge.kind === "subnet-nat" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "subnet-has-nat" };
+  }
+
   return { valid: true, edgeKind };
 }
 
@@ -344,35 +338,12 @@ export function isValidConnection(
   return matchesHandleIds(edgeKind, sourceHandle, targetHandle);
 }
 
-export function handlesForEdgeKind(kind: DiagramEdge["kind"]): {
+export function handlesForEdgeKind(_kind: DiagramEdge["kind"]): {
   sourceHandle: string;
   targetHandle: string;
 } {
-  switch (kind) {
-    case "subnet-vpc":
-      return {
-        sourceHandle: HANDLE_IDS.subnet.toVpc,
-        targetHandle: HANDLE_IDS.vpc.in,
-      };
-    case "vm-subnet":
-      return {
-        sourceHandle: HANDLE_IDS.vm.toSubnet,
-        targetHandle: HANDLE_IDS.subnet.fromVm,
-      };
-    case "vm-storage":
-      return {
-        sourceHandle: HANDLE_IDS.vm.toStorage,
-        targetHandle: HANDLE_IDS.storage.fromVm,
-      };
-    case "sql-subnet":
-      return {
-        sourceHandle: HANDLE_IDS.sql.toSubnet,
-        targetHandle: HANDLE_IDS.subnet.fromSql,
-      };
-    case "gke-subnet":
-      return {
-        sourceHandle: HANDLE_IDS.gke.toSubnet,
-        targetHandle: HANDLE_IDS.subnet.fromGke,
-      };
-  }
+  return {
+    sourceHandle: "bottom-0",
+    targetHandle: "top-0",
+  };
 }

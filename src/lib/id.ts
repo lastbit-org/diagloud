@@ -4,7 +4,18 @@ import type { ResourceKind } from "../types";
 const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const ID_PREFIXES = ["vpc", "subnet", "vm", "storage", "sql", "gke", "edge"] as const;
+const ID_PREFIXES = [
+  "vpc",
+  "subnet",
+  "vm",
+  "storage",
+  "sql",
+  "gke",
+  "nat",
+  "artifact",
+  "internet",
+  "edge",
+] as const;
 
 export type DiagramIdPrefix = (typeof ID_PREFIXES)[number];
 
@@ -27,7 +38,10 @@ export function createId(prefix = "node"): string {
     prefix === "vm" ||
     prefix === "storage" ||
     prefix === "sql" ||
-    prefix === "gke"
+    prefix === "gke" ||
+    prefix === "nat" ||
+    prefix === "artifact" ||
+    prefix === "internet"
   ) {
     return createNodeId(prefix);
   }
@@ -38,7 +52,7 @@ export function isUuid(value: string): boolean {
   return UUID_V4.test(value);
 }
 
-const ID_PREFIX_PATTERN = /^(vpc|subnet|vm|storage|sql|gke|edge)-(.+)$/;
+const ID_PREFIX_PATTERN = /^(vpc|subnet|vm|storage|sql|gke|nat|artifact|internet|edge)-(.+)$/;
 
 function parsePrefixedId(
   id: string,

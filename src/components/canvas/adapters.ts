@@ -1,6 +1,6 @@
 import type { Edge, Node } from "@xyflow/react";
 import { issueCountForNode, type DiagramIssue } from "../../model/validation";
-import { handlesForEdgeKind } from "../../model/connections";
+import { resolveEdgeHandles } from "../../lib/dynamicHandles";
 import type { DiagramEdge, DiagramNode } from "../../types";
 import type { GcpNodeData } from "../nodes";
 
@@ -29,6 +29,15 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     }
     return "Privado (sub-rede)";
   }
+  if (node.kind === "nat") {
+    return node.data.region;
+  }
+  if (node.kind === "artifact") {
+    return `${node.data.format} · ${node.data.location}`;
+  }
+  if (node.kind === "internet") {
+    return "Rede pública";
+  }
   return undefined;
 }
 
@@ -53,7 +62,7 @@ export function toFlowNode(
 }
 
 export function toFlowEdge(edge: DiagramEdge, selected = false): Edge {
-  const { sourceHandle, targetHandle } = handlesForEdgeKind(edge.kind);
+  const { sourceHandle, targetHandle } = resolveEdgeHandles(edge);
   return {
     id: edge.id,
     source: edge.source,
@@ -61,5 +70,6 @@ export function toFlowEdge(edge: DiagramEdge, selected = false): Edge {
     sourceHandle,
     targetHandle,
     selected,
+    className: "gcp-edge",
   };
 }

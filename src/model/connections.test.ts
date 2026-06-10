@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { HANDLE_IDS } from "../lib/handles";
+import {
+  DEFAULT_SOURCE_HANDLE,
+  DEFAULT_TARGET_HANDLE,
+  makeHandleId,
+} from "../lib/dynamicHandles";
 import type { DiagramEdge, DiagramNode } from "../types";
 import {
   canReachNode,
@@ -8,6 +12,11 @@ import {
   validateConnection,
   wouldCreateDirectedCycle,
 } from "./connections";
+
+const egress = (side: "top" | "right" | "bottom" | "left" = "bottom", index = 0) =>
+  makeHandleId(side, index);
+const ingress = (side: "top" | "right" | "bottom" | "left" = "top", index = 0) =>
+  makeHandleId(side, index);
 
 const vpc: DiagramNode = {
   id: "vpc-1",
@@ -62,6 +71,11 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vm", "subnet")).toBe("vm-subnet");
     expect(getEdgeKind("vm", "storage")).toBe("vm-storage");
     expect(getEdgeKind("sql", "subnet")).toBe("sql-subnet");
+    expect(getEdgeKind("nat", "vpc")).toBe("nat-vpc");
+    expect(getEdgeKind("internet", "nat")).toBe("internet-nat");
+    expect(getEdgeKind("subnet", "nat")).toBe("subnet-nat");
+    expect(getEdgeKind("gke", "artifact")).toBe("gke-artifact");
+    expect(getEdgeKind("vm", "artifact")).toBe("vm-artifact");
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {
@@ -95,8 +109,8 @@ describe("validateConnection", () => {
       {
         source: vm.id,
         target: vm.id,
-        sourceHandle: HANDLE_IDS.vm.toSubnet,
-        targetHandle: HANDLE_IDS.vm.toSubnet,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
       },
       { nodes, edges: [] },
     );
@@ -111,21 +125,21 @@ describe("validateConnection", () => {
       {
         source: subnet.id,
         target: vpc.id,
-        sourceHandle: HANDLE_IDS.subnet.toVpc,
-        targetHandle: HANDLE_IDS.vpc.in,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
       },
       { nodes, edges },
     );
     expect(result).toEqual({ valid: false, reason: "cycle" });
   });
 
-  it("aceita sub-rede → VPC com handles corretos", () => {
+  it("aceita sub-rede → VPC com handles em qualquer lado", () => {
     const result = validateConnection(
       {
         source: subnet.id,
         target: vpc.id,
-        sourceHandle: HANDLE_IDS.subnet.toVpc,
-        targetHandle: HANDLE_IDS.vpc.in,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
       },
       { nodes, edges: [] },
     );
@@ -137,8 +151,8 @@ describe("validateConnection", () => {
       {
         source: sql.id,
         target: subnet.id,
-        sourceHandle: HANDLE_IDS.sql.toSubnet,
-        targetHandle: HANDLE_IDS.subnet.fromSql,
+        sourceHandle: egress("top"),
+        targetHandle: ingress("left"),
       },
       { nodes, edges: [] },
     );
@@ -155,8 +169,8 @@ describe("validateConnection", () => {
       {
         source: publicSql.id,
         target: subnet.id,
-        sourceHandle: HANDLE_IDS.sql.toSubnet,
-        targetHandle: HANDLE_IDS.subnet.fromSql,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
       },
       { nodes: [...nodes, publicSql], edges: [] },
     );
@@ -168,15 +182,21 @@ describe("validateConnection", () => {
       {
         source: "gke-1",
         target: subnet.id,
-        sourceHandle: HANDLE_IDS.gke.toSubnet,
-        targetHandle: HANDLE_IDS.subnet.fromGke,
+        sourceHandle: egress(),
+        targetHandle: ingress("right"),
       },
-      { nodes: [...nodes, {
-        id: "gke-1",
-        kind: "gke",
-        position: { x: 0, y: 0 },
-        data: { name: "gke-1", nodeCount: 3, machineType: "e2-medium" },
-      }], edges: [] },
+      {
+        nodes: [
+          ...nodes,
+          {
+            id: "gke-1",
+            kind: "gke",
+            position: { x: 0, y: 0 },
+            data: { name: "gke-1", nodeCount: 3, machineType: "e2-medium" },
+          },
+        ],
+        edges: [],
+      },
     );
     expect(result).toEqual({ valid: true, edgeKind: "gke-subnet" });
   });
@@ -186,12 +206,25 @@ describe("validateConnection", () => {
       {
         source: vm.id,
         target: storage.id,
-        sourceHandle: HANDLE_IDS.vm.toStorage,
-        targetHandle: HANDLE_IDS.storage.fromVm,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
       },
       { nodes, edges: [] },
     );
     expect(result).toEqual({ valid: true, edgeKind: "vm-storage" });
+  });
+
+  it("rejeita ligação com handle inválido", () => {
+    const result = validateConnection(
+      {
+        source: vm.id,
+        target: storage.id,
+        sourceHandle: "wrong-handle",
+        targetHandle: ingress("left"),
+      },
+      { nodes, edges: [] },
+    );
+    expect(result).toEqual({ valid: false, reason: "invalid-handles" });
   });
 
   it("rejeita VM → VPC com invalid-types", () => {
@@ -199,8 +232,8 @@ describe("validateConnection", () => {
       {
         source: vm.id,
         target: vpc.id,
-        sourceHandle: HANDLE_IDS.vm.toSubnet,
-        targetHandle: HANDLE_IDS.vpc.in,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
       },
       { nodes, edges: [] },
     );
@@ -221,8 +254,8 @@ describe("validateConnection", () => {
       {
         source: subnet.id,
         target: vpc.id,
-        sourceHandle: HANDLE_IDS.subnet.toVpc,
-        targetHandle: HANDLE_IDS.vpc.in,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
       },
       { nodes, edges },
     );
@@ -239,8 +272,8 @@ describe("validateConnection", () => {
       {
         source: vm.id,
         target: badSubnet.id,
-        sourceHandle: HANDLE_IDS.vm.toSubnet,
-        targetHandle: HANDLE_IDS.subnet.fromVm,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
       },
       { nodes: [vpc, badSubnet, vm], edges: [] },
     );
@@ -277,8 +310,8 @@ describe("validateConnection", () => {
       {
         source: vm.id,
         target: tinySubnet.id,
-        sourceHandle: HANDLE_IDS.vm.toSubnet,
-        targetHandle: HANDLE_IDS.subnet.fromVm,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
       },
       { nodes: [vpc, tinySubnet, vm], edges },
     );
@@ -310,5 +343,18 @@ describe("validateConnection", () => {
         edges,
       }),
     ).toBe("subnet-vm-capacity");
+  });
+
+  it("aceita handles padrão", () => {
+    const result = validateConnection(
+      {
+        source: subnet.id,
+        target: vpc.id,
+        sourceHandle: DEFAULT_SOURCE_HANDLE,
+        targetHandle: DEFAULT_TARGET_HANDLE,
+      },
+      { nodes, edges: [] },
+    );
+    expect(result).toEqual({ valid: true, edgeKind: "subnet-vpc" });
   });
 });

@@ -11,16 +11,17 @@
   --xy-background-color: var(--bg);
   --xy-node-background-color: var(--code-bg);
   --xy-node-border-color: var(--border);
-  --xy-edge-stroke: var(--border);
+  --xy-edge-stroke: var(--edge-stroke);
 }
 
-.diagram-canvas .react-flow__node.selected {
-  outline: none;
+.diagram-canvas .react-flow__edge-path {
+  stroke: var(--edge-stroke);
+  stroke-width: 1.75;
 }
 
 .diagram-canvas .react-flow__edge.selected .react-flow__edge-path {
   stroke: var(--accent);
-  stroke-width: 2.5;
+  stroke-width: 2.25;
 }
 
 /* Linha enquanto arrasta (fallback se o componente custom não aplicar) */
@@ -129,8 +130,8 @@
 }
 
 .diagram-canvas--exporting .react-flow__edge.selected .react-flow__edge-path {
-  stroke: var(--border);
-  stroke-width: 2;
+  stroke: var(--edge-stroke);
+  stroke-width: 1.75;
 }
 
 .diagram-canvas--exporting .react-flow__controls {

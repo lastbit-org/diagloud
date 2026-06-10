@@ -11,6 +11,9 @@ import type {
   SubnetProps,
   VmProps,
   VpcProps,
+  NatProps,
+  ArtifactProps,
+  InternetProps,
 } from "../types";
 
 export function defaultResourceData<K extends ResourceKind>(
@@ -62,6 +65,21 @@ export function defaultResourceData<K extends ResourceKind>(
         nodeCount: 3,
         machineType: "e2-medium",
       } as GkeProps as ResourcePropsByKind[K];
+    case "nat":
+      return {
+        name,
+        region: "southamerica-east1",
+      } as NatProps as ResourcePropsByKind[K];
+    case "artifact":
+      return {
+        name,
+        location: "southamerica-east1",
+        format: "DOCKER",
+      } as ArtifactProps as ResourcePropsByKind[K];
+    case "internet":
+      return {
+        name: name || "Internet",
+      } as InternetProps as ResourcePropsByKind[K];
   }
 }
 
@@ -80,5 +98,11 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `sql-${count}`;
     case "gke":
       return `gke-${count}`;
+    case "nat":
+      return `nat-${count}`;
+    case "artifact":
+      return `gar-${count}`;
+    case "internet":
+      return "Internet";
   }
 }

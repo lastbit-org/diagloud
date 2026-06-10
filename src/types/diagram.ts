@@ -1,6 +1,9 @@
 import type { NamingPatternByKind } from "./naming";
 import type {
+  ArtifactProps,
   GkeProps,
+  InternetProps,
+  NatProps,
   SqlProps,
   StorageProps,
   SubnetProps,
@@ -24,13 +27,28 @@ export type DiagramNode =
   | (NodeBase & { kind: "vm"; data: VmProps })
   | (NodeBase & { kind: "storage"; data: StorageProps })
   | (NodeBase & { kind: "sql"; data: SqlProps })
-  | (NodeBase & { kind: "gke"; data: GkeProps });
+  | (NodeBase & { kind: "gke"; data: GkeProps })
+  | (NodeBase & { kind: "nat"; data: NatProps })
+  | (NodeBase & { kind: "artifact"; data: ArtifactProps })
+  | (NodeBase & { kind: "internet"; data: InternetProps });
 
 export type DiagramEdge = {
   id: string;
   source: string;
   target: string;
-  kind: "subnet-vpc" | "vm-subnet" | "vm-storage" | "sql-subnet" | "gke-subnet";
+  sourceHandle?: string;
+  targetHandle?: string;
+  kind:
+    | "subnet-vpc"
+    | "vm-subnet"
+    | "vm-storage"
+    | "sql-subnet"
+    | "gke-subnet"
+    | "nat-vpc"
+    | "internet-nat"
+    | "subnet-nat"
+    | "gke-artifact"
+    | "vm-artifact";
 };
 
 export type DiagramNamingMetadata = {

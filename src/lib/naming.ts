@@ -97,6 +97,12 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `sql-${count}`;
     case "gke":
       return `gke-${count}`;
+    case "nat":
+      return `nat-${count}`;
+    case "artifact":
+      return `gar-${count}`;
+    case "internet":
+      return "Internet";
   }
 }
 

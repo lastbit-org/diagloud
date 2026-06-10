@@ -1,5 +1,8 @@
 export type { GcpNodeData } from "./BaseNode";
+export { ArtifactNode } from "./ArtifactNode";
 export { GkeNode } from "./GkeNode";
+export { InternetNode } from "./InternetNode";
+export { NatNode } from "./NatNode";
 export { SqlNode } from "./SqlNode";
 export { StorageNode } from "./StorageNode";
 export { SubnetNode } from "./SubnetNode";

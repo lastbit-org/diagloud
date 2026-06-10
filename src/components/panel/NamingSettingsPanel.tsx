@@ -8,10 +8,13 @@ import type { ResourceKind } from "../../types";
 const RESOURCE_ORDER: ResourceKind[] = [
   "vpc",
   "subnet",
+  "internet",
+  "nat",
   "vm",
+  "gke",
   "storage",
   "sql",
-  "gke",
+  "artifact",
 ];
 
 export function NamingSettingsPanel() {

@@ -15,7 +15,8 @@ export type PaletteCategoryId =
   | "networking"
   | "compute"
   | "storage"
-  | "databases";
+  | "databases"
+  | "devtools";
 
 export type PaletteCategoryConfig = {
   id: PaletteCategoryId;
@@ -31,12 +32,13 @@ export type PaletteItemConfig = {
   icon: string;
 };
 
-/** Ordem do painel lateral do console: Networking → Compute → Storage → Databases. */
+/** Ordem do painel lateral do console: Networking → Compute → Storage → Databases → Developer tools. */
 export const PALETTE_CATEGORIES: PaletteCategoryConfig[] = [
   { id: "networking", label: "Rede (Networking)" },
   { id: "compute", label: "Computação (Compute)" },
   { id: "storage", label: "Armazenamento (Storage)" },
   { id: "databases", label: "Bancos de dados (Databases)" },
+  { id: "devtools", label: "Ferramentas (Developer tools)" },
 ];
 
 export function isPaletteResourceKind(value: string): value is ResourceKind {
@@ -46,7 +48,10 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "vm" ||
     value === "storage" ||
     value === "sql" ||
-    value === "gke"
+    value === "gke" ||
+    value === "nat" ||
+    value === "artifact" ||
+    value === "internet"
   );
 }
 
@@ -64,6 +69,20 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.subnet,
     description: "Segmento de IP na VPC",
     icon: GCP_RESOURCE_ICONS.subnet,
+  },
+  {
+    kind: "internet",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.internet,
+    description: "Rede pública externa",
+    icon: GCP_RESOURCE_ICONS.internet,
+  },
+  {
+    kind: "nat",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.nat,
+    description: "Saída para internet sem IP público",
+    icon: GCP_RESOURCE_ICONS.nat,
   },
   {
     kind: "vm",
@@ -92,6 +111,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.sql,
     description: "Banco gerenciado (MySQL / PostgreSQL)",
     icon: GCP_RESOURCE_ICONS.sql,
+  },
+  {
+    kind: "artifact",
+    category: "devtools",
+    label: GCP_RESOURCE_LABELS.artifact,
+    description: "Repositório de imagens e pacotes",
+    icon: GCP_RESOURCE_ICONS.artifact,
   },
 ];
 

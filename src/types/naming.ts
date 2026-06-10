@@ -14,6 +14,9 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   storage: "gcs-AREA-AMBIENTE",
   sql: "sql-AREA-AMBIENTE",
   gke: "gke-AREA-AMBIENTE",
+  nat: "nat-AREA-AMBIENTE",
+  artifact: "gar-AREA-AMBIENTE",
+  internet: "Internet",
 };
 
 export const NAMING_TOKEN_HINTS = [

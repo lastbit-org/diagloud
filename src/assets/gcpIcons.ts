@@ -1,10 +1,13 @@
 import type { ResourceKind } from "../types";
+import artifactIcon from "./google-cloud-legacy-icons/artifact_registry/artifact_registry.svg";
+import natIcon from "./google-cloud-legacy-icons/cloud_nat/cloud_nat.svg";
 import subnetIcon from "./google-cloud-legacy-icons/cloud_network/cloud_network.svg";
 import gkeIcon from "./google-cloud-legacy-icons/google_kubernetes_engine/google_kubernetes_engine.svg";
 import sqlIcon from "./google-cloud-legacy-icons/cloud_sql/cloud_sql.svg";
 import storageIcon from "./google-cloud-legacy-icons/cloud_storage/cloud_storage.svg";
 import vmIcon from "./google-cloud-legacy-icons/compute_engine/compute_engine.svg";
 import vpcIcon from "./google-cloud-legacy-icons/virtual_private_cloud/virtual_private_cloud.svg";
+import internetIcon from "./icons/internet.svg";
 
 /** Ícones oficiais GCP (legacy 24px). Sub-rede usa Cloud Network (sem ícone subnet no pacote). */
 export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
@@ -14,6 +17,9 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   storage: storageIcon,
   sql: sqlIcon,
   gke: gkeIcon,
+  nat: natIcon,
+  artifact: artifactIcon,
+  internet: internetIcon,
 };
 
 export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
@@ -23,4 +29,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   storage: "Cloud Storage",
   sql: "Cloud SQL",
   gke: "GKE",
+  nat: "Cloud NAT",
+  artifact: "Artifact Registry",
+  internet: "Internet",
 };

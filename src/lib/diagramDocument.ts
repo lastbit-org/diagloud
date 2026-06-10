@@ -1,4 +1,5 @@
-import { handlesForEdgeKind, validateConnection } from "../model/connections";
+import { resolveEdgeHandles } from "./dynamicHandles";
+import { validateConnection } from "../model/connections";
 import { migrateSqlVpcEdge } from "../model/sqlSubnet";
 import {
   isValidDiagramId,
@@ -19,6 +20,9 @@ import {
   type SubnetProps,
   type VmProps,
   type VpcProps,
+  type NatProps,
+  type ArtifactProps,
+  type InternetProps,
 } from "../types";
 
 export const DIAGRAM_STORAGE_KEY = "diagloud-diagram";
@@ -172,6 +176,46 @@ function parseGkeData(raw: unknown): GkeProps {
   return data;
 }
 
+function parseNatData(raw: unknown): NatProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Cloud NAT inválidos.");
+  }
+  return {
+    name: raw.name,
+    region: raw.region,
+  };
+}
+
+const ARTIFACT_FORMATS = new Set(["DOCKER", "MAVEN", "NPM"]);
+
+function parseArtifactData(raw: unknown): ArtifactProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string" ||
+    typeof raw.format !== "string" ||
+    !ARTIFACT_FORMATS.has(raw.format)
+  ) {
+    throw new DiagramParseError("Dados de Artifact Registry inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
+    format: raw.format as ArtifactProps["format"],
+  };
+}
+
+function parseInternetData(raw: unknown): InternetProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Internet inválidos.");
+  }
+  return { name: raw.name };
+}
+
 function parseNode(raw: unknown): DiagramNode {
   if (!isRecord(raw)) {
     throw new DiagramParseError("Nó inválido no documento.");
@@ -250,6 +294,38 @@ function parseNode(raw: unknown): DiagramNode {
         position: parsedPosition,
         data: parseGkeData(data),
       };
+    case "nat":
+      if (!nodeIdMatchesKind(nodeId, "nat")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Cloud NAT.`);
+      }
+      return {
+        id: nodeId,
+        kind: "nat",
+        position: parsedPosition,
+        data: parseNatData(data),
+      };
+    case "artifact":
+      if (!nodeIdMatchesKind(nodeId, "artifact")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Artifact Registry.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "artifact",
+        position: parsedPosition,
+        data: parseArtifactData(data),
+      };
+    case "internet":
+      if (!nodeIdMatchesKind(nodeId, "internet")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Internet.`);
+      }
+      return {
+        id: nodeId,
+        kind: "internet",
+        position: parsedPosition,
+        data: parseInternetData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -260,7 +336,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     throw new DiagramParseError("Aresta inválida no documento.");
   }
 
-  const { id, source, target, kind } = raw;
+  const { id, source, target, kind, sourceHandle, targetHandle } = raw;
   if (
     typeof id !== "string" ||
     typeof source !== "string" ||
@@ -282,17 +358,31 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "vm-storage" &&
     kind !== "sql-subnet" &&
     kind !== "gke-subnet" &&
+    kind !== "nat-vpc" &&
+    kind !== "internet-nat" &&
+    kind !== "subnet-nat" &&
+    kind !== "gke-artifact" &&
+    kind !== "vm-artifact" &&
     kind !== "sql-vpc"
   ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
   }
 
-  return {
+  const parsed: DiagramEdge = {
     id,
     source,
     target,
     kind: kind === "sql-vpc" ? "sql-vpc" : kind,
   } as DiagramEdge;
+
+  if (typeof sourceHandle === "string") {
+    parsed.sourceHandle = sourceHandle;
+  }
+  if (typeof targetHandle === "string") {
+    parsed.targetHandle = targetHandle;
+  }
+
+  return parsed;
 }
 
 function assertUniqueNodeIds(nodes: DiagramNode[]): void {
@@ -352,6 +442,18 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.gke === "string"
           ? patterns.gke
           : DEFAULT_NAMING_PATTERNS.gke,
+      nat:
+        typeof patterns.nat === "string"
+          ? patterns.nat
+          : DEFAULT_NAMING_PATTERNS.nat,
+      artifact:
+        typeof patterns.artifact === "string"
+          ? patterns.artifact
+          : DEFAULT_NAMING_PATTERNS.artifact,
+      internet:
+        typeof patterns.internet === "string"
+          ? patterns.internet
+          : DEFAULT_NAMING_PATTERNS.internet,
     },
   };
 }
@@ -405,7 +507,7 @@ export function sanitizeDocumentEdges(
 ): DiagramEdge[] {
   const accepted: DiagramEdge[] = [];
   for (const edge of edges) {
-    const { sourceHandle, targetHandle } = handlesForEdgeKind(edge.kind);
+    const { sourceHandle, targetHandle } = resolveEdgeHandles(edge);
     const result = validateConnection(
       {
         source: edge.source,
@@ -416,7 +518,7 @@ export function sanitizeDocumentEdges(
       { nodes, edges: accepted },
     );
     if (result.valid) {
-      accepted.push(edge);
+      accepted.push({ ...edge, sourceHandle, targetHandle });
     }
   }
   return accepted;
@@ -500,7 +602,10 @@ function namingMetadataEqual(
     a.patterns.vm === b.patterns.vm &&
     a.patterns.storage === b.patterns.storage &&
     a.patterns.sql === b.patterns.sql &&
-    a.patterns.gke === b.patterns.gke
+    a.patterns.gke === b.patterns.gke &&
+    a.patterns.nat === b.patterns.nat &&
+    a.patterns.artifact === b.patterns.artifact &&
+    a.patterns.internet === b.patterns.internet
   );
 }
 

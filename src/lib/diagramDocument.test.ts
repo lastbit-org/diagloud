@@ -1,6 +1,10 @@
 import { describe, expect, it, afterEach, beforeEach } from "vitest";
 import { createEdgeId, createNodeId } from "./id";
 import {
+  DEFAULT_SOURCE_HANDLE,
+  DEFAULT_TARGET_HANDLE,
+} from "./dynamicHandles";
+import {
   buildDiagramDocument,
   documentsEqual,
   filterEdgesWithValidReferences,
@@ -27,6 +31,9 @@ const sampleDocument: DiagramDocument = {
         storage: "gcs-AREA-AMBIENTE",
         sql: "sql-AREA-AMBIENTE",
         gke: "gke-AREA-AMBIENTE",
+        nat: "nat-AREA-AMBIENTE",
+        artifact: "gar-AREA-AMBIENTE",
+        internet: "Internet",
       },
     },
   },
@@ -65,12 +72,16 @@ const sampleDocument: DiagramDocument = {
       source: "subnet-1",
       target: "vpc-1",
       kind: "subnet-vpc",
+      sourceHandle: DEFAULT_SOURCE_HANDLE,
+      targetHandle: DEFAULT_TARGET_HANDLE,
     },
     {
       id: "edge-2",
       source: "vm-1",
       target: "subnet-1",
       kind: "vm-subnet",
+      sourceHandle: DEFAULT_SOURCE_HANDLE,
+      targetHandle: DEFAULT_TARGET_HANDLE,
     },
   ],
 };

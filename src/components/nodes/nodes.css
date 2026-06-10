@@ -87,21 +87,22 @@
 }
 
 .gcp-handle {
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--bg);
-  background: var(--accent);
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--code-bg);
+  background: var(--handle-color);
+  opacity: 0.9;
+  z-index: 2;
+  pointer-events: all;
+  transition: opacity 0.15s ease;
 }
 
-.gcp-handle--source {
-  background: var(--accent);
-}
-
-.gcp-handle--target {
-  background: #669df6;
+.gcp-node--selected .gcp-handle {
+  border-color: var(--accent-bg);
 }
 
 .gcp-handle:hover {
+  opacity: 1;
   outline: 2px solid var(--accent-border);
-  outline-offset: 1px;
+  outline-offset: 0;
 }

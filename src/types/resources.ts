@@ -1,4 +1,15 @@
-export type ResourceKind = "vpc" | "subnet" | "vm" | "storage" | "sql" | "gke";
+export type ResourceKind =
+  | "vpc"
+  | "subnet"
+  | "vm"
+  | "storage"
+  | "sql"
+  | "gke"
+  | "nat"
+  | "artifact"
+  | "internet";
+
+export type ArtifactFormat = "DOCKER" | "MAVEN" | "NPM";
 
 export type SqlEngine = "MYSQL_8_0" | "POSTGRES_15";
 
@@ -61,6 +72,21 @@ export type GkeProps = {
   internalIp?: string;
 };
 
+export type NatProps = {
+  name: string;
+  region: string;
+};
+
+export type ArtifactProps = {
+  name: string;
+  location: string;
+  format: ArtifactFormat;
+};
+
+export type InternetProps = {
+  name: string;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
@@ -68,4 +94,7 @@ export type ResourcePropsByKind = {
   storage: StorageProps;
   sql: SqlProps;
   gke: GkeProps;
+  nat: NatProps;
+  artifact: ArtifactProps;
+  internet: InternetProps;
 };

@@ -1,5 +1,8 @@
 import {
+  ArtifactNode,
   GkeNode,
+  InternetNode,
+  NatNode,
   SqlNode,
   StorageNode,
   SubnetNode,
@@ -14,4 +17,7 @@ export const nodeTypes = {
   storage: StorageNode,
   sql: SqlNode,
   gke: GkeNode,
+  nat: NatNode,
+  artifact: ArtifactNode,
+  internet: InternetNode,
 };

@@ -6,8 +6,8 @@ import {
 
 const STROKE = {
   invalid: "#e53935",
-  valid: "#43a047",
-  neutral: "var(--border)",
+  valid: "var(--handle-color)",
+  neutral: "var(--edge-stroke)",
 } as const;
 
 export function CustomConnectionLine({

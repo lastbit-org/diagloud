@@ -6,7 +6,7 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Esta ligação fecharia um ciclo inválido no diagrama (ex.: VPC ↔ sub-rede).",
   "unknown-node": "Recursos da ligação não foram encontrados.",
   "invalid-types": "Esta ligação não é permitida (ex.: VM → VPC direto).",
-  "invalid-handles": "Use os pontos de conexão corretos em cada recurso.",
+  "invalid-handles": "Use os pontos de conexão nos lados do recurso.",
   "duplicate-edge": "Esta ligação já existe no diagrama.",
   "subnet-has-vpc": "Esta sub-rede já está ligada a uma VPC.",
   "vm-has-subnet": "Esta VM já está ligada a uma sub-rede.",
@@ -21,6 +21,8 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
   "gke-has-subnet": "Este cluster GKE já está ligado a uma sub-rede.",
   "subnet-gke-capacity":
     "Não há mais endereços de IP na sub-rede para o cluster GKE.",
+  "nat-has-vpc": "Este Cloud NAT já está ligado a uma VPC.",
+  "subnet-has-nat": "Esta sub-rede já está ligada a um Cloud NAT.",
 };
 
 export function connectionErrorMessage(reason: ConnectionInvalidReason): string {

@@ -19,7 +19,7 @@ type BaseNodeProps = NodeProps & {
   kind: ResourceKind;
 };
 
-export function BaseNode({ data, selected, kind }: BaseNodeProps) {
+export function BaseNode({ id, data, selected, kind }: BaseNodeProps) {
   const { label, subtitle, issueCount } = (data ?? {}) as GcpNodeData;
   const iconSrc = GCP_RESOURCE_ICONS[kind];
   const typeLabel = GCP_RESOURCE_LABELS[kind];
@@ -55,7 +55,7 @@ export function BaseNode({ data, selected, kind }: BaseNodeProps) {
           <span className="gcp-node__subtitle">{subtitle}</span>
         ) : null}
       </div>
-      <NodeHandles kind={kind} />
+      <NodeHandles nodeId={id} />
     </div>
   );
 }

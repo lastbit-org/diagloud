@@ -9,6 +9,7 @@ import {
 } from "../../model/subnet";
 import { useDiagramStore } from "../../store/diagramStore";
 import type {
+  ArtifactFormat,
   DiagramNode,
   SqlAccessMode,
   SqlEngine,
@@ -543,6 +544,95 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           <GkeSubnetInfo gke={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
+
+      {selectedNode?.kind === "nat" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="nat-name">Nome</label>
+            <input
+              id="nat-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="nat-region">Região</label>
+            <input
+              id="nat-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <NatVpcInfo nat={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
+      {selectedNode?.kind === "artifact" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="artifact-name">Nome</label>
+            <input
+              id="artifact-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="artifact-location">Localização</label>
+            <input
+              id="artifact-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="artifact-format">Formato</label>
+            <select
+              id="artifact-format"
+              value={selectedNode.data.format}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  format: e.target.value as ArtifactFormat,
+                })
+              }
+            >
+              <option value="DOCKER">Docker</option>
+              <option value="MAVEN">Maven</option>
+              <option value="NPM">npm</option>
+            </select>
+          </div>
+          <ArtifactPullInfo artifact={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
+      {selectedNode?.kind === "internet" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="internet-name">Nome</label>
+            <input
+              id="internet-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <p className="properties-field__hint">
+            Representa a rede pública externa. Ligue ao Cloud NAT para documentar
+            egress de sub-redes privadas.
+          </p>
+          <InternetNatInfo internet={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
     </>
   );
 
@@ -650,6 +740,142 @@ function VmStorageInfo({
       <dd>
         {linked.map((bucket) => bucket.data.name).join(", ")}
       </dd>
+    </dl>
+  );
+}
+
+function NatVpcInfo({
+  nat,
+  edges,
+  nodes,
+}: {
+  nat: Extract<DiagramNode, { kind: "nat" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vpcEdge = edges.find(
+    (e) => e.kind === "nat-vpc" && e.source === nat.id,
+  );
+  const subnetEdges = edges.filter(
+    (e) => e.kind === "subnet-nat" && e.target === nat.id,
+  );
+  const internetEdge = edges.find(
+    (e) => e.kind === "internet-nat" && e.target === nat.id,
+  );
+
+  if (!vpcEdge && subnetEdges.length === 0 && !internetEdge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à VPC (handle inferior), sub-redes privadas (esquerda) e Internet
+        (superior) para documentar egress.
+      </p>
+    );
+  }
+
+  const vpc = vpcEdge
+    ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+
+  return (
+    <dl className="properties-stats">
+      {vpc && vpc.kind === "vpc" ? (
+        <>
+          <dt>VPC</dt>
+          <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {subnetEdges.length > 0 ? (
+        <>
+          <dt>Sub-redes (egress)</dt>
+          <dd>
+            {subnetEdges
+              .map((e) => nodes.find((n) => n.id === e.source && n.kind === "subnet"))
+              .filter((n): n is Extract<DiagramNode, { kind: "subnet" }> => n != null)
+              .map((s) => s.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {internetEdge ? (
+        <>
+          <dt>Internet</dt>
+          <dd>Ligada</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function ArtifactPullInfo({
+  artifact,
+  edges,
+  nodes,
+}: {
+  artifact: Extract<DiagramNode, { kind: "artifact" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const gkePulls = edges
+    .filter((e) => e.kind === "gke-artifact" && e.target === artifact.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const vmPulls = edges
+    .filter((e) => e.kind === "vm-artifact" && e.target === artifact.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+
+  if (gkePulls.length === 0 && vmPulls.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue GKE ou VMs para documentar pull de imagens/pacotes.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {gkePulls.length > 0 ? (
+        <>
+          <dt>Clusters GKE</dt>
+          <dd>{gkePulls.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {vmPulls.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vmPulls.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function InternetNatInfo({
+  internet,
+  edges,
+  nodes,
+}: {
+  internet: Extract<DiagramNode, { kind: "internet" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find(
+    (e) => e.kind === "internet-nat" && e.source === internet.id,
+  );
+  if (!edge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue ao Cloud NAT (handle inferior) para documentar saída à internet.
+      </p>
+    );
+  }
+  const nat = nodes.find((n) => n.id === edge.target && n.kind === "nat");
+  if (!nat || nat.kind !== "nat") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Cloud NAT</dt>
+      <dd>{nat.data.name}</dd>
     </dl>
   );
 }
