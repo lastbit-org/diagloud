@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { maxVmsForCidr } from "../../lib/cidr";
 import { resolveNodeZIndex } from "../../lib/nodeLayers";
+import {
+  isWorkbenchMachineType,
+  WORKBENCH_MACHINE_TYPES,
+} from "../../lib/workbenchMachineTypes";
 import { ZONE_COLOR_OPTIONS, type ZoneColorId } from "../../lib/zoneColors";
 import { ZONE_PURPOSE_LABELS } from "../nodes";
 import { useSelectedNode } from "../../hooks/useSelectedNode";
@@ -756,6 +760,59 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "workbench" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="workbench-name">Instância</label>
+            <input
+              id="workbench-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="workbench-region">Região</label>
+            <input
+              id="workbench-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="workbench-machine">Tipo de máquina</label>
+            <select
+              id="workbench-machine"
+              value={selectedNode.data.machineType}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  machineType: e.target.value,
+                })
+              }
+            >
+              {!isWorkbenchMachineType(selectedNode.data.machineType) ? (
+                <option value={selectedNode.data.machineType}>
+                  {selectedNode.data.machineType} (personalizado)
+                </option>
+              ) : null}
+              {WORKBENCH_MACHINE_TYPES.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <WorkbenchConnectionsInfo
+            workbench={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "nat" && (
         <>
           <div className="properties-field">
@@ -1115,6 +1172,115 @@ function PubsubDestinationsInfo({
   );
 }
 
+function WorkbenchConnectionsInfo({
+  workbench,
+  edges,
+  nodes,
+}: {
+  workbench: Extract<DiagramNode, { kind: "workbench" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const subnetEdge = edges.find(
+    (e) => e.kind === "workbench-subnet" && e.source === workbench.id,
+  );
+  const storageEdges = edges.filter(
+    (e) => e.kind === "workbench-storage" && e.source === workbench.id,
+  );
+  const bigqueryEdges = edges.filter(
+    (e) => e.kind === "workbench-bigquery" && e.source === workbench.id,
+  );
+  const spannerEdges = edges.filter(
+    (e) => e.kind === "workbench-spanner" && e.source === workbench.id,
+  );
+
+  if (
+    !subnetEdge &&
+    storageEdges.length === 0 &&
+    bigqueryEdges.length === 0 &&
+    spannerEdges.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à sub-rede (VPC), Cloud Storage, BigQuery ou Cloud Spanner para
+        documentar o ambiente de notebooks.
+      </p>
+    );
+  }
+
+  const subnet = subnetEdge
+    ? nodes.find((n) => n.id === subnetEdge.target && n.kind === "subnet")
+    : undefined;
+
+  return (
+    <dl className="properties-stats">
+      {subnet && subnet.kind === "subnet" ? (
+        <>
+          <dt>Sub-rede</dt>
+          <dd>{subnet.data.name}</dd>
+        </>
+      ) : null}
+      {workbench.data.internalIp ? (
+        <>
+          <dt>IP interno</dt>
+          <dd>{workbench.data.internalIp}</dd>
+        </>
+      ) : null}
+      {storageEdges.length > 0 ? (
+        <>
+          <dt>Cloud Storage</dt>
+          <dd>
+            {storageEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "storage"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "storage" }> =>
+                  n != null,
+              )
+              .map((b) => b.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {bigqueryEdges.length > 0 ? (
+        <>
+          <dt>BigQuery</dt>
+          <dd>
+            {bigqueryEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "bigquery"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "bigquery" }> =>
+                  n != null,
+              )
+              .map((b) => b.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {spannerEdges.length > 0 ? (
+        <>
+          <dt>Cloud Spanner</dt>
+          <dd>
+            {spannerEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "spanner"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "spanner" }> =>
+                  n != null,
+              )
+              .map((s) => s.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function SpannerClientsInfo({
   spanner,
   edges,
@@ -1140,17 +1306,24 @@ function SpannerClientsInfo({
     .filter((e) => e.kind === "pubsub-spanner" && e.target === spanner.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
     .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const workbenches = edges
+    .filter((e) => e.kind === "workbench-spanner" && e.target === spanner.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "workbench"))
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
+    );
 
   if (
     vms.length === 0 &&
     clusters.length === 0 &&
     runs.length === 0 &&
-    topics.length === 0
+    topics.length === 0 &&
+    workbenches.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue VMs, GKE, Cloud Run ou Pub/Sub para documentar clientes desta
-        instância.
+        Ligue VMs, GKE, Cloud Run, Workbench ou Pub/Sub para documentar
+        clientes desta instância.
       </p>
     );
   }
@@ -1181,6 +1354,12 @@ function SpannerClientsInfo({
           <dd>{topics.map((p) => p.data.name).join(", ")}</dd>
         </>
       ) : null}
+      {workbenches.length > 0 ? (
+        <>
+          <dt>Vertex AI Workbench</dt>
+          <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }
@@ -1194,23 +1373,40 @@ function BigqueryPubsubInfo({
   edges: ReturnType<typeof useDiagramStore.getState>["edges"];
   nodes: DiagramNode[];
 }) {
-  const linked = edges
+  const topics = edges
     .filter((e) => e.kind === "pubsub-bigquery" && e.target === bigquery.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
     .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const workbenches = edges
+    .filter((e) => e.kind === "workbench-bigquery" && e.target === bigquery.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "workbench"))
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
+    );
 
-  if (linked.length === 0) {
+  if (topics.length === 0 && workbenches.length === 0) {
     return (
       <p className="properties-field__hint">
-        Ligue tópicos Pub/Sub para documentar streaming para este dataset.
+        Ligue tópicos Pub/Sub ou Vertex AI Workbench para documentar consumo
+        deste dataset.
       </p>
     );
   }
 
   return (
     <dl className="properties-stats">
-      <dt>Pub/Sub (origem)</dt>
-      <dd>{linked.map((p) => p.data.name).join(", ")}</dd>
+      {topics.length > 0 ? (
+        <>
+          <dt>Pub/Sub (origem)</dt>
+          <dd>{topics.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {workbenches.length > 0 ? (
+        <>
+          <dt>Vertex AI Workbench</dt>
+          <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }
@@ -1580,11 +1776,18 @@ function StorageVmInfo({
     .filter((e) => e.kind === "pubsub-storage" && e.target === storage.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
     .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const workbenches = edges
+    .filter((e) => e.kind === "workbench-storage" && e.target === storage.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "workbench"))
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
+    );
 
   if (
     storage.data.accessMode === "public" &&
     vms.length === 0 &&
-    pubsubTopics.length === 0
+    pubsubTopics.length === 0 &&
+    workbenches.length === 0
   ) {
     return (
       <p className="properties-field__hint">
@@ -1593,10 +1796,10 @@ function StorageVmInfo({
     );
   }
 
-  if (vms.length === 0 && pubsubTopics.length === 0) {
+  if (vms.length === 0 && pubsubTopics.length === 0 && workbenches.length === 0) {
     return (
       <p className="properties-field__hint">
-        Ligue VMs ou tópicos Pub/Sub a este bucket.
+        Ligue VMs, Workbench ou tópicos Pub/Sub a este bucket.
       </p>
     );
   }
@@ -1607,6 +1810,12 @@ function StorageVmInfo({
         <>
           <dt>VMs com acesso</dt>
           <dd>{vms.map((vm) => vm.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {workbenches.length > 0 ? (
+        <>
+          <dt>Vertex AI Workbench</dt>
+          <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
         </>
       ) : null}
       {pubsubTopics.length > 0 ? (

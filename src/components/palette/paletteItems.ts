@@ -17,6 +17,7 @@ export type PaletteCategoryId =
   | "compute"
   | "storage"
   | "databases"
+  | "ai"
   | "devtools"
   | "integration";
 
@@ -41,6 +42,7 @@ export const PALETTE_CATEGORIES: PaletteCategoryConfig[] = [
   { id: "compute", label: "Computação (Compute)" },
   { id: "storage", label: "Armazenamento (Storage)" },
   { id: "databases", label: "Bancos de dados (Databases)" },
+  { id: "ai", label: "IA (Artificial intelligence)" },
   { id: "integration", label: "Integração (Integration)" },
   { id: "devtools", label: "Ferramentas (Developer tools)" },
 ];
@@ -62,6 +64,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "pubsub" ||
     value === "bigquery" ||
     value === "spanner" ||
+    value === "workbench" ||
     value === "zone"
   );
 }
@@ -164,6 +167,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.spanner,
     description: "Banco relacional globalmente distribuído",
     icon: GCP_RESOURCE_ICONS.spanner,
+  },
+  {
+    kind: "workbench",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.workbench,
+    description: "Notebooks gerenciados na Vertex AI",
+    icon: GCP_RESOURCE_ICONS.workbench,
   },
   {
     kind: "pubsub",

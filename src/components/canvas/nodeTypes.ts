@@ -2,6 +2,7 @@ import {
   ArtifactNode,
   BigqueryNode,
   SpannerNode,
+  WorkbenchNode,
   GkeNode,
   InternetNode,
   NatNode,
@@ -33,5 +34,6 @@ export const nodeTypes = {
   pubsub: PubsubNode,
   bigquery: BigqueryNode,
   spanner: SpannerNode,
+  workbench: WorkbenchNode,
   zone: ZoneNode,
 };

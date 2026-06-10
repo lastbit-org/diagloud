@@ -2,6 +2,7 @@ import { parseCidr } from "../lib/cidr";
 import { matchesHandleRoles } from "../lib/dynamicHandles";
 import { canAttachGkeToSubnet } from "./gkeSubnet";
 import { canAttachRunToSubnet } from "./runSubnet";
+import { canAttachWorkbenchToSubnet } from "./workbenchSubnet";
 import { canAttachSqlToSubnet } from "./sqlSubnet";
 import { canAttachHostToSubnet } from "./subnetHosts";
 import { getSubnetNode } from "./subnet";
@@ -37,7 +38,9 @@ export type ConnectionInvalidReason =
   | "subnet-has-nat"
   | "run-has-subnet"
   | "run-not-vpc"
-  | "subnet-run-capacity";
+  | "subnet-run-capacity"
+  | "workbench-has-subnet"
+  | "subnet-workbench-capacity";
 
 export function canonicalizeEdgeEndpoints(
   edge: Pick<DiagramEdge, "source" | "target" | "kind">,
@@ -415,6 +418,32 @@ export function validateConnection(
     }
     if (!canAttachRunToSubnet(directed.target, context.nodes, context.edges)) {
       return { valid: false, reason: "subnet-run-capacity" };
+    }
+  }
+
+  if (
+    edgeKind === "workbench-subnet" &&
+    context.edges.some(
+      (edge) =>
+        edge.kind === "workbench-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "workbench-has-subnet" };
+  }
+
+  if (edgeKind === "workbench-subnet") {
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+    if (
+      !canAttachWorkbenchToSubnet(
+        directed.target,
+        context.nodes,
+        context.edges,
+      )
+    ) {
+      return { valid: false, reason: "subnet-workbench-capacity" };
     }
   }
 

@@ -1,4 +1,5 @@
 import { suggestSubnetCidr } from "./cidr";
+import { DEFAULT_WORKBENCH_MACHINE_TYPE } from "./workbenchMachineTypes";
 import { generateResourceName } from "./naming";
 import { getNamingConfig } from "../store/namingStore";
 import type {
@@ -20,6 +21,7 @@ import type {
   PubsubProps,
   BigqueryProps,
   SpannerProps,
+  WorkbenchProps,
   ZoneProps,
 } from "../types";
 
@@ -118,6 +120,12 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         config: "regional-southamerica-east1",
       } as SpannerProps as ResourcePropsByKind[K];
+    case "workbench":
+      return {
+        name,
+        region: "southamerica-east1",
+        machineType: DEFAULT_WORKBENCH_MACHINE_TYPE,
+      } as WorkbenchProps as ResourcePropsByKind[K];
     case "zone":
       return {
         name,
@@ -162,6 +170,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `bq-${count}`;
     case "spanner":
       return `spanner-${count}`;
+    case "workbench":
+      return `wb-${count}`;
     case "zone":
       return `zona-${count}`;
   }

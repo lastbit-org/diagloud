@@ -31,6 +31,7 @@ import {
   type PubsubProps,
   type BigqueryProps,
   type SpannerProps,
+  type WorkbenchProps,
   type ZoneProps,
   type ZonePurpose,
 } from "../types";
@@ -314,6 +315,26 @@ function parseSpannerData(raw: unknown): SpannerProps {
   };
 }
 
+function parseWorkbenchData(raw: unknown): WorkbenchProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string" ||
+    typeof raw.machineType !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Vertex AI Workbench inválidos.");
+  }
+  const data: WorkbenchProps = {
+    name: raw.name,
+    region: raw.region,
+    machineType: raw.machineType,
+  };
+  if (typeof raw.internalIp === "string" && raw.internalIp) {
+    data.internalIp = raw.internalIp;
+  }
+  return data;
+}
+
 function parseZonePurpose(value: unknown): ZonePurpose {
   if (value === "project" || value === "vpc-area" || value === "perimeter") {
     return value;
@@ -547,6 +568,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseSpannerData(data),
       };
+    case "workbench":
+      if (!nodeIdMatchesKind(nodeId, "workbench")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Vertex AI Workbench.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "workbench",
+        position: parsedPosition,
+        zIndex,
+        data: parseWorkbenchData(data),
+      };
     case "zone":
       if (!nodeIdMatchesKind(nodeId, "zone")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Zona.`);
@@ -607,6 +641,10 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "gke-spanner" &&
     kind !== "run-spanner" &&
     kind !== "pubsub-spanner" &&
+    kind !== "workbench-subnet" &&
+    kind !== "workbench-storage" &&
+    kind !== "workbench-bigquery" &&
+    kind !== "workbench-spanner" &&
     kind !== "sql-vpc"
   ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
@@ -722,6 +760,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.spanner === "string"
           ? patterns.spanner
           : DEFAULT_NAMING_PATTERNS.spanner,
+      workbench:
+        typeof patterns.workbench === "string"
+          ? patterns.workbench
+          : DEFAULT_NAMING_PATTERNS.workbench,
       zone:
         typeof patterns.zone === "string"
           ? patterns.zone
@@ -892,7 +934,8 @@ function namingMetadataEqual(
     a.patterns.run === b.patterns.run &&
     a.patterns.pubsub === b.patterns.pubsub &&
     a.patterns.bigquery === b.patterns.bigquery &&
-    a.patterns.spanner === b.patterns.spanner
+    a.patterns.spanner === b.patterns.spanner &&
+    a.patterns.workbench === b.patterns.workbench
   );
 }
 

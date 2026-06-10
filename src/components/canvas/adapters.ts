@@ -10,7 +10,10 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     return undefined;
   }
   if (
-    (node.kind === "vm" || node.kind === "gke" || node.kind === "run") &&
+    (node.kind === "vm" ||
+      node.kind === "gke" ||
+      node.kind === "run" ||
+      node.kind === "workbench") &&
     node.data.internalIp
   ) {
     return node.data.internalIp;

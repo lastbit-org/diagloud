@@ -21,6 +21,10 @@ import {
   reassignSubnetRunIps,
 } from "../model/runSubnet";
 import {
+  clearWorkbenchNetwork,
+  reassignSubnetWorkbenchIps,
+} from "../model/workbenchSubnet";
+import {
   clearSqlPrivateNetwork,
   reassignSubnetSqlIps,
 } from "../model/sqlSubnet";
@@ -54,6 +58,7 @@ import type {
   PubsubProps,
   BigqueryProps,
   SpannerProps,
+  WorkbenchProps,
   ZoneProps,
 } from "../types";
 
@@ -92,6 +97,7 @@ type DiagramActions = {
       | Partial<PubsubProps>
       | Partial<BigqueryProps>
       | Partial<SpannerProps>
+      | Partial<WorkbenchProps>
       | Partial<ZoneProps>,
   ) => void;
   updateNodeDimensions: (id: string, width: number, height: number) => void;
@@ -248,6 +254,12 @@ function buildNode<K extends ResourceKind>(
         kind: "spanner",
         data: { ...defaultResourceData("spanner", resourceContext), ...data },
       };
+    case "workbench":
+      return {
+        ...base,
+        kind: "workbench",
+        data: { ...defaultResourceData("workbench", resourceContext), ...data },
+      };
     case "zone":
       return {
         ...base,
@@ -275,6 +287,7 @@ function mergeNodeData(
     | Partial<PubsubProps>
     | Partial<BigqueryProps>
     | Partial<SpannerProps>
+    | Partial<WorkbenchProps>
     | Partial<ZoneProps>,
 ): DiagramNode {
   switch (node.kind) {
@@ -353,6 +366,11 @@ function mergeNodeData(
         ...node,
         data: { ...node.data, ...(patch as Partial<SpannerProps>) },
       };
+    case "workbench":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<WorkbenchProps>) },
+      };
     case "zone":
       return {
         ...node,
@@ -370,6 +388,7 @@ function reassignSubnetHostIps(
   next = reassignSubnetSqlIps(subnetId, next, edges);
   next = reassignSubnetGkeIps(subnetId, next, edges);
   next = reassignSubnetRunIps(subnetId, next, edges);
+  next = reassignSubnetWorkbenchIps(subnetId, next, edges);
   return next;
 }
 
@@ -539,7 +558,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
           (edge.kind === "vm-subnet" ||
             edge.kind === "sql-subnet" ||
             edge.kind === "gke-subnet" ||
-            edge.kind === "run-subnet") &&
+            edge.kind === "run-subnet" ||
+            edge.kind === "workbench-subnet") &&
           (edge.source === id || edge.target === id)
         ) {
           affectedSubnetIds.add(edge.target);
@@ -600,7 +620,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         next.kind === "vm-subnet" ||
         next.kind === "sql-subnet" ||
         next.kind === "gke-subnet" ||
-        next.kind === "run-subnet"
+        next.kind === "run-subnet" ||
+        next.kind === "workbench-subnet"
       ) {
         if (next.kind === "vm-subnet") {
           nodes = assignIpToVm(next.source, next.target, nodes, edges);
@@ -637,6 +658,11 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
       if (removed?.kind === "run-subnet") {
         nodes = clearRunNetwork(removed.source, nodes);
+        nodes = reassignSubnetHostIps(removed.target, nodes, edges);
+      }
+
+      if (removed?.kind === "workbench-subnet") {
+        nodes = clearWorkbenchNetwork(removed.source, nodes);
         nodes = reassignSubnetHostIps(removed.target, nodes, edges);
       }
 

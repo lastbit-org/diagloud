@@ -19,6 +19,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "sql",
   "bigquery",
   "spanner",
+  "workbench",
   "pubsub",
   "artifact",
 ];

@@ -22,6 +22,8 @@ import type { ResourceKind } from "./resources";
  * - Pub/Sub → BigQuery (`pubsub-bigquery`): streaming para tabela
  * - VM / GKE / Cloud Run → Cloud Spanner: acesso de aplicações
  * - Pub/Sub → Cloud Spanner (`pubsub-spanner`): ingestão assíncrona
+ * - Vertex AI Workbench → Sub-rede (`workbench-subnet`): notebook na VPC
+ * - Vertex AI Workbench → Storage / BigQuery / Spanner: acesso a dados
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
 export const EDGE_ENDPOINTS = {
@@ -47,6 +49,10 @@ export const EDGE_ENDPOINTS = {
   "gke-spanner": { from: "gke", to: "spanner" },
   "run-spanner": { from: "run", to: "spanner" },
   "pubsub-spanner": { from: "pubsub", to: "spanner" },
+  "workbench-subnet": { from: "workbench", to: "subnet" },
+  "workbench-storage": { from: "workbench", to: "storage" },
+  "workbench-bigquery": { from: "workbench", to: "bigquery" },
+  "workbench-spanner": { from: "workbench", to: "spanner" },
 } as const satisfies Record<
   DiagramEdge["kind"],
   { from: ResourceKind; to: ResourceKind }

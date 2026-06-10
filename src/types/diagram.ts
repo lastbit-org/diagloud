@@ -8,6 +8,7 @@ import type {
   VpnProps,
   BigqueryProps,
   SpannerProps,
+  WorkbenchProps,
   PubsubProps,
   RunProps,
   SqlProps,
@@ -46,6 +47,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "pubsub"; data: PubsubProps })
   | (NodeBase & { kind: "bigquery"; data: BigqueryProps })
   | (NodeBase & { kind: "spanner"; data: SpannerProps })
+  | (NodeBase & { kind: "workbench"; data: WorkbenchProps })
   | (NodeBase & { kind: "zone"; data: ZoneProps });
 
 export type DiagramEdge = {
@@ -76,7 +78,11 @@ export type DiagramEdge = {
     | "vm-spanner"
     | "gke-spanner"
     | "run-spanner"
-    | "pubsub-spanner";
+    | "pubsub-spanner"
+    | "workbench-subnet"
+    | "workbench-storage"
+    | "workbench-bigquery"
+    | "workbench-spanner";
 };
 
 export type DiagramNamingMetadata = {

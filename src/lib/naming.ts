@@ -115,6 +115,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `bq-${count}`;
     case "spanner":
       return `spanner-${count}`;
+    case "workbench":
+      return `wb-${count}`;
     case "zone":
       return `zona-${count}`;
   }

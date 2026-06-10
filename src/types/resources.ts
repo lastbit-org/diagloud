@@ -16,6 +16,7 @@ export type ResourceKind =
   | "pubsub"
   | "bigquery"
   | "spanner"
+  | "workbench"
   | "zone";
 
 export type ZonePurpose = "project" | "vpc-area" | "perimeter";
@@ -138,6 +139,15 @@ export type SpannerProps = {
   config: string;
 };
 
+export type WorkbenchProps = {
+  /** Nome da instância de notebook. */
+  name: string;
+  region: string;
+  machineType: string;
+  /** IP interno na sub-rede ao conectar (VPC). */
+  internalIp?: string;
+};
+
 export type ZoneProps = {
   name: string;
   purpose: ZonePurpose;
@@ -162,5 +172,6 @@ export type ResourcePropsByKind = {
   pubsub: PubsubProps;
   bigquery: BigqueryProps;
   spanner: SpannerProps;
+  workbench: WorkbenchProps;
   zone: ZoneProps;
 };

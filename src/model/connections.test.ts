@@ -88,6 +88,10 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("gke", "spanner")).toBe("gke-spanner");
     expect(getEdgeKind("run", "spanner")).toBe("run-spanner");
     expect(getEdgeKind("pubsub", "spanner")).toBe("pubsub-spanner");
+    expect(getEdgeKind("workbench", "subnet")).toBe("workbench-subnet");
+    expect(getEdgeKind("workbench", "storage")).toBe("workbench-storage");
+    expect(getEdgeKind("workbench", "bigquery")).toBe("workbench-bigquery");
+    expect(getEdgeKind("workbench", "spanner")).toBe("workbench-spanner");
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {
@@ -714,6 +718,99 @@ describe("validateConnection", () => {
       { nodes: [vpc, vpcB, vpn], edges },
     );
     expect(result).toEqual({ valid: false, reason: "vpn-has-vpc" });
+  });
+
+  it("aceita Vertex AI Workbench → sub-rede e dados", () => {
+    const workbench: DiagramNode = {
+      id: "workbench-1",
+      kind: "workbench",
+      position: { x: 200, y: 0 },
+      data: {
+        name: "wb-1",
+        region: "southamerica-east1",
+        machineType: "n1-standard-4",
+      },
+    };
+    const storageNode: DiagramNode = {
+      id: "storage-1",
+      kind: "storage",
+      position: { x: 400, y: 0 },
+      data: {
+        name: "bucket-1",
+        location: "southamerica-east1",
+        storageClass: "STANDARD",
+        accessMode: "public",
+      },
+    };
+
+    const subnetResult = validateConnection(
+      {
+        source: workbench.id,
+        target: subnet.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [...nodes, workbench], edges: [] },
+    );
+    expect(subnetResult).toMatchObject({
+      valid: true,
+      edgeKind: "workbench-subnet",
+    });
+
+    const storageResult = validateConnection(
+      {
+        source: workbench.id,
+        target: storageNode.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: [...nodes, workbench, storageNode], edges: [] },
+    );
+    expect(storageResult).toMatchObject({
+      valid: true,
+      edgeKind: "workbench-storage",
+    });
+  });
+
+  it("rejeita segunda sub-rede no mesmo Workbench", () => {
+    const workbench: DiagramNode = {
+      id: "workbench-1",
+      kind: "workbench",
+      position: { x: 200, y: 0 },
+      data: {
+        name: "wb-1",
+        region: "southamerica-east1",
+        machineType: "n1-standard-4",
+      },
+    };
+    const subnetB: DiagramNode = {
+      id: "subnet-2",
+      kind: "subnet",
+      position: { x: 400, y: 0 },
+      data: {
+        name: "subnet-b",
+        region: "southamerica-east1",
+        cidr: "10.0.1.0/24",
+      },
+    };
+    const edges: DiagramEdge[] = [
+      {
+        id: "e1",
+        source: workbench.id,
+        target: subnet.id,
+        kind: "workbench-subnet",
+      },
+    ];
+    const result = validateConnection(
+      {
+        source: workbench.id,
+        target: subnetB.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [...nodes, workbench, subnetB], edges },
+    );
+    expect(result).toEqual({ valid: false, reason: "workbench-has-subnet" });
   });
 
   it("aceita Internet → Cloud VPN", () => {

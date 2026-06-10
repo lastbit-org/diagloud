@@ -31,6 +31,10 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Cloud Run em modo público não se liga à sub-rede. Altere o acesso para VPC connector.",
   "subnet-run-capacity":
     "Não há mais endereços de IP na sub-rede para Cloud Run (após VMs, SQL e GKE).",
+  "workbench-has-subnet":
+    "Este Vertex AI Workbench já está ligado a uma sub-rede.",
+  "subnet-workbench-capacity":
+    "Não há mais endereços de IP na sub-rede para Vertex AI Workbench (após VMs, SQL, GKE e Cloud Run).",
 };
 
 export function connectionErrorMessage(reason: ConnectionInvalidReason): string {
