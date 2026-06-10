@@ -7,6 +7,7 @@ import type {
   PeeringProps,
   VpnProps,
   BigqueryProps,
+  SpannerProps,
   PubsubProps,
   RunProps,
   SqlProps,
@@ -44,6 +45,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "run"; data: RunProps })
   | (NodeBase & { kind: "pubsub"; data: PubsubProps })
   | (NodeBase & { kind: "bigquery"; data: BigqueryProps })
+  | (NodeBase & { kind: "spanner"; data: SpannerProps })
   | (NodeBase & { kind: "zone"; data: ZoneProps });
 
 export type DiagramEdge = {
@@ -70,7 +72,11 @@ export type DiagramEdge = {
     | "run-artifact"
     | "pubsub-run"
     | "pubsub-storage"
-    | "pubsub-bigquery";
+    | "pubsub-bigquery"
+    | "vm-spanner"
+    | "gke-spanner"
+    | "run-spanner"
+    | "pubsub-spanner";
 };
 
 export type DiagramNamingMetadata = {

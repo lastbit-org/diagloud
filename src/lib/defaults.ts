@@ -19,6 +19,7 @@ import type {
   RunProps,
   PubsubProps,
   BigqueryProps,
+  SpannerProps,
   ZoneProps,
 } from "../types";
 
@@ -112,6 +113,11 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         location: "southamerica-east1",
       } as BigqueryProps as ResourcePropsByKind[K];
+    case "spanner":
+      return {
+        name,
+        config: "regional-southamerica-east1",
+      } as SpannerProps as ResourcePropsByKind[K];
     case "zone":
       return {
         name,
@@ -154,6 +160,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `topic-${count}`;
     case "bigquery":
       return `bq-${count}`;
+    case "spanner":
+      return `spanner-${count}`;
     case "zone":
       return `zona-${count}`;
   }

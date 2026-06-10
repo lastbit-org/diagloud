@@ -40,6 +40,7 @@ const sampleDocument: DiagramDocument = {
         run: "run-AREA-AMBIENTE",
         pubsub: "topic-AREA-AMBIENTE",
         bigquery: "bq-AREA-AMBIENTE",
+        spanner: "spanner-AREA-AMBIENTE",
         zone: "zona-AREA-AMBIENTE",
       },
     },

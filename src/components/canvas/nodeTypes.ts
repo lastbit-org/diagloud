@@ -1,6 +1,7 @@
 import {
   ArtifactNode,
   BigqueryNode,
+  SpannerNode,
   GkeNode,
   InternetNode,
   NatNode,
@@ -31,5 +32,6 @@ export const nodeTypes = {
   run: RunNode,
   pubsub: PubsubNode,
   bigquery: BigqueryNode,
+  spanner: SpannerNode,
   zone: ZoneNode,
 };

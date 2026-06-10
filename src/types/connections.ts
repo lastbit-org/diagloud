@@ -20,6 +20,8 @@ import type { ResourceKind } from "./resources";
  * - Pub/Sub → Cloud Run (`pubsub-run`): push subscription / evento
  * - Pub/Sub → Cloud Storage (`pubsub-storage`): exportação para bucket
  * - Pub/Sub → BigQuery (`pubsub-bigquery`): streaming para tabela
+ * - VM / GKE / Cloud Run → Cloud Spanner: acesso de aplicações
+ * - Pub/Sub → Cloud Spanner (`pubsub-spanner`): ingestão assíncrona
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
 export const EDGE_ENDPOINTS = {
@@ -41,6 +43,10 @@ export const EDGE_ENDPOINTS = {
   "pubsub-run": { from: "pubsub", to: "run" },
   "pubsub-storage": { from: "pubsub", to: "storage" },
   "pubsub-bigquery": { from: "pubsub", to: "bigquery" },
+  "vm-spanner": { from: "vm", to: "spanner" },
+  "gke-spanner": { from: "gke", to: "spanner" },
+  "run-spanner": { from: "run", to: "spanner" },
+  "pubsub-spanner": { from: "pubsub", to: "spanner" },
 } as const satisfies Record<
   DiagramEdge["kind"],
   { from: ResourceKind; to: ResourceKind }

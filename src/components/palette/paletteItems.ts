@@ -61,6 +61,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "run" ||
     value === "pubsub" ||
     value === "bigquery" ||
+    value === "spanner" ||
     value === "zone"
   );
 }
@@ -156,6 +157,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.bigquery,
     description: "Data warehouse analítico",
     icon: GCP_RESOURCE_ICONS.bigquery,
+  },
+  {
+    kind: "spanner",
+    category: "databases",
+    label: GCP_RESOURCE_LABELS.spanner,
+    description: "Banco relacional globalmente distribuído",
+    icon: GCP_RESOURCE_ICONS.spanner,
   },
   {
     kind: "pubsub",

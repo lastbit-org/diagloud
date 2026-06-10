@@ -59,6 +59,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "bigquery") {
     return node.data.location;
   }
+  if (node.kind === "spanner") {
+    return node.data.config;
+  }
   return undefined;
 }
 

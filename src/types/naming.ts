@@ -22,6 +22,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   run: "run-AREA-AMBIENTE",
   pubsub: "topic-AREA-AMBIENTE",
   bigquery: "bq-AREA-AMBIENTE",
+  spanner: "spanner-AREA-AMBIENTE",
   zone: "zona-AREA-AMBIENTE",
 };
 

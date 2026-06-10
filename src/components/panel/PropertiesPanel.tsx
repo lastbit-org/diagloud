@@ -725,6 +725,37 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "spanner" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="spanner-name">Instância</label>
+            <input
+              id="spanner-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="spanner-config">Configuração</label>
+            <input
+              id="spanner-config"
+              value={selectedNode.data.config}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { config: e.target.value })
+              }
+              placeholder="regional-southamerica-east1"
+            />
+          </div>
+          <SpannerClientsInfo
+            spanner={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "nat" && (
         <>
           <div className="properties-field">
@@ -1035,12 +1066,21 @@ function PubsubDestinationsInfo({
     .filter((e) => e.kind === "pubsub-bigquery" && e.source === pubsub.id)
     .map((e) => nodes.find((n) => n.id === e.target && n.kind === "bigquery"))
     .filter((n): n is Extract<DiagramNode, { kind: "bigquery" }> => n != null);
+  const spanners = edges
+    .filter((e) => e.kind === "pubsub-spanner" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "spanner"))
+    .filter((n): n is Extract<DiagramNode, { kind: "spanner" }> => n != null);
 
-  if (runs.length === 0 && buckets.length === 0 && datasets.length === 0) {
+  if (
+    runs.length === 0 &&
+    buckets.length === 0 &&
+    datasets.length === 0 &&
+    spanners.length === 0
+  ) {
     return (
       <p className="properties-field__hint">
-        Ligue a Cloud Run, Cloud Storage ou BigQuery para documentar
-        subscriptions e exportações.
+        Ligue a Cloud Run, Cloud Storage, BigQuery ou Cloud Spanner para
+        documentar subscriptions e exportações.
       </p>
     );
   }
@@ -1063,6 +1103,82 @@ function PubsubDestinationsInfo({
         <>
           <dt>BigQuery</dt>
           <dd>{datasets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {spanners.length > 0 ? (
+        <>
+          <dt>Cloud Spanner</dt>
+          <dd>{spanners.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function SpannerClientsInfo({
+  spanner,
+  edges,
+  nodes,
+}: {
+  spanner: Extract<DiagramNode, { kind: "spanner" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vms = edges
+    .filter((e) => e.kind === "vm-spanner" && e.target === spanner.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "gke-spanner" && e.target === spanner.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "run-spanner" && e.target === spanner.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const topics = edges
+    .filter((e) => e.kind === "pubsub-spanner" && e.target === spanner.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+
+  if (
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    topics.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue VMs, GKE, Cloud Run ou Pub/Sub para documentar clientes desta
+        instância.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {topics.length > 0 ? (
+        <>
+          <dt>Pub/Sub</dt>
+          <dd>{topics.map((p) => p.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

@@ -84,6 +84,10 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("pubsub", "run")).toBe("pubsub-run");
     expect(getEdgeKind("pubsub", "storage")).toBe("pubsub-storage");
     expect(getEdgeKind("pubsub", "bigquery")).toBe("pubsub-bigquery");
+    expect(getEdgeKind("vm", "spanner")).toBe("vm-spanner");
+    expect(getEdgeKind("gke", "spanner")).toBe("gke-spanner");
+    expect(getEdgeKind("run", "spanner")).toBe("run-spanner");
+    expect(getEdgeKind("pubsub", "spanner")).toBe("pubsub-spanner");
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {
@@ -475,6 +479,50 @@ describe("validateConnection", () => {
       { nodes: [...nodes, pubsub], edges: [] },
     );
     expect(result).toMatchObject({ valid: true, edgeKind: "pubsub-storage" });
+  });
+
+  it("aceita VM → Cloud Spanner", () => {
+    const spanner: DiagramNode = {
+      id: "spanner-1",
+      kind: "spanner",
+      position: { x: 200, y: 0 },
+      data: { name: "spanner-1", config: "regional-southamerica-east1" },
+    };
+    const result = validateConnection(
+      {
+        source: vm.id,
+        target: spanner.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: [...nodes, spanner], edges: [] },
+    );
+    expect(result).toMatchObject({ valid: true, edgeKind: "vm-spanner" });
+  });
+
+  it("aceita Pub/Sub → Cloud Spanner", () => {
+    const spanner: DiagramNode = {
+      id: "spanner-1",
+      kind: "spanner",
+      position: { x: 200, y: 0 },
+      data: { name: "spanner-1", config: "regional-southamerica-east1" },
+    };
+    const pubsub: DiagramNode = {
+      id: "pubsub-1",
+      kind: "pubsub",
+      position: { x: 0, y: 0 },
+      data: { name: "events" },
+    };
+    const result = validateConnection(
+      {
+        source: pubsub.id,
+        target: spanner.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: [...nodes, spanner, pubsub], edges: [] },
+    );
+    expect(result).toMatchObject({ valid: true, edgeKind: "pubsub-spanner" });
   });
 
   it("aceita Pub/Sub → BigQuery", () => {

@@ -113,6 +113,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `topic-${count}`;
     case "bigquery":
       return `bq-${count}`;
+    case "spanner":
+      return `spanner-${count}`;
     case "zone":
       return `zona-${count}`;
   }

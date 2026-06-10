@@ -1,6 +1,7 @@
 export type { GcpNodeData } from "./BaseNode";
 export { ArtifactNode } from "./ArtifactNode";
 export { BigqueryNode } from "./BigqueryNode";
+export { SpannerNode } from "./SpannerNode";
 export { GkeNode } from "./GkeNode";
 export { InternetNode } from "./InternetNode";
 export { NatNode } from "./NatNode";

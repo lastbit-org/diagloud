@@ -15,6 +15,7 @@ export type ResourceKind =
   | "run"
   | "pubsub"
   | "bigquery"
+  | "spanner"
   | "zone";
 
 export type ZonePurpose = "project" | "vpc-area" | "perimeter";
@@ -130,6 +131,13 @@ export type BigqueryProps = {
   location: string;
 };
 
+export type SpannerProps = {
+  /** Nome da instância. */
+  name: string;
+  /** Configuração regional ou multi-regional (ex.: regional-southamerica-east1). */
+  config: string;
+};
+
 export type ZoneProps = {
   name: string;
   purpose: ZonePurpose;
@@ -153,5 +161,6 @@ export type ResourcePropsByKind = {
   run: RunProps;
   pubsub: PubsubProps;
   bigquery: BigqueryProps;
+  spanner: SpannerProps;
   zone: ZoneProps;
 };

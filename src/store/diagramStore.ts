@@ -53,6 +53,7 @@ import type {
   RunProps,
   PubsubProps,
   BigqueryProps,
+  SpannerProps,
   ZoneProps,
 } from "../types";
 
@@ -90,6 +91,7 @@ type DiagramActions = {
       | Partial<RunProps>
       | Partial<PubsubProps>
       | Partial<BigqueryProps>
+      | Partial<SpannerProps>
       | Partial<ZoneProps>,
   ) => void;
   updateNodeDimensions: (id: string, width: number, height: number) => void;
@@ -240,6 +242,12 @@ function buildNode<K extends ResourceKind>(
         kind: "bigquery",
         data: { ...defaultResourceData("bigquery", resourceContext), ...data },
       };
+    case "spanner":
+      return {
+        ...base,
+        kind: "spanner",
+        data: { ...defaultResourceData("spanner", resourceContext), ...data },
+      };
     case "zone":
       return {
         ...base,
@@ -266,6 +274,7 @@ function mergeNodeData(
     | Partial<RunProps>
     | Partial<PubsubProps>
     | Partial<BigqueryProps>
+    | Partial<SpannerProps>
     | Partial<ZoneProps>,
 ): DiagramNode {
   switch (node.kind) {
@@ -338,6 +347,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<BigqueryProps>) },
+      };
+    case "spanner":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<SpannerProps>) },
       };
     case "zone":
       return {

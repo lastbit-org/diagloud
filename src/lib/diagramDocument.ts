@@ -29,7 +29,8 @@ import {
   type InternetProps,
   type RunProps,
   type PubsubProps,
-  type   BigqueryProps,
+  type BigqueryProps,
+  type SpannerProps,
   type ZoneProps,
   type ZonePurpose,
 } from "../types";
@@ -299,6 +300,20 @@ function parseBigqueryData(raw: unknown): BigqueryProps {
   };
 }
 
+function parseSpannerData(raw: unknown): SpannerProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.config !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Cloud Spanner inválidos.");
+  }
+  return {
+    name: raw.name,
+    config: raw.config,
+  };
+}
+
 function parseZonePurpose(value: unknown): ZonePurpose {
   if (value === "project" || value === "vpc-area" || value === "perimeter") {
     return value;
@@ -519,6 +534,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseBigqueryData(data),
       };
+    case "spanner":
+      if (!nodeIdMatchesKind(nodeId, "spanner")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Spanner.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "spanner",
+        position: parsedPosition,
+        zIndex,
+        data: parseSpannerData(data),
+      };
     case "zone":
       if (!nodeIdMatchesKind(nodeId, "zone")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Zona.`);
@@ -575,6 +603,10 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "pubsub-run" &&
     kind !== "pubsub-storage" &&
     kind !== "pubsub-bigquery" &&
+    kind !== "vm-spanner" &&
+    kind !== "gke-spanner" &&
+    kind !== "run-spanner" &&
+    kind !== "pubsub-spanner" &&
     kind !== "sql-vpc"
   ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
@@ -686,6 +718,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.bigquery === "string"
           ? patterns.bigquery
           : DEFAULT_NAMING_PATTERNS.bigquery,
+      spanner:
+        typeof patterns.spanner === "string"
+          ? patterns.spanner
+          : DEFAULT_NAMING_PATTERNS.spanner,
       zone:
         typeof patterns.zone === "string"
           ? patterns.zone
@@ -855,7 +891,8 @@ function namingMetadataEqual(
     a.patterns.internet === b.patterns.internet &&
     a.patterns.run === b.patterns.run &&
     a.patterns.pubsub === b.patterns.pubsub &&
-    a.patterns.bigquery === b.patterns.bigquery
+    a.patterns.bigquery === b.patterns.bigquery &&
+    a.patterns.spanner === b.patterns.spanner
   );
 }
 
