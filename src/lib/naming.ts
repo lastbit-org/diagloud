@@ -101,6 +101,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `nat-${count}`;
     case "peering":
       return `peer-${count}`;
+    case "vpn":
+      return `vpn-${count}`;
     case "artifact":
       return `gar-${count}`;
     case "internet":

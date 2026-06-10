@@ -55,6 +55,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "gke" ||
     value === "nat" ||
     value === "peering" ||
+    value === "vpn" ||
     value === "artifact" ||
     value === "internet" ||
     value === "run" ||
@@ -106,6 +107,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.peering,
     description: "Conectividade privada entre duas VPCs",
     icon: GCP_RESOURCE_ICONS.peering,
+  },
+  {
+    kind: "vpn",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.vpn,
+    description: "Túnel IPsec híbrido com rede externa",
+    icon: GCP_RESOURCE_ICONS.vpn,
   },
   {
     kind: "vm",

@@ -2,6 +2,7 @@ import type { ResourceKind } from "../types";
 import artifactIcon from "./google-cloud-legacy-icons/artifact_registry/artifact_registry.svg";
 import bigqueryIcon from "./google-cloud-legacy-icons/bigquery/bigquery.svg";
 import natIcon from "./google-cloud-legacy-icons/cloud_nat/cloud_nat.svg";
+import vpnIcon from "./google-cloud-legacy-icons/cloud_vpn/cloud_vpn.svg";
 import subnetIcon from "./google-cloud-legacy-icons/cloud_network/cloud_network.svg";
 import runIcon from "./google-cloud-legacy-icons/cloud_run/cloud_run.svg";
 import gkeIcon from "./google-cloud-legacy-icons/google_kubernetes_engine/google_kubernetes_engine.svg";
@@ -24,6 +25,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   gke: gkeIcon,
   nat: natIcon,
   peering: peeringIcon,
+  vpn: vpnIcon,
   artifact: artifactIcon,
   internet: internetIcon,
   run: runIcon,
@@ -41,6 +43,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   gke: "GKE",
   nat: "Cloud NAT",
   peering: "VPC Peering",
+  vpn: "Cloud VPN",
   artifact: "Artifact Registry",
   internet: "Internet",
   run: "Cloud Run",

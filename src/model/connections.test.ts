@@ -73,7 +73,9 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("sql", "subnet")).toBe("sql-subnet");
     expect(getEdgeKind("nat", "vpc")).toBe("nat-vpc");
     expect(getEdgeKind("peering", "vpc")).toBe("peering-vpc");
+    expect(getEdgeKind("vpn", "vpc")).toBe("vpn-vpc");
     expect(getEdgeKind("internet", "nat")).toBe("internet-nat");
+    expect(getEdgeKind("internet", "vpn")).toBe("internet-vpn");
     expect(getEdgeKind("subnet", "nat")).toBe("subnet-nat");
     expect(getEdgeKind("gke", "artifact")).toBe("gke-artifact");
     expect(getEdgeKind("vm", "artifact")).toBe("vm-artifact");
@@ -594,5 +596,105 @@ describe("validateConnection", () => {
       { nodes: [vpc, vpcB, vpcC, peering], edges },
     );
     expect(result).toEqual({ valid: false, reason: "peering-has-max-vpcs" });
+  });
+
+  it("aceita Cloud VPN → VPC e normaliza VPC → VPN", () => {
+    const vpn: DiagramNode = {
+      id: "vpn-1",
+      kind: "vpn",
+      position: { x: 200, y: 0 },
+      data: { name: "vpn-1", region: "southamerica-east1" },
+    };
+    const diagramNodes = [vpc, vpn];
+
+    const forward = validateConnection(
+      {
+        source: vpn.id,
+        target: vpc.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: diagramNodes, edges: [] },
+    );
+    expect(forward).toMatchObject({
+      valid: true,
+      edgeKind: "vpn-vpc",
+      source: vpn.id,
+      target: vpc.id,
+    });
+
+    const reversed = validateConnection(
+      {
+        source: vpc.id,
+        target: vpn.id,
+        sourceHandle: egress("left"),
+        targetHandle: ingress("right"),
+      },
+      { nodes: diagramNodes, edges: [] },
+    );
+    expect(reversed).toMatchObject({
+      valid: true,
+      edgeKind: "vpn-vpc",
+      source: vpn.id,
+      target: vpc.id,
+    });
+  });
+
+  it("rejeita segunda VPC no mesmo Cloud VPN", () => {
+    const vpn: DiagramNode = {
+      id: "vpn-1",
+      kind: "vpn",
+      position: { x: 200, y: 0 },
+      data: { name: "vpn-1", region: "southamerica-east1" },
+    };
+    const vpcB: DiagramNode = {
+      id: "vpc-2",
+      kind: "vpc",
+      position: { x: 400, y: 0 },
+      data: { name: "vpc-2" },
+    };
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: vpn.id, target: vpc.id, kind: "vpn-vpc" },
+    ];
+    const result = validateConnection(
+      {
+        source: vpn.id,
+        target: vpcB.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [vpc, vpcB, vpn], edges },
+    );
+    expect(result).toEqual({ valid: false, reason: "vpn-has-vpc" });
+  });
+
+  it("aceita Internet → Cloud VPN", () => {
+    const vpn: DiagramNode = {
+      id: "vpn-1",
+      kind: "vpn",
+      position: { x: 200, y: 0 },
+      data: { name: "vpn-1", region: "southamerica-east1" },
+    };
+    const internet: DiagramNode = {
+      id: "internet-1",
+      kind: "internet",
+      position: { x: 0, y: 0 },
+      data: { name: "Internet" },
+    };
+    const result = validateConnection(
+      {
+        source: internet.id,
+        target: vpn.id,
+        sourceHandle: egress("bottom"),
+        targetHandle: ingress("top"),
+      },
+      { nodes: [...nodes, vpn, internet], edges: [] },
+    );
+    expect(result).toMatchObject({
+      valid: true,
+      edgeKind: "internet-vpn",
+      source: internet.id,
+      target: vpn.id,
+    });
   });
 });

@@ -44,7 +44,7 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     }
     return "Privado (sub-rede)";
   }
-  if (node.kind === "nat") {
+  if (node.kind === "nat" || node.kind === "vpn") {
     return node.data.region;
   }
   if (node.kind === "peering") {

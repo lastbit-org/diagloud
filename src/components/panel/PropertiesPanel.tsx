@@ -771,6 +771,32 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "vpn" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="vpn-name">Nome</label>
+            <input
+              id="vpn-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="vpn-region">Região</label>
+            <input
+              id="vpn-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <VpnVpcInfo vpn={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
       {selectedNode?.kind === "artifact" && (
         <>
           <div className="properties-field">
@@ -827,10 +853,14 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             />
           </div>
           <p className="properties-field__hint">
-            Representa a rede pública externa. Ligue ao Cloud NAT para documentar
-            egress de sub-redes privadas.
+            Representa a rede pública externa ou on-prem. Ligue ao Cloud NAT
+            (egress) ou ao Cloud VPN (túnel híbrido).
           </p>
-          <InternetNatInfo internet={selectedNode} edges={edges} nodes={nodes} />
+          <InternetConnectivityInfo
+            internet={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
         </>
       )}
 
@@ -1205,6 +1235,53 @@ function PeeringVpcInfo({
   );
 }
 
+function VpnVpcInfo({
+  vpn,
+  edges,
+  nodes,
+}: {
+  vpn: Extract<DiagramNode, { kind: "vpn" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vpcEdge = edges.find(
+    (e) => e.kind === "vpn-vpc" && e.source === vpn.id,
+  );
+  const internetEdge = edges.find(
+    (e) => e.kind === "internet-vpn" && e.target === vpn.id,
+  );
+
+  if (!vpcEdge && !internetEdge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à VPC (handle inferior) e à Internet (superior) para documentar
+        conectividade híbrida.
+      </p>
+    );
+  }
+
+  const vpc = vpcEdge
+    ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+
+  return (
+    <dl className="properties-stats">
+      {vpc && vpc.kind === "vpc" ? (
+        <>
+          <dt>VPC</dt>
+          <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {internetEdge ? (
+        <>
+          <dt>Internet / on-prem</dt>
+          <dd>Ligada</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function NatVpcInfo({
   nat,
   edges,
@@ -1321,7 +1398,7 @@ function ArtifactPullInfo({
   );
 }
 
-function InternetNatInfo({
+function InternetConnectivityInfo({
   internet,
   edges,
   nodes,
@@ -1330,23 +1407,42 @@ function InternetNatInfo({
   edges: ReturnType<typeof useDiagramStore.getState>["edges"];
   nodes: DiagramNode[];
 }) {
-  const edge = edges.find(
+  const natEdge = edges.find(
     (e) => e.kind === "internet-nat" && e.source === internet.id,
   );
-  if (!edge) {
+  const vpnEdge = edges.find(
+    (e) => e.kind === "internet-vpn" && e.source === internet.id,
+  );
+
+  if (!natEdge && !vpnEdge) {
     return (
       <p className="properties-field__hint">
-        Ligue ao Cloud NAT (handle inferior) para documentar saída à internet.
+        Ligue ao Cloud NAT ou Cloud VPN para documentar egress ou túnel híbrido.
       </p>
     );
   }
-  const nat = nodes.find((n) => n.id === edge.target && n.kind === "nat");
-  if (!nat || nat.kind !== "nat") return null;
+
+  const nat = natEdge
+    ? nodes.find((n) => n.id === natEdge.target && n.kind === "nat")
+    : undefined;
+  const vpn = vpnEdge
+    ? nodes.find((n) => n.id === vpnEdge.target && n.kind === "vpn")
+    : undefined;
 
   return (
     <dl className="properties-stats">
-      <dt>Cloud NAT</dt>
-      <dd>{nat.data.name}</dd>
+      {nat && nat.kind === "nat" ? (
+        <>
+          <dt>Cloud NAT</dt>
+          <dd>{nat.data.name}</dd>
+        </>
+      ) : null}
+      {vpn && vpn.kind === "vpn" ? (
+        <>
+          <dt>Cloud VPN</dt>
+          <dd>{vpn.data.name}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }

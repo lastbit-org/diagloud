@@ -11,6 +11,8 @@ import type { ResourceKind } from "./resources";
  * - Cloud SQL → Sub-rede (`sql-subnet`): IP privado na sub-rede (modo privado)
  * - Cloud NAT → VPC (`nat-vpc`): gateway NAT na VPC
  * - VPC Peering → VPC (`peering-vpc`): peering entre duas VPCs (máx. 2 por peering)
+ * - Cloud VPN → VPC (`vpn-vpc`): gateway VPN na VPC
+ * - Internet → Cloud VPN (`internet-vpn`): túnel híbrido (on-prem / rede externa)
  * - Internet → Cloud NAT (`internet-nat`): saída para a internet
  * - Sub-rede → Cloud NAT (`subnet-nat`): sub-rede com egress via NAT
  * - GKE / VM / Cloud Run → Artifact Registry: pull de imagens
@@ -28,7 +30,9 @@ export const EDGE_ENDPOINTS = {
   "gke-subnet": { from: "gke", to: "subnet" },
   "nat-vpc": { from: "nat", to: "vpc" },
   "peering-vpc": { from: "peering", to: "vpc" },
+  "vpn-vpc": { from: "vpn", to: "vpc" },
   "internet-nat": { from: "internet", to: "nat" },
+  "internet-vpn": { from: "internet", to: "vpn" },
   "subnet-nat": { from: "subnet", to: "nat" },
   "gke-artifact": { from: "gke", to: "artifact" },
   "vm-artifact": { from: "vm", to: "artifact" },

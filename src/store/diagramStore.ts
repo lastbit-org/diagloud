@@ -47,6 +47,7 @@ import type {
   VpcProps,
   NatProps,
   PeeringProps,
+  VpnProps,
   ArtifactProps,
   InternetProps,
   RunProps,
@@ -83,6 +84,7 @@ type DiagramActions = {
       | Partial<GkeProps>
       | Partial<NatProps>
       | Partial<PeeringProps>
+      | Partial<VpnProps>
       | Partial<ArtifactProps>
       | Partial<InternetProps>
       | Partial<RunProps>
@@ -202,6 +204,12 @@ function buildNode<K extends ResourceKind>(
         kind: "peering",
         data: { ...defaultResourceData("peering", resourceContext), ...data },
       };
+    case "vpn":
+      return {
+        ...base,
+        kind: "vpn",
+        data: { ...defaultResourceData("vpn", resourceContext), ...data },
+      };
     case "artifact":
       return {
         ...base,
@@ -251,6 +259,8 @@ function mergeNodeData(
     | Partial<SqlProps>
     | Partial<GkeProps>
     | Partial<NatProps>
+    | Partial<PeeringProps>
+    | Partial<VpnProps>
     | Partial<ArtifactProps>
     | Partial<InternetProps>
     | Partial<RunProps>
@@ -298,6 +308,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<PeeringProps>) },
+      };
+    case "vpn":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<VpnProps>) },
       };
     case "artifact":
       return {

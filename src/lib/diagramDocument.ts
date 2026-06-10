@@ -24,6 +24,7 @@ import {
   type VpcProps,
   type NatProps,
   type PeeringProps,
+  type VpnProps,
   type ArtifactProps,
   type InternetProps,
   type RunProps,
@@ -222,6 +223,20 @@ function parsePeeringData(raw: unknown): PeeringProps {
     throw new DiagramParseError("Dados de VPC Peering inválidos.");
   }
   return { name: raw.name };
+}
+
+function parseVpnData(raw: unknown): VpnProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Cloud VPN inválidos.");
+  }
+  return {
+    name: raw.name,
+    region: raw.region,
+  };
 }
 
 function parseInternetData(raw: unknown): InternetProps {
@@ -434,6 +449,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parsePeeringData(data),
       };
+    case "vpn":
+      if (!nodeIdMatchesKind(nodeId, "vpn")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud VPN.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "vpn",
+        position: parsedPosition,
+        zIndex,
+        data: parseVpnData(data),
+      };
     case "artifact":
       if (!nodeIdMatchesKind(nodeId, "artifact")) {
         throw new DiagramParseError(
@@ -536,7 +564,9 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "gke-subnet" &&
     kind !== "nat-vpc" &&
     kind !== "peering-vpc" &&
+    kind !== "vpn-vpc" &&
     kind !== "internet-nat" &&
+    kind !== "internet-vpn" &&
     kind !== "subnet-nat" &&
     kind !== "gke-artifact" &&
     kind !== "vm-artifact" &&
@@ -632,6 +662,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.peering === "string"
           ? patterns.peering
           : DEFAULT_NAMING_PATTERNS.peering,
+      vpn:
+        typeof patterns.vpn === "string"
+          ? patterns.vpn
+          : DEFAULT_NAMING_PATTERNS.vpn,
       artifact:
         typeof patterns.artifact === "string"
           ? patterns.artifact
@@ -816,6 +850,7 @@ function namingMetadataEqual(
     a.patterns.gke === b.patterns.gke &&
     a.patterns.nat === b.patterns.nat &&
     a.patterns.peering === b.patterns.peering &&
+    a.patterns.vpn === b.patterns.vpn &&
     a.patterns.artifact === b.patterns.artifact &&
     a.patterns.internet === b.patterns.internet &&
     a.patterns.run === b.patterns.run &&

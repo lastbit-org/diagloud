@@ -34,6 +34,7 @@ const sampleDocument: DiagramDocument = {
         gke: "gke-AREA-AMBIENTE",
         nat: "nat-AREA-AMBIENTE",
         peering: "peer-AREA-AMBIENTE",
+        vpn: "vpn-AREA-AMBIENTE",
         artifact: "gar-AREA-AMBIENTE",
         internet: "Internet",
         run: "run-AREA-AMBIENTE",

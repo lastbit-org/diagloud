@@ -9,6 +9,7 @@ export type ResourceKind =
   | "gke"
   | "nat"
   | "peering"
+  | "vpn"
   | "artifact"
   | "internet"
   | "run"
@@ -92,6 +93,11 @@ export type PeeringProps = {
   name: string;
 };
 
+export type VpnProps = {
+  name: string;
+  region: string;
+};
+
 export type ArtifactProps = {
   name: string;
   location: string;
@@ -141,6 +147,7 @@ export type ResourcePropsByKind = {
   gke: GkeProps;
   nat: NatProps;
   peering: PeeringProps;
+  vpn: VpnProps;
   artifact: ArtifactProps;
   internet: InternetProps;
   run: RunProps;
