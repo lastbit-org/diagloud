@@ -1,26 +1,23 @@
 import { NodeResizer, type NodeProps } from "@xyflow/react";
 import type { ZoneColorId } from "../../lib/zoneColors";
-import type { ZonePurpose } from "../../types";
+import type { ZoneBorderStyle, ZoneBorderWidth } from "../../lib/zoneBorder";
 import "./zones.css";
 
 export type ZoneNodeData = {
   kind: "zone";
   label: string;
-  purpose: ZonePurpose;
   colorId: ZoneColorId;
+  borderWidth: ZoneBorderWidth;
+  borderStyle: ZoneBorderStyle;
   width: number;
   height: number;
 };
 
-export const ZONE_PURPOSE_LABELS: Record<ZonePurpose, string> = {
-  project: "Projeto",
-  "vpc-area": "Área VPC",
-  perimeter: "Perímetro",
-};
+const DEFAULT_ZONE_LABEL = "Zona";
 
 export function ZoneNode({ data, selected }: NodeProps) {
-  const { label, purpose, colorId } = (data ?? {}) as ZoneNodeData;
-  const displayName = label || ZONE_PURPOSE_LABELS[purpose];
+  const { label, colorId, borderWidth, borderStyle } = (data ?? {}) as ZoneNodeData;
+  const displayName = label.trim() || DEFAULT_ZONE_LABEL;
 
   return (
     <>
@@ -32,7 +29,7 @@ export function ZoneNode({ data, selected }: NodeProps) {
         handleClassName="gcp-zone-resizer__handle"
       />
       <div
-        className={`gcp-zone gcp-zone--${colorId}${selected ? " gcp-zone--selected" : ""}`}
+        className={`gcp-zone gcp-zone--${colorId} gcp-zone--width-${borderWidth ?? "normal"} gcp-zone--style-${borderStyle ?? "solid"}${selected ? " gcp-zone--selected" : ""}`}
         aria-label={displayName}
       >
         <span className="gcp-zone__label">{displayName}</span>

@@ -12,6 +12,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "nat",
   "peering",
   "vpn",
+  "interconnect",
   "firewall",
   "vm",
   "gke",

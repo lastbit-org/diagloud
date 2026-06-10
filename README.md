@@ -13,7 +13,7 @@ O Diagloud é pensado para **design reviews**, **documentação de infraestrutur
 - **Painel de propriedades** por recurso (nome, região, CIDR, modos de acesso, etc.)
 - **Painel de validação** com avisos e erros (VM órfã, sub-rede sem VPC, CIDR inválido, etc.)
 - **Nomenclatura configurável** com padrões `AREA`, `AMBIENTE` e sequência `##`
-- **Zonas** redimensionáveis para agrupar projeto, área VPC ou perímetro
+- **Zonas** redimensionáveis para agrupar recursos no diagrama
 - **Exportação** em JSON (editável), PNG e SVG
 - **Autosave** no `localStorage` do navegador
 - **Tema claro/escuro** e **cor de destaque** personalizável (preferências persistidas)
@@ -34,8 +34,8 @@ Categorias espelham o menu *All products* do GCP:
 
 | Categoria | Recursos |
 |-----------|----------|
-| **Organização** | Zona (projeto, área VPC, perímetro) |
-| **Rede** | VPC, Sub-rede, Internet, Cloud NAT, VPC Peering, Cloud VPN, Firewall |
+| **Organização** | Zona |
+| **Rede** | VPC, Sub-rede, Internet, Cloud NAT, VPC Peering, Cloud VPN, Cloud Interconnect, Firewall |
 | **Computação** | VM (Compute Engine), GKE, Cloud Run |
 | **Armazenamento** | Cloud Storage |
 | **Bancos de dados** | Cloud SQL, BigQuery, Cloud Spanner, Firestore |
@@ -53,7 +53,8 @@ O modelo segue uma hierarquia simplificada de rede e dependências de aplicaçã
 VPC ← Sub-rede ← VM / GKE / Cloud Run (VPC)
 VM → Cloud Storage
 Cloud SQL (privado) → Sub-rede
-Cloud NAT / VPN / Firewall / Peering → VPC
+Cloud NAT / VPN / Interconnect / Firewall / Peering → VPC
+Internet → Cloud VPN / Cloud Interconnect (híbrido)
 Pub/Sub → Cloud Run, Storage, BigQuery, Spanner, Firestore, Eventarc
 Pub/Sub / Cloud Storage → Eventarc → Cloud Run, GKE
 ```

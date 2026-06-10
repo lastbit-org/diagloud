@@ -17,6 +17,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   nat: "nat-AREA-AMBIENTE",
   peering: "peer-AREA-AMBIENTE",
   vpn: "vpn-AREA-AMBIENTE",
+  interconnect: "ic-AREA-AMBIENTE",
   firewall: "fw-AREA-AMBIENTE",
   artifact: "gar-AREA-AMBIENTE",
   internet: "Internet",

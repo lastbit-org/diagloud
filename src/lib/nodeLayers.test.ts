@@ -18,8 +18,9 @@ const zone: DiagramNode = {
   zIndex: MISSING_Z_INDEX,
   data: {
     name: "Projeto",
-    purpose: "project",
     colorId: "slate",
+    borderWidth: "normal",
+    borderStyle: "solid",
     width: 320,
     height: 200,
   },

@@ -15,6 +15,7 @@ import type {
   NatProps,
   PeeringProps,
   VpnProps,
+  InterconnectProps,
   FirewallProps,
   ArtifactProps,
   InternetProps,
@@ -91,6 +92,11 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         region: "southamerica-east1",
       } as VpnProps as ResourcePropsByKind[K];
+    case "interconnect":
+      return {
+        name,
+        region: "southamerica-east1",
+      } as InterconnectProps as ResourcePropsByKind[K];
     case "firewall":
       return {
         name,
@@ -147,8 +153,9 @@ export function defaultResourceData<K extends ResourceKind>(
     case "zone":
       return {
         name,
-        purpose: "project",
         colorId: "slate",
+        borderWidth: "normal",
+        borderStyle: "solid",
         width: 320,
         height: 200,
       } as ZoneProps as ResourcePropsByKind[K];
@@ -176,6 +183,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `peer-${count}`;
     case "vpn":
       return `vpn-${count}`;
+    case "interconnect":
+      return `ic-${count}`;
     case "firewall":
       return `fw-${count}`;
     case "artifact":

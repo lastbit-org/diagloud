@@ -201,6 +201,37 @@
   --swatch-border: #8b5cf6;
 }
 
+.zone-option-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.zone-option-toggle__btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.zone-option-toggle__btn:hover {
+  border-color: var(--accent-border);
+  color: var(--text-h);
+}
+
+.zone-option-toggle__btn--selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  box-shadow: 0 0 0 1px var(--accent-border);
+}
+
 .properties-layer-actions__buttons {
   display: flex;
   flex-wrap: wrap;

@@ -74,9 +74,13 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("nat", "vpc")).toBe("nat-vpc");
     expect(getEdgeKind("peering", "vpc")).toBe("peering-vpc");
     expect(getEdgeKind("vpn", "vpc")).toBe("vpn-vpc");
+    expect(getEdgeKind("interconnect", "vpc")).toBe("interconnect-vpc");
     expect(getEdgeKind("firewall", "vpc")).toBe("firewall-vpc");
     expect(getEdgeKind("internet", "nat")).toBe("internet-nat");
     expect(getEdgeKind("internet", "vpn")).toBe("internet-vpn");
+    expect(getEdgeKind("internet", "interconnect")).toBe(
+      "internet-interconnect",
+    );
     expect(getEdgeKind("subnet", "nat")).toBe("subnet-nat");
     expect(getEdgeKind("gke", "artifact")).toBe("gke-artifact");
     expect(getEdgeKind("vm", "artifact")).toBe("vm-artifact");
@@ -716,6 +720,111 @@ describe("validateConnection", () => {
       edgeKind: "vpn-vpc",
       source: vpn.id,
       target: vpc.id,
+    });
+  });
+
+  it("aceita Cloud Interconnect → VPC e normaliza VPC → Interconnect", () => {
+    const interconnect: DiagramNode = {
+      id: "interconnect-1",
+      kind: "interconnect",
+      position: { x: 200, y: 0 },
+      data: { name: "ic-1", region: "southamerica-east1" },
+    };
+    const diagramNodes = [vpc, interconnect];
+
+    const forward = validateConnection(
+      {
+        source: interconnect.id,
+        target: vpc.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: diagramNodes, edges: [] },
+    );
+    expect(forward).toMatchObject({
+      valid: true,
+      edgeKind: "interconnect-vpc",
+      source: interconnect.id,
+      target: vpc.id,
+    });
+
+    const reversed = validateConnection(
+      {
+        source: vpc.id,
+        target: interconnect.id,
+        sourceHandle: egress("left"),
+        targetHandle: ingress("right"),
+      },
+      { nodes: diagramNodes, edges: [] },
+    );
+    expect(reversed).toMatchObject({
+      valid: true,
+      edgeKind: "interconnect-vpc",
+      source: interconnect.id,
+      target: vpc.id,
+    });
+  });
+
+  it("rejeita segunda VPC no mesmo Cloud Interconnect", () => {
+    const interconnect: DiagramNode = {
+      id: "interconnect-1",
+      kind: "interconnect",
+      position: { x: 200, y: 0 },
+      data: { name: "ic-1", region: "southamerica-east1" },
+    };
+    const vpcB: DiagramNode = {
+      id: "vpc-2",
+      kind: "vpc",
+      position: { x: 400, y: 0 },
+      data: { name: "vpc-2" },
+    };
+    const edges: DiagramEdge[] = [
+      {
+        id: "e1",
+        source: interconnect.id,
+        target: vpc.id,
+        kind: "interconnect-vpc",
+      },
+    ];
+    const result = validateConnection(
+      {
+        source: interconnect.id,
+        target: vpcB.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [vpc, vpcB, interconnect], edges },
+    );
+    expect(result).toEqual({ valid: false, reason: "interconnect-has-vpc" });
+  });
+
+  it("aceita Internet → Cloud Interconnect", () => {
+    const interconnect: DiagramNode = {
+      id: "interconnect-1",
+      kind: "interconnect",
+      position: { x: 200, y: 0 },
+      data: { name: "ic-1", region: "southamerica-east1" },
+    };
+    const internet: DiagramNode = {
+      id: "internet-1",
+      kind: "internet",
+      position: { x: 0, y: 0 },
+      data: { name: "Internet" },
+    };
+    const result = validateConnection(
+      {
+        source: internet.id,
+        target: interconnect.id,
+        sourceHandle: egress("bottom"),
+        targetHandle: ingress("top"),
+      },
+      { nodes: [...nodes, interconnect, internet], edges: [] },
+    );
+    expect(result).toMatchObject({
+      valid: true,
+      edgeKind: "internet-interconnect",
+      source: internet.id,
+      target: interconnect.id,
     });
   });
 

@@ -47,7 +47,7 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     }
     return "Privado (sub-rede)";
   }
-  if (node.kind === "nat" || node.kind === "vpn") {
+  if (node.kind === "nat" || node.kind === "vpn" || node.kind === "interconnect") {
     return node.data.region;
   }
   if (node.kind === "peering") {
@@ -87,8 +87,9 @@ export function toFlowNode(
       data: {
         kind: "zone",
         label: node.data.name,
-        purpose: node.data.purpose,
         colorId: node.data.colorId,
+        borderWidth: node.data.borderWidth,
+        borderStyle: node.data.borderStyle,
         width: node.data.width,
         height: node.data.height,
       },

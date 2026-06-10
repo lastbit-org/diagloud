@@ -58,6 +58,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "nat" ||
     value === "peering" ||
     value === "vpn" ||
+    value === "interconnect" ||
     value === "firewall" ||
     value === "artifact" ||
     value === "internet" ||
@@ -77,7 +78,7 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     kind: "zone",
     category: "organization",
     label: GCP_RESOURCE_LABELS.zone,
-    description: "Projeto, área VPC ou perímetro",
+    description: "Agrupamento visual de recursos",
     icon: GCP_RESOURCE_ICONS.zone,
   },
   {
@@ -121,6 +122,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.vpn,
     description: "Túnel IPsec híbrido com rede externa",
     icon: GCP_RESOURCE_ICONS.vpn,
+  },
+  {
+    kind: "interconnect",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.interconnect,
+    description: "Link dedicado de alta largura de banda com on-prem",
+    icon: GCP_RESOURCE_ICONS.interconnect,
   },
   {
     kind: "firewall",

@@ -12,8 +12,10 @@ import type { ResourceKind } from "./resources";
  * - Cloud NAT → VPC (`nat-vpc`): gateway NAT na VPC
  * - VPC Peering → VPC (`peering-vpc`): peering entre duas VPCs (máx. 2 por peering)
  * - Cloud VPN → VPC (`vpn-vpc`): gateway VPN na VPC
+ * - Cloud Interconnect → VPC (`interconnect-vpc`): anexo dedicado na VPC
  * - Firewall → VPC (`firewall-vpc`): regra de firewall na VPC
  * - Internet → Cloud VPN (`internet-vpn`): túnel híbrido (on-prem / rede externa)
+ * - Internet → Cloud Interconnect (`internet-interconnect`): link dedicado on-prem
  * - Internet → Cloud NAT (`internet-nat`): saída para a internet
  * - Sub-rede → Cloud NAT (`subnet-nat`): sub-rede com egress via NAT
  * - GKE / VM / Cloud Run → Artifact Registry: pull de imagens
@@ -40,9 +42,11 @@ export const EDGE_ENDPOINTS = {
   "nat-vpc": { from: "nat", to: "vpc" },
   "peering-vpc": { from: "peering", to: "vpc" },
   "vpn-vpc": { from: "vpn", to: "vpc" },
+  "interconnect-vpc": { from: "interconnect", to: "vpc" },
   "firewall-vpc": { from: "firewall", to: "vpc" },
   "internet-nat": { from: "internet", to: "nat" },
   "internet-vpn": { from: "internet", to: "vpn" },
+  "internet-interconnect": { from: "internet", to: "interconnect" },
   "subnet-nat": { from: "subnet", to: "nat" },
   "gke-artifact": { from: "gke", to: "artifact" },
   "vm-artifact": { from: "vm", to: "artifact" },

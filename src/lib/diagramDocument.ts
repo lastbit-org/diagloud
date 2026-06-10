@@ -1,5 +1,6 @@
 import { assignDefaultZIndices, MISSING_Z_INDEX } from "./nodeLayers";
 import { isZoneColorId } from "./zoneColors";
+import { isZoneBorderStyle, isZoneBorderWidth } from "./zoneBorder";
 import { resolveEdgeHandles } from "./dynamicHandles";
 import { validateConnection } from "../model/connections";
 import { migrateSqlVpcEdge } from "../model/sqlSubnet";
@@ -25,6 +26,7 @@ import {
   type NatProps,
   type PeeringProps,
   type VpnProps,
+  type InterconnectProps,
   type FirewallProps,
   type ArtifactProps,
   type InternetProps,
@@ -36,7 +38,6 @@ import {
   type FirestoreProps,
   type WorkbenchProps,
   type ZoneProps,
-  type ZonePurpose,
 } from "../types";
 
 export const DIAGRAM_STORAGE_KEY = "diagloud-diagram";
@@ -254,6 +255,20 @@ function parseVpnData(raw: unknown): VpnProps {
   };
 }
 
+function parseInterconnectData(raw: unknown): InterconnectProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Cloud Interconnect inválidos.");
+  }
+  return {
+    name: raw.name,
+    region: raw.region,
+  };
+}
+
 function parseInternetData(raw: unknown): InternetProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de Internet inválidos.");
@@ -376,13 +391,6 @@ function parseWorkbenchData(raw: unknown): WorkbenchProps {
   return data;
 }
 
-function parseZonePurpose(value: unknown): ZonePurpose {
-  if (value === "project" || value === "vpc-area" || value === "perimeter") {
-    return value;
-  }
-  throw new DiagramParseError("Propósito de zona inválido.");
-}
-
 function parseZoneData(raw: unknown): ZoneProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de zona inválidos.");
@@ -400,11 +408,20 @@ function parseZoneData(raw: unknown): ZoneProps {
     typeof raw.colorId === "string" && isZoneColorId(raw.colorId)
       ? raw.colorId
       : "slate";
+  const borderWidth =
+    typeof raw.borderWidth === "string" && isZoneBorderWidth(raw.borderWidth)
+      ? raw.borderWidth
+      : "normal";
+  const borderStyle =
+    typeof raw.borderStyle === "string" && isZoneBorderStyle(raw.borderStyle)
+      ? raw.borderStyle
+      : "solid";
 
   return {
     name: raw.name,
-    purpose: parseZonePurpose(raw.purpose),
     colorId,
+    borderWidth,
+    borderStyle,
     width,
     height,
   };
@@ -538,6 +555,19 @@ function parseNode(raw: unknown): DiagramNode {
         position: parsedPosition,
         zIndex,
         data: parseVpnData(data),
+      };
+    case "interconnect":
+      if (!nodeIdMatchesKind(nodeId, "interconnect")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Interconnect.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "interconnect",
+        position: parsedPosition,
+        zIndex,
+        data: parseInterconnectData(data),
       };
     case "firewall":
       if (!nodeIdMatchesKind(nodeId, "firewall")) {
@@ -705,9 +735,11 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "nat-vpc" &&
     kind !== "peering-vpc" &&
     kind !== "vpn-vpc" &&
+    kind !== "interconnect-vpc" &&
     kind !== "firewall-vpc" &&
     kind !== "internet-nat" &&
     kind !== "internet-vpn" &&
+    kind !== "internet-interconnect" &&
     kind !== "subnet-nat" &&
     kind !== "gke-artifact" &&
     kind !== "vm-artifact" &&
@@ -824,6 +856,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.vpn === "string"
           ? patterns.vpn
           : DEFAULT_NAMING_PATTERNS.vpn,
+      interconnect:
+        typeof patterns.interconnect === "string"
+          ? patterns.interconnect
+          : DEFAULT_NAMING_PATTERNS.interconnect,
       firewall:
         typeof patterns.firewall === "string"
           ? patterns.firewall
@@ -1029,6 +1065,7 @@ function namingMetadataEqual(
     a.patterns.nat === b.patterns.nat &&
     a.patterns.peering === b.patterns.peering &&
     a.patterns.vpn === b.patterns.vpn &&
+    a.patterns.interconnect === b.patterns.interconnect &&
     a.patterns.firewall === b.patterns.firewall &&
     a.patterns.artifact === b.patterns.artifact &&
     a.patterns.internet === b.patterns.internet &&

@@ -6,7 +6,14 @@ import {
   WORKBENCH_MACHINE_TYPES,
 } from "../../lib/workbenchMachineTypes";
 import { ZONE_COLOR_OPTIONS, type ZoneColorId } from "../../lib/zoneColors";
-import { ZONE_PURPOSE_LABELS } from "../nodes";
+import {
+  ZONE_BORDER_STYLE_LABELS,
+  ZONE_BORDER_STYLES,
+  ZONE_BORDER_WIDTH_LABELS,
+  ZONE_BORDER_WIDTHS,
+  type ZoneBorderStyle,
+  type ZoneBorderWidth,
+} from "../../lib/zoneBorder";
 import { useSelectedNode } from "../../hooks/useSelectedNode";
 import {
   countVmsOnSubnet,
@@ -24,7 +31,6 @@ import type {
   FirewallDirection,
   StorageAccessMode,
   StorageClass,
-  ZonePurpose,
 } from "../../types";
 import "./properties.css";
 
@@ -957,6 +963,36 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "interconnect" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="interconnect-name">Nome</label>
+            <input
+              id="interconnect-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="interconnect-region">Região</label>
+            <input
+              id="interconnect-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <InterconnectVpcInfo
+            interconnect={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "firewall" && (
         <>
           <div className="properties-field">
@@ -1069,24 +1105,8 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
               onChange={(e) =>
                 updateNodeData(selectedNode.id, { name: e.target.value })
               }
-              placeholder={ZONE_PURPOSE_LABELS[selectedNode.data.purpose]}
+              placeholder="Zona"
             />
-          </div>
-          <div className="properties-field">
-            <label htmlFor="zone-purpose">Tipo</label>
-            <select
-              id="zone-purpose"
-              value={selectedNode.data.purpose}
-              onChange={(e) =>
-                updateNodeData(selectedNode.id, {
-                  purpose: e.target.value as ZonePurpose,
-                })
-              }
-            >
-              <option value="project">Projeto</option>
-              <option value="vpc-area">Área VPC</option>
-              <option value="perimeter">Perímetro</option>
-            </select>
           </div>
           <div className="properties-field">
             <span className="properties-field__label">Cor de fundo</span>
@@ -1110,6 +1130,64 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
                     })
                   }
                 />
+              ))}
+            </div>
+          </div>
+          <div className="properties-field">
+            <span className="properties-field__label">Grossura da borda</span>
+            <div
+              className="zone-option-toggle"
+              role="radiogroup"
+              aria-label="Grossura da borda"
+            >
+              {ZONE_BORDER_WIDTHS.map((width) => (
+                <button
+                  key={width}
+                  type="button"
+                  className={`zone-option-toggle__btn${
+                    selectedNode.data.borderWidth === width
+                      ? " zone-option-toggle__btn--selected"
+                      : ""
+                  }`}
+                  role="radio"
+                  aria-checked={selectedNode.data.borderWidth === width}
+                  onClick={() =>
+                    updateNodeData(selectedNode.id, {
+                      borderWidth: width as ZoneBorderWidth,
+                    })
+                  }
+                >
+                  {ZONE_BORDER_WIDTH_LABELS[width]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="properties-field">
+            <span className="properties-field__label">Estilo da borda</span>
+            <div
+              className="zone-option-toggle"
+              role="radiogroup"
+              aria-label="Estilo da borda"
+            >
+              {ZONE_BORDER_STYLES.map((style) => (
+                <button
+                  key={style}
+                  type="button"
+                  className={`zone-option-toggle__btn${
+                    selectedNode.data.borderStyle === style
+                      ? " zone-option-toggle__btn--selected"
+                      : ""
+                  }`}
+                  role="radio"
+                  aria-checked={selectedNode.data.borderStyle === style}
+                  onClick={() =>
+                    updateNodeData(selectedNode.id, {
+                      borderStyle: style as ZoneBorderStyle,
+                    })
+                  }
+                >
+                  {ZONE_BORDER_STYLE_LABELS[style]}
+                </button>
               ))}
             </div>
           </div>
@@ -1988,6 +2066,54 @@ function FirewallVpcInfo({
   );
 }
 
+function InterconnectVpcInfo({
+  interconnect,
+  edges,
+  nodes,
+}: {
+  interconnect: Extract<DiagramNode, { kind: "interconnect" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vpcEdge = edges.find(
+    (e) => e.kind === "interconnect-vpc" && e.source === interconnect.id,
+  );
+  const internetEdge = edges.find(
+    (e) =>
+      e.kind === "internet-interconnect" && e.target === interconnect.id,
+  );
+
+  if (!vpcEdge && !internetEdge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à VPC (handle inferior) e à Internet (superior) para documentar
+        o link dedicado on-prem.
+      </p>
+    );
+  }
+
+  const vpc = vpcEdge
+    ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+
+  return (
+    <dl className="properties-stats">
+      {vpc && vpc.kind === "vpc" ? (
+        <>
+          <dt>VPC</dt>
+          <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {internetEdge ? (
+        <>
+          <dt>Internet / on-prem</dt>
+          <dd>Ligada</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function VpnVpcInfo({
   vpn,
   edges,
@@ -2166,11 +2292,15 @@ function InternetConnectivityInfo({
   const vpnEdge = edges.find(
     (e) => e.kind === "internet-vpn" && e.source === internet.id,
   );
+  const interconnectEdge = edges.find(
+    (e) => e.kind === "internet-interconnect" && e.source === internet.id,
+  );
 
-  if (!natEdge && !vpnEdge) {
+  if (!natEdge && !vpnEdge && !interconnectEdge) {
     return (
       <p className="properties-field__hint">
-        Ligue ao Cloud NAT ou Cloud VPN para documentar egress ou túnel híbrido.
+        Ligue ao Cloud NAT, Cloud VPN ou Cloud Interconnect para documentar
+        egress ou conectividade híbrida.
       </p>
     );
   }
@@ -2180,6 +2310,11 @@ function InternetConnectivityInfo({
     : undefined;
   const vpn = vpnEdge
     ? nodes.find((n) => n.id === vpnEdge.target && n.kind === "vpn")
+    : undefined;
+  const interconnect = interconnectEdge
+    ? nodes.find(
+        (n) => n.id === interconnectEdge.target && n.kind === "interconnect",
+      )
     : undefined;
 
   return (
@@ -2194,6 +2329,12 @@ function InternetConnectivityInfo({
         <>
           <dt>Cloud VPN</dt>
           <dd>{vpn.data.name}</dd>
+        </>
+      ) : null}
+      {interconnect && interconnect.kind === "interconnect" ? (
+        <>
+          <dt>Cloud Interconnect</dt>
+          <dd>{interconnect.data.name}</dd>
         </>
       ) : null}
     </dl>

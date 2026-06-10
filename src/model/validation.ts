@@ -12,6 +12,7 @@ export type DiagramIssueCode =
   | "orphan-sql-private"
   | "orphan-nat"
   | "orphan-vpn"
+  | "orphan-interconnect"
   | "orphan-firewall"
   | "orphan-peering"
   | "orphan-peering-incomplete"
@@ -69,6 +70,12 @@ export function collectDiagramIssues(
   const vpnIdsOnVpc = new Set(
     edges
       .filter((edge) => edge.kind === "vpn-vpc")
+      .map((edge) => edge.source),
+  );
+
+  const interconnectIdsOnVpc = new Set(
+    edges
+      .filter((edge) => edge.kind === "interconnect-vpc")
       .map((edge) => edge.source),
   );
 
@@ -146,6 +153,15 @@ export function collectDiagramIssues(
         severity: "warning",
         nodeId: node.id,
         message: `Cloud VPN "${node.data.name}" não está ligado a uma VPC.`,
+      });
+    }
+
+    if (node.kind === "interconnect" && !interconnectIdsOnVpc.has(node.id)) {
+      issues.push({
+        code: "orphan-interconnect",
+        severity: "warning",
+        nodeId: node.id,
+        message: `Cloud Interconnect "${node.data.name}" não está ligado a uma VPC.`,
       });
     }
 

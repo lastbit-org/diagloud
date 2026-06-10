@@ -1,4 +1,5 @@
 import type { ZoneColorId } from "../lib/zoneColors";
+import type { ZoneBorderStyle, ZoneBorderWidth } from "../lib/zoneBorder";
 
 export type ResourceKind =
   | "vpc"
@@ -10,6 +11,7 @@ export type ResourceKind =
   | "nat"
   | "peering"
   | "vpn"
+  | "interconnect"
   | "firewall"
   | "artifact"
   | "internet"
@@ -21,8 +23,6 @@ export type ResourceKind =
   | "firestore"
   | "workbench"
   | "zone";
-
-export type ZonePurpose = "project" | "vpc-area" | "perimeter";
 
 export type RunAccessMode = "public" | "vpc";
 
@@ -103,6 +103,11 @@ export type VpnProps = {
   region: string;
 };
 
+export type InterconnectProps = {
+  name: string;
+  region: string;
+};
+
 export type FirewallDirection = "ingress" | "egress";
 
 export type FirewallProps = {
@@ -172,8 +177,9 @@ export type WorkbenchProps = {
 
 export type ZoneProps = {
   name: string;
-  purpose: ZonePurpose;
   colorId: ZoneColorId;
+  borderWidth: ZoneBorderWidth;
+  borderStyle: ZoneBorderStyle;
   width: number;
   height: number;
 };
@@ -188,6 +194,7 @@ export type ResourcePropsByKind = {
   nat: NatProps;
   peering: PeeringProps;
   vpn: VpnProps;
+  interconnect: InterconnectProps;
   firewall: FirewallProps;
   artifact: ArtifactProps;
   internet: InternetProps;

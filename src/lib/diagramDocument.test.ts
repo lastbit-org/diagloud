@@ -35,6 +35,7 @@ const sampleDocument: DiagramDocument = {
         nat: "nat-AREA-AMBIENTE",
         peering: "peer-AREA-AMBIENTE",
         vpn: "vpn-AREA-AMBIENTE",
+        interconnect: "ic-AREA-AMBIENTE",
         firewall: "fw-AREA-AMBIENTE",
         artifact: "gar-AREA-AMBIENTE",
         internet: "Internet",
@@ -267,8 +268,9 @@ describe("diagramDocument", () => {
           zIndex: 0,
           data: {
             name: "meu-projeto",
-            purpose: "project",
             colorId: "blue",
+            borderWidth: "thin",
+            borderStyle: "dashed",
             width: 400,
             height: 260,
           },
@@ -279,6 +281,37 @@ describe("diagramDocument", () => {
 
     const parsed = parseDiagramDocument(serializeDiagramDocument(doc));
     expect(parsed.nodes[0]).toEqual(doc.nodes[0]);
+  });
+
+  it("aplica defaults de borda em zonas antigas sem borderWidth/borderStyle", () => {
+    const zoneId = createNodeId("zone");
+    const json = JSON.stringify({
+      version: 1,
+      metadata: { savedAt: "2026-06-01T12:00:00.000Z", generator: "diagloud" },
+      nodes: [
+        {
+          id: zoneId,
+          kind: "zone",
+          position: { x: 0, y: 0 },
+          data: {
+            name: "legado",
+            colorId: "slate",
+            width: 320,
+            height: 200,
+          },
+        },
+      ],
+      edges: [],
+    });
+
+    const parsed = parseDiagramDocument(json);
+    expect(parsed.nodes[0]).toMatchObject({
+      kind: "zone",
+      data: {
+        borderWidth: "normal",
+        borderStyle: "solid",
+      },
+    });
   });
 
   it("updateNodeDimensions ignora nós que não são zona", () => {

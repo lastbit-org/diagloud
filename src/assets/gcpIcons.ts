@@ -6,6 +6,7 @@ import firestoreIcon from "./google-cloud-legacy-icons/firestore/firestore.svg";
 import workbenchIcon from "./google-cloud-legacy-icons/vertexai/vertexai.svg";
 import natIcon from "./google-cloud-legacy-icons/cloud_nat/cloud_nat.svg";
 import vpnIcon from "./google-cloud-legacy-icons/cloud_vpn/cloud_vpn.svg";
+import interconnectIcon from "./google-cloud-legacy-icons/cloud_interconnect/cloud_interconnect.svg";
 import firewallIcon from "./google-cloud-legacy-icons/cloud_firewall_rules/cloud_firewall_rules.svg";
 import subnetIcon from "./google-cloud-legacy-icons/cloud_network/cloud_network.svg";
 import runIcon from "./google-cloud-legacy-icons/cloud_run/cloud_run.svg";
@@ -31,6 +32,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   nat: natIcon,
   peering: peeringIcon,
   vpn: vpnIcon,
+  interconnect: interconnectIcon,
   firewall: firewallIcon,
   artifact: artifactIcon,
   internet: internetIcon,
@@ -54,6 +56,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   nat: "Cloud NAT",
   peering: "VPC Peering",
   vpn: "Cloud VPN",
+  interconnect: "Cloud Interconnect",
   firewall: "Firewall",
   artifact: "Artifact Registry",
   internet: "Internet",
