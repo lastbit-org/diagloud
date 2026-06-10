@@ -1,3 +1,5 @@
+import type { ZoneColorId } from "../lib/zoneColors";
+
 export type ResourceKind =
   | "vpc"
   | "subnet"
@@ -7,7 +9,15 @@ export type ResourceKind =
   | "gke"
   | "nat"
   | "artifact"
-  | "internet";
+  | "internet"
+  | "run"
+  | "pubsub"
+  | "bigquery"
+  | "zone";
+
+export type ZonePurpose = "project" | "vpc-area" | "perimeter";
+
+export type RunAccessMode = "public" | "vpc";
 
 export type ArtifactFormat = "DOCKER" | "MAVEN" | "NPM";
 
@@ -87,6 +97,36 @@ export type InternetProps = {
   name: string;
 };
 
+export type RunProps = {
+  name: string;
+  cpu: string;
+  memory: string;
+  minInstances: number;
+  accessMode: RunAccessMode;
+  /** Região — herdada da sub-rede (VPC connector). */
+  region?: string;
+  /** IP do conector VPC na sub-rede. */
+  internalIp?: string;
+};
+
+export type PubsubProps = {
+  name: string;
+};
+
+export type BigqueryProps = {
+  /** Nome do dataset. */
+  name: string;
+  location: string;
+};
+
+export type ZoneProps = {
+  name: string;
+  purpose: ZonePurpose;
+  colorId: ZoneColorId;
+  width: number;
+  height: number;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
@@ -97,4 +137,8 @@ export type ResourcePropsByKind = {
   nat: NatProps;
   artifact: ArtifactProps;
   internet: InternetProps;
+  run: RunProps;
+  pubsub: PubsubProps;
+  bigquery: BigqueryProps;
+  zone: ZoneProps;
 };

@@ -13,6 +13,7 @@ import {
 } from "./diagramDocument";
 import { useDiagramStore } from "../store/diagramStore";
 import { useNamingStore } from "../store/namingStore";
+import { assignDefaultZIndices } from "./nodeLayers";
 import type { DiagramDocument } from "../types";
 
 const sampleDocument: DiagramDocument = {
@@ -34,6 +35,10 @@ const sampleDocument: DiagramDocument = {
         nat: "nat-AREA-AMBIENTE",
         artifact: "gar-AREA-AMBIENTE",
         internet: "Internet",
+        run: "run-AREA-AMBIENTE",
+        pubsub: "topic-AREA-AMBIENTE",
+        bigquery: "bq-AREA-AMBIENTE",
+        zone: "zona-AREA-AMBIENTE",
       },
     },
   },
@@ -42,12 +47,14 @@ const sampleDocument: DiagramDocument = {
       id: "vpc-1",
       kind: "vpc",
       position: { x: 100, y: 50 },
+      zIndex: 1000,
       data: { name: "vpc-financeiro-prd" },
     },
     {
       id: "subnet-1",
       kind: "subnet",
       position: { x: 100, y: 180 },
+      zIndex: 1001,
       data: {
         name: "sub-financeiro-prd",
         region: "southamerica-east1",
@@ -58,6 +65,7 @@ const sampleDocument: DiagramDocument = {
       id: "vm-1",
       kind: "vm",
       position: { x: 100, y: 310 },
+      zIndex: 1002,
       data: {
         name: "vm-01-financeiro-prd",
         machineType: "e2-micro",
@@ -113,7 +121,7 @@ describe("diagramDocument", () => {
       edges: sampleDocument.edges,
     };
     const parsed = parseDiagramDocument(JSON.stringify(legacy));
-    expect(parsed.nodes).toEqual(sampleDocument.nodes);
+    expect(parsed.nodes).toEqual(assignDefaultZIndices(sampleDocument.nodes));
     expect(parsed.edges).toEqual(sampleDocument.edges);
     expect(parsed.metadata.generator).toBe("diagloud");
   });
@@ -234,6 +242,59 @@ describe("diagramDocument", () => {
     const filtered = filterEdgesWithValidReferences(nodes, edges);
     expect(filtered).toHaveLength(2);
     expect(filtered.every((e) => e.id !== "edge-orphan")).toBe(true);
+  });
+
+  it("serializa e restaura zona com dimensões e cor", () => {
+    const zoneId = createNodeId("zone");
+    const doc: DiagramDocument = {
+      version: 1,
+      metadata: {
+        savedAt: "2026-06-01T12:00:00.000Z",
+        generator: "diagloud",
+      },
+      nodes: [
+        {
+          id: zoneId,
+          kind: "zone",
+          position: { x: 40, y: 40 },
+          zIndex: 0,
+          data: {
+            name: "meu-projeto",
+            purpose: "project",
+            colorId: "blue",
+            width: 400,
+            height: 260,
+          },
+        },
+      ],
+      edges: [],
+    };
+
+    const parsed = parseDiagramDocument(serializeDiagramDocument(doc));
+    expect(parsed.nodes[0]).toEqual(doc.nodes[0]);
+  });
+
+  it("updateNodeDimensions ignora nós que não são zona", () => {
+    useDiagramStore.getState().reset();
+    const vpcId = useDiagramStore.getState().addNode("vpc", { x: 10, y: 10 });
+    useDiagramStore.getState().updateNodeDimensions(vpcId, 999, 999);
+    const vpc = useDiagramStore.getState().nodes.find((n) => n.id === vpcId);
+    expect(vpc?.kind).toBe("vpc");
+    if (vpc?.kind === "vpc") {
+      expect(vpc.data).toEqual({ name: expect.any(String) });
+    }
+  });
+
+  it("updateNodeDimensions altera tamanho da zona", () => {
+    useDiagramStore.getState().reset();
+    const id = useDiagramStore.getState().addNode("zone", { x: 0, y: 0 });
+    useDiagramStore.getState().updateNodeDimensions(id, 500, 300);
+    const node = useDiagramStore.getState().nodes.find((n) => n.id === id);
+    expect(node?.kind).toBe("zone");
+    if (node?.kind === "zone") {
+      expect(node.data.width).toBe(500);
+      expect(node.data.height).toBe(300);
+    }
   });
 
   it("store loadDocument + getDocument preserva o diagrama", () => {

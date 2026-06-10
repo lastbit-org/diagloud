@@ -1,13 +1,17 @@
 import {
   ArtifactNode,
+  BigqueryNode,
   GkeNode,
   InternetNode,
   NatNode,
+  PubsubNode,
+  RunNode,
   SqlNode,
   StorageNode,
   SubnetNode,
   VmNode,
   VpcNode,
+  ZoneNode,
 } from "../nodes";
 
 export const nodeTypes = {
@@ -20,4 +24,8 @@ export const nodeTypes = {
   nat: NatNode,
   artifact: ArtifactNode,
   internet: InternetNode,
+  run: RunNode,
+  pubsub: PubsubNode,
+  bigquery: BigqueryNode,
+  zone: ZoneNode,
 };

@@ -12,7 +12,11 @@ import type { ResourceKind } from "./resources";
  * - Cloud NAT → VPC (`nat-vpc`): gateway NAT na VPC
  * - Internet → Cloud NAT (`internet-nat`): saída para a internet
  * - Sub-rede → Cloud NAT (`subnet-nat`): sub-rede com egress via NAT
- * - GKE / VM → Artifact Registry (`gke-artifact`, `vm-artifact`): pull de imagens
+ * - GKE / VM / Cloud Run → Artifact Registry: pull de imagens
+ * - Cloud Run → Sub-rede (`run-subnet`): VPC connector (modo VPC)
+ * - Pub/Sub → Cloud Run (`pubsub-run`): push subscription / evento
+ * - Pub/Sub → Cloud Storage (`pubsub-storage`): exportação para bucket
+ * - Pub/Sub → BigQuery (`pubsub-bigquery`): streaming para tabela
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
 export const EDGE_ENDPOINTS = {
@@ -26,6 +30,11 @@ export const EDGE_ENDPOINTS = {
   "subnet-nat": { from: "subnet", to: "nat" },
   "gke-artifact": { from: "gke", to: "artifact" },
   "vm-artifact": { from: "vm", to: "artifact" },
+  "run-subnet": { from: "run", to: "subnet" },
+  "run-artifact": { from: "run", to: "artifact" },
+  "pubsub-run": { from: "pubsub", to: "run" },
+  "pubsub-storage": { from: "pubsub", to: "storage" },
+  "pubsub-bigquery": { from: "pubsub", to: "bigquery" },
 } as const satisfies Record<
   DiagramEdge["kind"],
   { from: ResourceKind; to: ResourceKind }

@@ -4,11 +4,15 @@ import type {
   GkeProps,
   InternetProps,
   NatProps,
+  BigqueryProps,
+  PubsubProps,
+  RunProps,
   SqlProps,
   StorageProps,
   SubnetProps,
   VmProps,
   VpcProps,
+  ZoneProps,
 } from "./resources";
 
 export const DIAGRAM_DOCUMENT_VERSION = 1 as const;
@@ -19,6 +23,8 @@ type NodeBase = {
     x: number;
     y: number;
   };
+  /** Ordem de empilhamento no canvas (menor = mais atrás). */
+  zIndex?: number;
 };
 
 export type DiagramNode =
@@ -30,7 +36,11 @@ export type DiagramNode =
   | (NodeBase & { kind: "gke"; data: GkeProps })
   | (NodeBase & { kind: "nat"; data: NatProps })
   | (NodeBase & { kind: "artifact"; data: ArtifactProps })
-  | (NodeBase & { kind: "internet"; data: InternetProps });
+  | (NodeBase & { kind: "internet"; data: InternetProps })
+  | (NodeBase & { kind: "run"; data: RunProps })
+  | (NodeBase & { kind: "pubsub"; data: PubsubProps })
+  | (NodeBase & { kind: "bigquery"; data: BigqueryProps })
+  | (NodeBase & { kind: "zone"; data: ZoneProps });
 
 export type DiagramEdge = {
   id: string;
@@ -48,7 +58,12 @@ export type DiagramEdge = {
     | "internet-nat"
     | "subnet-nat"
     | "gke-artifact"
-    | "vm-artifact";
+    | "vm-artifact"
+    | "run-subnet"
+    | "run-artifact"
+    | "pubsub-run"
+    | "pubsub-storage"
+    | "pubsub-bigquery";
 };
 
 export type DiagramNamingMetadata = {

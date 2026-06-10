@@ -14,6 +14,10 @@ import type {
   NatProps,
   ArtifactProps,
   InternetProps,
+  RunProps,
+  PubsubProps,
+  BigqueryProps,
+  ZoneProps,
 } from "../types";
 
 export function defaultResourceData<K extends ResourceKind>(
@@ -80,6 +84,31 @@ export function defaultResourceData<K extends ResourceKind>(
       return {
         name: name || "Internet",
       } as InternetProps as ResourcePropsByKind[K];
+    case "run":
+      return {
+        name,
+        cpu: "1",
+        memory: "512Mi",
+        minInstances: 0,
+        accessMode: "public",
+      } as RunProps as ResourcePropsByKind[K];
+    case "pubsub":
+      return {
+        name,
+      } as PubsubProps as ResourcePropsByKind[K];
+    case "bigquery":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as BigqueryProps as ResourcePropsByKind[K];
+    case "zone":
+      return {
+        name,
+        purpose: "project",
+        colorId: "slate",
+        width: 320,
+        height: 200,
+      } as ZoneProps as ResourcePropsByKind[K];
   }
 }
 
@@ -104,5 +133,13 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `gar-${count}`;
     case "internet":
       return "Internet";
+    case "run":
+      return `run-${count}`;
+    case "pubsub":
+      return `topic-${count}`;
+    case "bigquery":
+      return `bq-${count}`;
+    case "zone":
+      return `zona-${count}`;
   }
 }

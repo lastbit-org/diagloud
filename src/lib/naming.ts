@@ -103,6 +103,14 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `gar-${count}`;
     case "internet":
       return "Internet";
+    case "run":
+      return `run-${count}`;
+    case "pubsub":
+      return `topic-${count}`;
+    case "bigquery":
+      return `bq-${count}`;
+    case "zone":
+      return `zona-${count}`;
   }
 }
 

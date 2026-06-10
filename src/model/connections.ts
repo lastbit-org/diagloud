@@ -1,6 +1,7 @@
 import { parseCidr } from "../lib/cidr";
 import { matchesHandleRoles } from "../lib/dynamicHandles";
 import { canAttachGkeToSubnet } from "./gkeSubnet";
+import { canAttachRunToSubnet } from "./runSubnet";
 import { canAttachSqlToSubnet } from "./sqlSubnet";
 import { canAttachHostToSubnet } from "./subnetHosts";
 import { getSubnetNode } from "./subnet";
@@ -31,7 +32,10 @@ export type ConnectionInvalidReason =
   | "gke-has-subnet"
   | "subnet-gke-capacity"
   | "nat-has-vpc"
-  | "subnet-has-nat";
+  | "subnet-has-nat"
+  | "run-has-subnet"
+  | "run-not-vpc"
+  | "subnet-run-capacity";
 
 /** Verifica se `toId` é alcançável a partir de `fromId` seguindo as arestas existentes. */
 export function canReachNode(
@@ -322,6 +326,32 @@ export function validateConnection(
     )
   ) {
     return { valid: false, reason: "subnet-has-nat" };
+  }
+
+  if (
+    edgeKind === "run-subnet" &&
+    context.edges.some(
+      (edge) => edge.kind === "run-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "run-has-subnet" };
+  }
+
+  if (edgeKind === "run-subnet") {
+    const runNode = context.nodes.find((n) => n.id === directed.source);
+    if (!runNode || runNode.kind !== "run") {
+      return { valid: false, reason: "unknown-node" };
+    }
+    if (runNode.data.accessMode !== "vpc") {
+      return { valid: false, reason: "run-not-vpc" };
+    }
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+    if (!canAttachRunToSubnet(directed.target, context.nodes, context.edges)) {
+      return { valid: false, reason: "subnet-run-capacity" };
+    }
   }
 
   return { valid: true, edgeKind };

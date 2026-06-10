@@ -76,6 +76,11 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("subnet", "nat")).toBe("subnet-nat");
     expect(getEdgeKind("gke", "artifact")).toBe("gke-artifact");
     expect(getEdgeKind("vm", "artifact")).toBe("vm-artifact");
+    expect(getEdgeKind("run", "subnet")).toBe("run-subnet");
+    expect(getEdgeKind("run", "artifact")).toBe("run-artifact");
+    expect(getEdgeKind("pubsub", "run")).toBe("pubsub-run");
+    expect(getEdgeKind("pubsub", "storage")).toBe("pubsub-storage");
+    expect(getEdgeKind("pubsub", "bigquery")).toBe("pubsub-bigquery");
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {
@@ -343,6 +348,131 @@ describe("validateConnection", () => {
         edges,
       }),
     ).toBe("subnet-vm-capacity");
+  });
+
+  it("aceita Cloud Run VPC → sub-rede", () => {
+    const run: DiagramNode = {
+      id: "run-1",
+      kind: "run",
+      position: { x: 0, y: 0 },
+      data: {
+        name: "run-1",
+        cpu: "1",
+        memory: "512Mi",
+        minInstances: 0,
+        accessMode: "vpc",
+      },
+    };
+    const result = validateConnection(
+      {
+        source: run.id,
+        target: subnet.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [...nodes, run], edges: [] },
+    );
+    expect(result).toEqual({ valid: true, edgeKind: "run-subnet" });
+  });
+
+  it("rejeita Cloud Run público → sub-rede", () => {
+    const run: DiagramNode = {
+      id: "run-pub",
+      kind: "run",
+      position: { x: 0, y: 0 },
+      data: {
+        name: "run-pub",
+        cpu: "1",
+        memory: "512Mi",
+        minInstances: 0,
+        accessMode: "public",
+      },
+    };
+    const result = validateConnection(
+      {
+        source: run.id,
+        target: subnet.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [...nodes, run], edges: [] },
+    );
+    expect(result).toEqual({ valid: false, reason: "run-not-vpc" });
+  });
+
+  it("aceita Pub/Sub → Cloud Run", () => {
+    const run: DiagramNode = {
+      id: "run-1",
+      kind: "run",
+      position: { x: 0, y: 0 },
+      data: {
+        name: "run-1",
+        cpu: "1",
+        memory: "512Mi",
+        minInstances: 0,
+        accessMode: "public",
+      },
+    };
+    const pubsub: DiagramNode = {
+      id: "pubsub-1",
+      kind: "pubsub",
+      position: { x: 100, y: 0 },
+      data: { name: "events" },
+    };
+    const result = validateConnection(
+      {
+        source: pubsub.id,
+        target: run.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: [...nodes, run, pubsub], edges: [] },
+    );
+    expect(result).toEqual({ valid: true, edgeKind: "pubsub-run" });
+  });
+
+  it("aceita Pub/Sub → Cloud Storage", () => {
+    const pubsub: DiagramNode = {
+      id: "pubsub-1",
+      kind: "pubsub",
+      position: { x: 0, y: 0 },
+      data: { name: "events" },
+    };
+    const result = validateConnection(
+      {
+        source: pubsub.id,
+        target: storage.id,
+        sourceHandle: egress(),
+        targetHandle: ingress("left"),
+      },
+      { nodes: [...nodes, pubsub], edges: [] },
+    );
+    expect(result).toEqual({ valid: true, edgeKind: "pubsub-storage" });
+  });
+
+  it("aceita Pub/Sub → BigQuery", () => {
+    const pubsub: DiagramNode = {
+      id: "pubsub-1",
+      kind: "pubsub",
+      position: { x: 0, y: 0 },
+      data: { name: "events" },
+    };
+    const bigquery: DiagramNode = {
+      id: "bq-1",
+      kind: "bigquery",
+      position: { x: 200, y: 0 },
+      data: { name: "analytics", location: "southamerica-east1" },
+    };
+    const result = validateConnection(
+      {
+        source: pubsub.id,
+        target: bigquery.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: [...nodes, pubsub, bigquery], edges: [] },
+    );
+    expect(result).toEqual({ valid: true, edgeKind: "pubsub-bigquery" });
   });
 
   it("aceita handles padrão", () => {

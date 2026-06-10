@@ -1,3 +1,5 @@
+import { assignDefaultZIndices, MISSING_Z_INDEX } from "./nodeLayers";
+import { isZoneColorId } from "./zoneColors";
 import { resolveEdgeHandles } from "./dynamicHandles";
 import { validateConnection } from "../model/connections";
 import { migrateSqlVpcEdge } from "../model/sqlSubnet";
@@ -23,6 +25,11 @@ import {
   type NatProps,
   type ArtifactProps,
   type InternetProps,
+  type RunProps,
+  type PubsubProps,
+  type   BigqueryProps,
+  type ZoneProps,
+  type ZonePurpose,
 } from "../types";
 
 export const DIAGRAM_STORAGE_KEY = "diagloud-diagram";
@@ -216,12 +223,107 @@ function parseInternetData(raw: unknown): InternetProps {
   return { name: raw.name };
 }
 
+function parseRunData(raw: unknown): RunProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.cpu !== "string" ||
+    typeof raw.memory !== "string" ||
+    typeof raw.minInstances !== "number" ||
+    !Number.isInteger(raw.minInstances) ||
+    raw.minInstances < 0
+  ) {
+    throw new DiagramParseError("Dados de Cloud Run inválidos.");
+  }
+  const accessMode =
+    raw.accessMode === "vpc" || raw.accessMode === "public"
+      ? raw.accessMode
+      : "public";
+  const data: RunProps = {
+    name: raw.name,
+    cpu: raw.cpu,
+    memory: raw.memory,
+    minInstances: raw.minInstances,
+    accessMode,
+  };
+  if (typeof raw.region === "string") {
+    data.region = raw.region;
+  }
+  if (typeof raw.internalIp === "string") {
+    data.internalIp = raw.internalIp;
+  }
+  return data;
+}
+
+function parsePubsubData(raw: unknown): PubsubProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Pub/Sub inválidos.");
+  }
+  return { name: raw.name };
+}
+
+function parseBigqueryData(raw: unknown): BigqueryProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string"
+  ) {
+    throw new DiagramParseError("Dados de BigQuery inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
+  };
+}
+
+function parseZonePurpose(value: unknown): ZonePurpose {
+  if (value === "project" || value === "vpc-area" || value === "perimeter") {
+    return value;
+  }
+  throw new DiagramParseError("Propósito de zona inválido.");
+}
+
+function parseZoneData(raw: unknown): ZoneProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de zona inválidos.");
+  }
+
+  const width =
+    typeof raw.width === "number" && Number.isFinite(raw.width)
+      ? Math.max(120, Math.round(raw.width))
+      : 320;
+  const height =
+    typeof raw.height === "number" && Number.isFinite(raw.height)
+      ? Math.max(80, Math.round(raw.height))
+      : 200;
+  const colorId =
+    typeof raw.colorId === "string" && isZoneColorId(raw.colorId)
+      ? raw.colorId
+      : "slate";
+
+  return {
+    name: raw.name,
+    purpose: parseZonePurpose(raw.purpose),
+    colorId,
+    width,
+    height,
+  };
+}
+
+function parseZIndex(raw: Record<string, unknown>): number {
+  if (typeof raw.zIndex === "number" && Number.isFinite(raw.zIndex)) {
+    return Math.round(raw.zIndex);
+  }
+  return MISSING_Z_INDEX;
+}
+
 function parseNode(raw: unknown): DiagramNode {
   if (!isRecord(raw)) {
     throw new DiagramParseError("Nó inválido no documento.");
   }
 
   const { id, kind, position, data } = raw;
+  const zIndex = parseZIndex(raw);
   if (typeof id !== "string" || !isValidDiagramId(id)) {
     throw new DiagramParseError(`ID de nó inválido: ${String(id)}`);
   }
@@ -238,6 +340,7 @@ function parseNode(raw: unknown): DiagramNode {
         id: nodeId,
         kind: "vpc",
         position: parsedPosition,
+        zIndex,
         data: parseVpcData(data),
       };
     case "subnet":
@@ -248,6 +351,7 @@ function parseNode(raw: unknown): DiagramNode {
         id: nodeId,
         kind: "subnet",
         position: parsedPosition,
+        zIndex,
         data: parseSubnetData(data),
       };
     case "vm":
@@ -258,6 +362,7 @@ function parseNode(raw: unknown): DiagramNode {
         id: nodeId,
         kind: "vm",
         position: parsedPosition,
+        zIndex,
         data: parseVmData(data),
       };
     case "storage":
@@ -270,6 +375,7 @@ function parseNode(raw: unknown): DiagramNode {
         id: nodeId,
         kind: "storage",
         position: parsedPosition,
+        zIndex,
         data: parseStorageData(data),
       };
     case "sql":
@@ -282,6 +388,7 @@ function parseNode(raw: unknown): DiagramNode {
         id: nodeId,
         kind: "sql",
         position: parsedPosition,
+        zIndex,
         data: parseSqlData(data),
       };
     case "gke":
@@ -292,6 +399,7 @@ function parseNode(raw: unknown): DiagramNode {
         id: nodeId,
         kind: "gke",
         position: parsedPosition,
+        zIndex,
         data: parseGkeData(data),
       };
     case "nat":
@@ -302,6 +410,7 @@ function parseNode(raw: unknown): DiagramNode {
         id: nodeId,
         kind: "nat",
         position: parsedPosition,
+        zIndex,
         data: parseNatData(data),
       };
     case "artifact":
@@ -314,6 +423,7 @@ function parseNode(raw: unknown): DiagramNode {
         id: nodeId,
         kind: "artifact",
         position: parsedPosition,
+        zIndex,
         data: parseArtifactData(data),
       };
     case "internet":
@@ -324,7 +434,52 @@ function parseNode(raw: unknown): DiagramNode {
         id: nodeId,
         kind: "internet",
         position: parsedPosition,
+        zIndex,
         data: parseInternetData(data),
+      };
+    case "run":
+      if (!nodeIdMatchesKind(nodeId, "run")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Cloud Run.`);
+      }
+      return {
+        id: nodeId,
+        kind: "run",
+        position: parsedPosition,
+        zIndex,
+        data: parseRunData(data),
+      };
+    case "pubsub":
+      if (!nodeIdMatchesKind(nodeId, "pubsub")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Pub/Sub.`);
+      }
+      return {
+        id: nodeId,
+        kind: "pubsub",
+        position: parsedPosition,
+        zIndex,
+        data: parsePubsubData(data),
+      };
+    case "bigquery":
+      if (!nodeIdMatchesKind(nodeId, "bigquery")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo BigQuery.`);
+      }
+      return {
+        id: nodeId,
+        kind: "bigquery",
+        position: parsedPosition,
+        zIndex,
+        data: parseBigqueryData(data),
+      };
+    case "zone":
+      if (!nodeIdMatchesKind(nodeId, "zone")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Zona.`);
+      }
+      return {
+        id: nodeId,
+        kind: "zone",
+        position: parsedPosition,
+        zIndex,
+        data: parseZoneData(data),
       };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
@@ -363,6 +518,11 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "subnet-nat" &&
     kind !== "gke-artifact" &&
     kind !== "vm-artifact" &&
+    kind !== "run-subnet" &&
+    kind !== "run-artifact" &&
+    kind !== "pubsub-run" &&
+    kind !== "pubsub-storage" &&
+    kind !== "pubsub-bigquery" &&
     kind !== "sql-vpc"
   ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
@@ -454,6 +614,22 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.internet === "string"
           ? patterns.internet
           : DEFAULT_NAMING_PATTERNS.internet,
+      run:
+        typeof patterns.run === "string"
+          ? patterns.run
+          : DEFAULT_NAMING_PATTERNS.run,
+      pubsub:
+        typeof patterns.pubsub === "string"
+          ? patterns.pubsub
+          : DEFAULT_NAMING_PATTERNS.pubsub,
+      bigquery:
+        typeof patterns.bigquery === "string"
+          ? patterns.bigquery
+          : DEFAULT_NAMING_PATTERNS.bigquery,
+      zone:
+        typeof patterns.zone === "string"
+          ? patterns.zone
+          : DEFAULT_NAMING_PATTERNS.zone,
     },
   };
 }
@@ -527,7 +703,9 @@ export function sanitizeDocumentEdges(
 export function normalizeLoadedDocument(
   input: DiagramDocument | LegacyDiagramDocument,
 ): DiagramDocument {
-  const nodes = input.nodes.map((node) => structuredClone(node));
+  const nodes = assignDefaultZIndices(
+    input.nodes.map((node) => structuredClone(node)),
+  );
   assertUniqueNodeIds(nodes);
 
   const clonedEdges = input.edges.map((edge) => structuredClone(edge));
@@ -605,7 +783,10 @@ function namingMetadataEqual(
     a.patterns.gke === b.patterns.gke &&
     a.patterns.nat === b.patterns.nat &&
     a.patterns.artifact === b.patterns.artifact &&
-    a.patterns.internet === b.patterns.internet
+    a.patterns.internet === b.patterns.internet &&
+    a.patterns.run === b.patterns.run &&
+    a.patterns.pubsub === b.patterns.pubsub &&
+    a.patterns.bigquery === b.patterns.bigquery
   );
 }
 

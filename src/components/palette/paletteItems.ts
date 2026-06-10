@@ -12,11 +12,13 @@ export const PALETTE_DRAG_MIME = "application/diagloud.resource";
  * @see https://cloud.google.com/docs/product-list
  */
 export type PaletteCategoryId =
+  | "organization"
   | "networking"
   | "compute"
   | "storage"
   | "databases"
-  | "devtools";
+  | "devtools"
+  | "integration";
 
 export type PaletteCategoryConfig = {
   id: PaletteCategoryId;
@@ -32,12 +34,14 @@ export type PaletteItemConfig = {
   icon: string;
 };
 
-/** Ordem do painel lateral do console: Networking → Compute → Storage → Databases → Developer tools. */
+/** Ordem do painel lateral do console. */
 export const PALETTE_CATEGORIES: PaletteCategoryConfig[] = [
+  { id: "organization", label: "Organização (Diagrama)" },
   { id: "networking", label: "Rede (Networking)" },
   { id: "compute", label: "Computação (Compute)" },
   { id: "storage", label: "Armazenamento (Storage)" },
   { id: "databases", label: "Bancos de dados (Databases)" },
+  { id: "integration", label: "Integração (Integration)" },
   { id: "devtools", label: "Ferramentas (Developer tools)" },
 ];
 
@@ -51,11 +55,22 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "gke" ||
     value === "nat" ||
     value === "artifact" ||
-    value === "internet"
+    value === "internet" ||
+    value === "run" ||
+    value === "pubsub" ||
+    value === "bigquery" ||
+    value === "zone"
   );
 }
 
 export const PALETTE_ITEMS: PaletteItemConfig[] = [
+  {
+    kind: "zone",
+    category: "organization",
+    label: GCP_RESOURCE_LABELS.zone,
+    description: "Projeto, área VPC ou perímetro",
+    icon: GCP_RESOURCE_ICONS.zone,
+  },
   {
     kind: "vpc",
     category: "networking",
@@ -99,6 +114,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.gke,
   },
   {
+    kind: "run",
+    category: "compute",
+    label: GCP_RESOURCE_LABELS.run,
+    description: "Contêineres serverless gerenciados",
+    icon: GCP_RESOURCE_ICONS.run,
+  },
+  {
     kind: "storage",
     category: "storage",
     label: GCP_RESOURCE_LABELS.storage,
@@ -111,6 +133,20 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.sql,
     description: "Banco gerenciado (MySQL / PostgreSQL)",
     icon: GCP_RESOURCE_ICONS.sql,
+  },
+  {
+    kind: "bigquery",
+    category: "databases",
+    label: GCP_RESOURCE_LABELS.bigquery,
+    description: "Data warehouse analítico",
+    icon: GCP_RESOURCE_ICONS.bigquery,
+  },
+  {
+    kind: "pubsub",
+    category: "integration",
+    label: GCP_RESOURCE_LABELS.pubsub,
+    description: "Mensageria assíncrona (tópicos)",
+    icon: GCP_RESOURCE_ICONS.pubsub,
   },
   {
     kind: "artifact",

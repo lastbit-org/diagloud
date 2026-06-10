@@ -22,6 +22,7 @@ import { useInvalidConnectionFeedback } from "../../hooks/useInvalidConnectionFe
 import { useDiagramValidation } from "../../hooks/useDiagramValidation";
 import { validateConnection } from "../../model/connections";
 import { useDiagramStore } from "../../store/diagramStore";
+import { sortNodesByZIndex } from "../../lib/nodeLayers";
 import { toFlowEdge, toFlowNode } from "./adapters";
 import { ConnectionFeedback } from "./ConnectionFeedback";
 import { CustomConnectionLine } from "./CustomConnectionLine";
@@ -35,6 +36,9 @@ export function DiagramCanvas() {
   const addNode = useDiagramStore((state) => state.addNode);
   const addEdge = useDiagramStore((state) => state.addEdge);
   const updateNodePosition = useDiagramStore((state) => state.updateNodePosition);
+  const updateNodeDimensions = useDiagramStore(
+    (state) => state.updateNodeDimensions,
+  );
   const removeNode = useDiagramStore((state) => state.removeNode);
   const removeEdge = useDiagramStore((state) => state.removeEdge);
   const selectedNodeId = useDiagramStore((state) => state.selectedNodeId);
@@ -59,7 +63,10 @@ export function DiagramCanvas() {
   const { issues } = useDiagramValidation();
 
   const flowNodes = useMemo(
-    () => nodes.map((node) => toFlowNode(node, node.id === selectedNodeId, issues)),
+    () =>
+      sortNodesByZIndex(nodes).map((node) =>
+        toFlowNode(node, node.id === selectedNodeId, issues),
+      ),
     [nodes, selectedNodeId, issues],
   );
   const flowEdges = useMemo(() => {
@@ -74,9 +81,21 @@ export function DiagramCanvas() {
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
+      const diagramNodes = useDiagramStore.getState().nodes;
+
       for (const change of changes) {
         if (change.type === "position" && change.position) {
           updateNodePosition(change.id, change.position);
+        }
+        if (change.type === "dimensions" && change.dimensions) {
+          const diagramNode = diagramNodes.find((node) => node.id === change.id);
+          if (diagramNode?.kind !== "zone") continue;
+
+          updateNodeDimensions(
+            change.id,
+            Math.round(change.dimensions.width),
+            Math.round(change.dimensions.height),
+          );
         }
         if (change.type === "select" && change.selected) {
           selectNode(change.id);
@@ -86,7 +105,7 @@ export function DiagramCanvas() {
         }
       }
     },
-    [removeNode, selectNode, updateNodePosition],
+    [removeNode, selectNode, updateNodeDimensions, updateNodePosition],
   );
 
   const onEdgesChange = useCallback(
@@ -226,6 +245,8 @@ export function DiagramCanvas() {
         nodesConnectable
         nodesFocusable
         edgesFocusable
+        zIndexMode="manual"
+        elevateNodesOnSelect={false}
         fitView
         fitViewOptions={{ padding: 0.2 }}
         panOnDrag

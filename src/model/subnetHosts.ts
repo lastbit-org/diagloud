@@ -14,10 +14,17 @@ function getGkeIdsOnSubnet(subnetId: string, edges: DiagramEdge[]): string[] {
     .map((edge) => edge.source);
 }
 
+function getRunIdsOnSubnet(subnetId: string, edges: DiagramEdge[]): string[] {
+  return edges
+    .filter((edge) => edge.kind === "run-subnet" && edge.target === subnetId)
+    .map((edge) => edge.source);
+}
+
 export type SubnetHostCounts = {
   vm: number;
   sql: number;
   gke: number;
+  run: number;
 };
 
 export function countSubnetAttachedHosts(
@@ -28,11 +35,12 @@ export function countSubnetAttachedHosts(
     vm: getVmIdsOnSubnet(subnetId, edges).length,
     sql: getSqlIdsOnSubnet(subnetId, edges).length,
     gke: getGkeIdsOnSubnet(subnetId, edges).length,
+    run: getRunIdsOnSubnet(subnetId, edges).length,
   };
 }
 
 export function totalSubnetAttachedHosts(counts: SubnetHostCounts): number {
-  return counts.vm + counts.sql + counts.gke;
+  return counts.vm + counts.sql + counts.gke + counts.run;
 }
 
 /** Há IP disponível na sub-rede para mais um recurso (VM, SQL ou GKE). */
@@ -57,4 +65,9 @@ export function sqlHostIndexOffset(subnetId: string, edges: DiagramEdge[]): numb
 export function gkeHostIndexOffset(subnetId: string, edges: DiagramEdge[]): number {
   const counts = countSubnetAttachedHosts(subnetId, edges);
   return counts.vm + counts.sql;
+}
+
+export function runHostIndexOffset(subnetId: string, edges: DiagramEdge[]): number {
+  const counts = countSubnetAttachedHosts(subnetId, edges);
+  return counts.vm + counts.sql + counts.gke;
 }

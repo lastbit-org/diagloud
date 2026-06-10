@@ -12,8 +12,11 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "nat",
   "vm",
   "gke",
+  "run",
   "storage",
   "sql",
+  "bigquery",
+  "pubsub",
   "artifact",
 ];
 

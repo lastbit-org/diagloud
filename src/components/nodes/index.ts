@@ -1,10 +1,15 @@
 export type { GcpNodeData } from "./BaseNode";
 export { ArtifactNode } from "./ArtifactNode";
+export { BigqueryNode } from "./BigqueryNode";
 export { GkeNode } from "./GkeNode";
 export { InternetNode } from "./InternetNode";
 export { NatNode } from "./NatNode";
+export { PubsubNode } from "./PubsubNode";
+export { RunNode } from "./RunNode";
 export { SqlNode } from "./SqlNode";
 export { StorageNode } from "./StorageNode";
 export { SubnetNode } from "./SubnetNode";
 export { VmNode } from "./VmNode";
 export { VpcNode } from "./VpcNode";
+export type { ZoneNodeData } from "./ZoneNode";
+export { ZONE_PURPOSE_LABELS, ZoneNode } from "./ZoneNode";

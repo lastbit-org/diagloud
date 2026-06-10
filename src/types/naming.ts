@@ -17,6 +17,10 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   nat: "nat-AREA-AMBIENTE",
   artifact: "gar-AREA-AMBIENTE",
   internet: "Internet",
+  run: "run-AREA-AMBIENTE",
+  pubsub: "topic-AREA-AMBIENTE",
+  bigquery: "bq-AREA-AMBIENTE",
+  zone: "zona-AREA-AMBIENTE",
 };
 
 export const NAMING_TOKEN_HINTS = [

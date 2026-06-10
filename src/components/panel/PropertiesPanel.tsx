@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { maxVmsForCidr } from "../../lib/cidr";
+import { resolveNodeZIndex } from "../../lib/nodeLayers";
+import { ZONE_COLOR_OPTIONS, type ZoneColorId } from "../../lib/zoneColors";
+import { ZONE_PURPOSE_LABELS } from "../nodes";
 import { useSelectedNode } from "../../hooks/useSelectedNode";
 import {
   countVmsOnSubnet,
@@ -11,10 +14,12 @@ import { useDiagramStore } from "../../store/diagramStore";
 import type {
   ArtifactFormat,
   DiagramNode,
+  RunAccessMode,
   SqlAccessMode,
   SqlEngine,
   StorageAccessMode,
   StorageClass,
+  ZonePurpose,
 } from "../../types";
 import "./properties.css";
 
@@ -205,6 +210,8 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
   const nodes = useDiagramStore((s) => s.nodes);
   const edges = useDiagramStore((s) => s.edges);
   const updateNodeData = useDiagramStore((s) => s.updateNodeData);
+  const bringNodeToFront = useDiagramStore((s) => s.bringNodeToFront);
+  const sendNodeToBack = useDiagramStore((s) => s.sendNodeToBack);
   const selectNode = useDiagramStore((s) => s.selectNode);
 
   const allSubnets = nodes.filter(
@@ -214,6 +221,34 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
   const content = (
     <>
       <h2 className="properties-panel__title">Propriedades</h2>
+
+      {selectedNode && (
+        <div className="properties-field properties-layer-actions">
+          <span className="properties-field__label">Camadas</span>
+          <div className="properties-layer-actions__buttons">
+            <button
+              type="button"
+              className="properties-layer-actions__button"
+              onClick={() => bringNodeToFront(selectedNode.id)}
+            >
+              Trazer para frente
+            </button>
+            <button
+              type="button"
+              className="properties-layer-actions__button"
+              onClick={() => sendNodeToBack(selectedNode.id)}
+            >
+              Enviar para trás
+            </button>
+          </div>
+          <span className="properties-field__hint">
+            Ordem no diagrama: {resolveNodeZIndex(selectedNode)}
+            {selectedNode.kind === "zone"
+              ? " — zonas costumam ficar atrás dos recursos."
+              : ""}
+          </span>
+        </div>
+      )}
 
       {!selectedNode && (
         <>
@@ -545,6 +580,151 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "run" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="run-name">Nome</label>
+            <input
+              id="run-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="run-access">Acesso</label>
+            <select
+              id="run-access"
+              value={selectedNode.data.accessMode}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  accessMode: e.target.value as RunAccessMode,
+                })
+              }
+            >
+              <option value="public">Público (URL)</option>
+              <option value="vpc">VPC connector (sub-rede)</option>
+            </select>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="run-cpu">CPU</label>
+            <input
+              id="run-cpu"
+              value={selectedNode.data.cpu}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { cpu: e.target.value })
+              }
+              placeholder="1"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="run-memory">Memória</label>
+            <input
+              id="run-memory"
+              value={selectedNode.data.memory}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { memory: e.target.value })
+              }
+              placeholder="512Mi"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="run-min">Instâncias mínimas</label>
+            <input
+              id="run-min"
+              type="number"
+              min={0}
+              value={selectedNode.data.minInstances}
+              onChange={(e) => {
+                const minInstances = Number.parseInt(e.target.value, 10);
+                if (minInstances >= 0) {
+                  updateNodeData(selectedNode.id, { minInstances });
+                }
+              }}
+            />
+          </div>
+          {selectedNode.data.accessMode === "vpc" && (
+            <>
+              <div className="properties-field">
+                <label htmlFor="run-region">Região</label>
+                <input
+                  id="run-region"
+                  value={selectedNode.data.region ?? "—"}
+                  readOnly
+                  aria-readonly
+                />
+              </div>
+              <div className="properties-field">
+                <label htmlFor="run-ip">IP (VPC connector)</label>
+                <input
+                  id="run-ip"
+                  value={selectedNode.data.internalIp ?? "—"}
+                  readOnly
+                  aria-readonly
+                />
+                <span className="properties-field__hint">
+                  Atribuído ao ligar à sub-rede (após VMs, SQL e GKE).
+                </span>
+              </div>
+            </>
+          )}
+          <RunSubnetInfo run={selectedNode} edges={edges} nodes={nodes} />
+          <RunArtifactInfo run={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
+      {selectedNode?.kind === "pubsub" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="pubsub-name">Nome do tópico</label>
+            <input
+              id="pubsub-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <PubsubDestinationsInfo
+            pubsub={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "bigquery" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="bigquery-name">Dataset</label>
+            <input
+              id="bigquery-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="bigquery-location">Localização</label>
+            <input
+              id="bigquery-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1 ou US"
+            />
+          </div>
+          <BigqueryPubsubInfo
+            bigquery={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "nat" && (
         <>
           <div className="properties-field">
@@ -633,6 +813,74 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           <InternetNatInfo internet={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
+
+      {selectedNode?.kind === "zone" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="zone-name">Nome</label>
+            <input
+              id="zone-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+              placeholder={ZONE_PURPOSE_LABELS[selectedNode.data.purpose]}
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="zone-purpose">Tipo</label>
+            <select
+              id="zone-purpose"
+              value={selectedNode.data.purpose}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  purpose: e.target.value as ZonePurpose,
+                })
+              }
+            >
+              <option value="project">Projeto</option>
+              <option value="vpc-area">Área VPC</option>
+              <option value="perimeter">Perímetro</option>
+            </select>
+          </div>
+          <div className="properties-field">
+            <span className="properties-field__label">Cor de fundo</span>
+            <div className="zone-color-picker" role="radiogroup" aria-label="Cor de fundo">
+              {ZONE_COLOR_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`zone-color-picker__swatch zone-color-picker__swatch--${option.id}${
+                    selectedNode.data.colorId === option.id
+                      ? " zone-color-picker__swatch--selected"
+                      : ""
+                  }`}
+                  role="radio"
+                  aria-checked={selectedNode.data.colorId === option.id}
+                  aria-label={option.label}
+                  title={option.label}
+                  onClick={() =>
+                    updateNodeData(selectedNode.id, {
+                      colorId: option.id as ZoneColorId,
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </div>
+          <p className="properties-field__hint">
+            Arraste os cantos para redimensionar. A zona fica atrás dos recursos e
+            não aceita conexões.
+          </p>
+          <dl className="properties-stats">
+            <dt>Tamanho</dt>
+            <dd>
+              {Math.round(selectedNode.data.width)} ×{" "}
+              {Math.round(selectedNode.data.height)} px
+            </dd>
+          </dl>
+        </>
+      )}
     </>
   );
 
@@ -644,6 +892,160 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
     <aside className="properties-panel" aria-label="Propriedades">
       {content}
     </aside>
+  );
+}
+
+function RunSubnetInfo({
+  run,
+  edges,
+  nodes,
+}: {
+  run: Extract<DiagramNode, { kind: "run" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  if (run.data.accessMode === "public") {
+    return (
+      <p className="properties-field__hint">
+        Acesso por URL pública — não exige ligação à sub-rede.
+      </p>
+    );
+  }
+  const edge = edges.find(
+    (e) => e.kind === "run-subnet" && e.source === run.id,
+  );
+  if (!edge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue este serviço à sub-rede para o VPC connector.
+      </p>
+    );
+  }
+  const subnet = nodes.find((n) => n.id === edge.target && n.kind === "subnet");
+  if (!subnet || subnet.kind !== "subnet") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Sub-rede</dt>
+      <dd>
+        {subnet.data.name} ({subnet.data.cidr})
+      </dd>
+    </dl>
+  );
+}
+
+function RunArtifactInfo({
+  run,
+  edges,
+  nodes,
+}: {
+  run: Extract<DiagramNode, { kind: "run" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "run-artifact" && e.source === run.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "artifact"))
+    .filter((n): n is Extract<DiagramNode, { kind: "artifact" }> => n != null);
+
+  if (linked.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue ao Artifact Registry para documentar pull de imagens.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>Artifact Registry</dt>
+      <dd>{linked.map((a) => a.data.name).join(", ")}</dd>
+    </dl>
+  );
+}
+
+function PubsubDestinationsInfo({
+  pubsub,
+  edges,
+  nodes,
+}: {
+  pubsub: Extract<DiagramNode, { kind: "pubsub" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const runs = edges
+    .filter((e) => e.kind === "pubsub-run" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const buckets = edges
+    .filter((e) => e.kind === "pubsub-storage" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const datasets = edges
+    .filter((e) => e.kind === "pubsub-bigquery" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "bigquery"))
+    .filter((n): n is Extract<DiagramNode, { kind: "bigquery" }> => n != null);
+
+  if (runs.length === 0 && buckets.length === 0 && datasets.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue a Cloud Run, Cloud Storage ou BigQuery para documentar
+        subscriptions e exportações.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {buckets.length > 0 ? (
+        <>
+          <dt>Cloud Storage</dt>
+          <dd>{buckets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {datasets.length > 0 ? (
+        <>
+          <dt>BigQuery</dt>
+          <dd>{datasets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function BigqueryPubsubInfo({
+  bigquery,
+  edges,
+  nodes,
+}: {
+  bigquery: Extract<DiagramNode, { kind: "bigquery" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "pubsub-bigquery" && e.target === bigquery.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+
+  if (linked.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue tópicos Pub/Sub para documentar streaming para este dataset.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>Pub/Sub (origem)</dt>
+      <dd>{linked.map((p) => p.data.name).join(", ")}</dd>
+    </dl>
   );
 }
 
@@ -823,11 +1225,15 @@ function ArtifactPullInfo({
     .filter((e) => e.kind === "vm-artifact" && e.target === artifact.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
     .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const runPulls = edges
+    .filter((e) => e.kind === "run-artifact" && e.target === artifact.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
 
-  if (gkePulls.length === 0 && vmPulls.length === 0) {
+  if (gkePulls.length === 0 && vmPulls.length === 0 && runPulls.length === 0) {
     return (
       <p className="properties-field__hint">
-        Ligue GKE ou VMs para documentar pull de imagens/pacotes.
+        Ligue GKE, Cloud Run ou VMs para documentar pull de imagens/pacotes.
       </p>
     );
   }
@@ -838,6 +1244,12 @@ function ArtifactPullInfo({
         <>
           <dt>Clusters GKE</dt>
           <dd>{gkePulls.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runPulls.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runPulls.map((r) => r.data.name).join(", ")}</dd>
         </>
       ) : null}
       {vmPulls.length > 0 ? (
@@ -889,12 +1301,20 @@ function StorageVmInfo({
   edges: ReturnType<typeof useDiagramStore.getState>["edges"];
   nodes: DiagramNode[];
 }) {
-  const linked = edges
+  const vms = edges
     .filter((e) => e.kind === "vm-storage" && e.target === storage.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
     .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const pubsubTopics = edges
+    .filter((e) => e.kind === "pubsub-storage" && e.target === storage.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
 
-  if (storage.data.accessMode === "public" && linked.length === 0) {
+  if (
+    storage.data.accessMode === "public" &&
+    vms.length === 0 &&
+    pubsubTopics.length === 0
+  ) {
     return (
       <p className="properties-field__hint">
         Acesso público ou via CLI/gsutil — não exige ligação a VM.
@@ -902,18 +1322,28 @@ function StorageVmInfo({
     );
   }
 
-  if (linked.length === 0) {
+  if (vms.length === 0 && pubsubTopics.length === 0) {
     return (
       <p className="properties-field__hint">
-        Ligue uma ou mais VMs a este bucket pelo handle lateral da VM.
+        Ligue VMs ou tópicos Pub/Sub a este bucket.
       </p>
     );
   }
 
   return (
     <dl className="properties-stats">
-      <dt>VMs com acesso</dt>
-      <dd>{linked.map((vm) => vm.data.name).join(", ")}</dd>
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs com acesso</dt>
+          <dd>{vms.map((vm) => vm.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {pubsubTopics.length > 0 ? (
+        <>
+          <dt>Pub/Sub (exportação)</dt>
+          <dd>{pubsubTopics.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }

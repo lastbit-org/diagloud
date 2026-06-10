@@ -23,6 +23,11 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Não há mais endereços de IP na sub-rede para o cluster GKE.",
   "nat-has-vpc": "Este Cloud NAT já está ligado a uma VPC.",
   "subnet-has-nat": "Esta sub-rede já está ligada a um Cloud NAT.",
+  "run-has-subnet": "Este serviço Cloud Run já está ligado a uma sub-rede.",
+  "run-not-vpc":
+    "Cloud Run em modo público não se liga à sub-rede. Altere o acesso para VPC connector.",
+  "subnet-run-capacity":
+    "Não há mais endereços de IP na sub-rede para Cloud Run (após VMs, SQL e GKE).",
 };
 
 export function connectionErrorMessage(reason: ConnectionInvalidReason): string {

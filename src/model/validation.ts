@@ -10,6 +10,7 @@ export type DiagramIssueCode =
   | "orphan-storage"
   | "orphan-sql-private"
   | "orphan-nat"
+  | "orphan-run-vpc"
   | "subnet-without-vpc"
   | "subnet-invalid-cidr"
   | "subnet-cidr-overlap";
@@ -56,6 +57,12 @@ export function collectDiagramIssues(
   const natIdsOnVpc = new Set(
     edges
       .filter((edge) => edge.kind === "nat-vpc")
+      .map((edge) => edge.source),
+  );
+
+  const runIdsOnSubnet = new Set(
+    edges
+      .filter((edge) => edge.kind === "run-subnet")
       .map((edge) => edge.source),
   );
 
@@ -110,6 +117,19 @@ export function collectDiagramIssues(
         severity: "warning",
         nodeId: node.id,
         message: `Cloud SQL "${node.data.name}" está em modo privado mas não está ligado a uma sub-rede.`,
+      });
+    }
+
+    if (
+      node.kind === "run" &&
+      node.data.accessMode === "vpc" &&
+      !runIdsOnSubnet.has(node.id)
+    ) {
+      issues.push({
+        code: "orphan-run-vpc",
+        severity: "warning",
+        nodeId: node.id,
+        message: `Cloud Run "${node.data.name}" está em modo VPC mas não está ligado a uma sub-rede.`,
       });
     }
   }

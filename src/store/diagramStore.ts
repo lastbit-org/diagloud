@@ -17,11 +17,20 @@ import {
   reassignSubnetGkeIps,
 } from "../model/gkeSubnet";
 import {
+  clearRunNetwork,
+  reassignSubnetRunIps,
+} from "../model/runSubnet";
+import {
   clearSqlPrivateNetwork,
   reassignSubnetSqlIps,
 } from "../model/sqlSubnet";
 import { resolveEdgeHandles } from "../lib/dynamicHandles";
 import { validateConnection } from "../model/connections";
+import {
+  bringNodeToFront,
+  defaultZIndexForKind,
+  sendNodeToBack,
+} from "../lib/nodeLayers";
 import { validateSubnetCidr } from "../model/subnet";
 import type {
   DiagramDocument,
@@ -39,6 +48,10 @@ import type {
   NatProps,
   ArtifactProps,
   InternetProps,
+  RunProps,
+  PubsubProps,
+  BigqueryProps,
+  ZoneProps,
 } from "../types";
 
 type DiagramState = {
@@ -69,8 +82,15 @@ type DiagramActions = {
       | Partial<GkeProps>
       | Partial<NatProps>
       | Partial<ArtifactProps>
-      | Partial<InternetProps>,
+      | Partial<InternetProps>
+      | Partial<RunProps>
+      | Partial<PubsubProps>
+      | Partial<BigqueryProps>
+      | Partial<ZoneProps>,
   ) => void;
+  updateNodeDimensions: (id: string, width: number, height: number) => void;
+  bringNodeToFront: (id: string) => void;
+  sendNodeToBack: (id: string) => void;
   setSubnetCidr: (id: string, cidr: string) => boolean;
   removeNode: (id: string) => void;
   addEdge: (edge: Omit<DiagramEdge, "id"> & { id?: string }) => void;
@@ -99,9 +119,13 @@ function buildNode<K extends ResourceKind>(
   data?: Partial<ResourcePropsByKind[K]>,
   context?: { existingSubnetCidrs: string[]; nodes: DiagramNode[] },
 ): DiagramNode {
-  const base = { id: createNodeId(kind), position };
   const existingSubnetCidrs = context?.existingSubnetCidrs ?? [];
   const nodes = context?.nodes ?? [];
+  const base = {
+    id: createNodeId(kind),
+    position,
+    zIndex: defaultZIndexForKind(kind, nodes),
+  };
   const resourceContext = { existingSubnetCidrs, nodes };
 
   switch (kind) {
@@ -182,6 +206,30 @@ function buildNode<K extends ResourceKind>(
         kind: "internet",
         data: { ...defaultResourceData("internet", resourceContext), ...data },
       };
+    case "run":
+      return {
+        ...base,
+        kind: "run",
+        data: { ...defaultResourceData("run", resourceContext), ...data },
+      };
+    case "pubsub":
+      return {
+        ...base,
+        kind: "pubsub",
+        data: { ...defaultResourceData("pubsub", resourceContext), ...data },
+      };
+    case "bigquery":
+      return {
+        ...base,
+        kind: "bigquery",
+        data: { ...defaultResourceData("bigquery", resourceContext), ...data },
+      };
+    case "zone":
+      return {
+        ...base,
+        kind: "zone",
+        data: { ...defaultResourceData("zone", resourceContext), ...data },
+      };
   }
 }
 
@@ -196,7 +244,11 @@ function mergeNodeData(
     | Partial<GkeProps>
     | Partial<NatProps>
     | Partial<ArtifactProps>
-    | Partial<InternetProps>,
+    | Partial<InternetProps>
+    | Partial<RunProps>
+    | Partial<PubsubProps>
+    | Partial<BigqueryProps>
+    | Partial<ZoneProps>,
 ): DiagramNode {
   switch (node.kind) {
     case "vpc":
@@ -244,6 +296,26 @@ function mergeNodeData(
         ...node,
         data: { ...node.data, ...(patch as Partial<InternetProps>) },
       };
+    case "run":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<RunProps>) },
+      };
+    case "pubsub":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<PubsubProps>) },
+      };
+    case "bigquery":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<BigqueryProps>) },
+      };
+    case "zone":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<ZoneProps>) },
+      };
   }
 }
 
@@ -255,6 +327,7 @@ function reassignSubnetHostIps(
   let next = reassignSubnetVmIps(subnetId, nodes, edges);
   next = reassignSubnetSqlIps(subnetId, next, edges);
   next = reassignSubnetGkeIps(subnetId, next, edges);
+  next = reassignSubnetRunIps(subnetId, next, edges);
   return next;
 }
 
@@ -275,11 +348,64 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   },
 
   updateNodePosition: (id, position) => {
+    set((state) => {
+      const node = state.nodes.find((n) => n.id === id);
+      if (
+        !node ||
+        (node.position.x === position.x && node.position.y === position.y)
+      ) {
+        return state;
+      }
+
+      return {
+        nodes: state.nodes.map((current) =>
+          current.id === id ? { ...current, position } : current,
+        ),
+      };
+    });
+  },
+
+  bringNodeToFront: (id) => {
     set((state) => ({
-      nodes: state.nodes.map((node) =>
-        node.id === id ? { ...node, position } : node,
-      ),
+      nodes: bringNodeToFront(state.nodes, id),
     }));
+  },
+
+  sendNodeToBack: (id) => {
+    set((state) => ({
+      nodes: sendNodeToBack(state.nodes, id),
+    }));
+  },
+
+  updateNodeDimensions: (id, width, height) => {
+    const nextWidth = Math.max(120, width);
+    const nextHeight = Math.max(80, height);
+
+    set((state) => {
+      const node = state.nodes.find((n) => n.id === id);
+      if (
+        !node ||
+        node.kind !== "zone" ||
+        (node.data.width === nextWidth && node.data.height === nextHeight)
+      ) {
+        return state;
+      }
+
+      return {
+        nodes: state.nodes.map((current) =>
+          current.id === id && current.kind === "zone"
+            ? {
+                ...current,
+                data: {
+                  ...current.data,
+                  width: nextWidth,
+                  height: nextHeight,
+                },
+              }
+            : current,
+        ),
+      };
+    });
   },
 
   updateNodeData: (id, data) => {
@@ -316,6 +442,28 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         }
       }
 
+      if (updated?.kind === "run" && "accessMode" in data && data.accessMode === "public") {
+        nodes = clearRunNetwork(id, nodes);
+        const subnetEdge = edges.find(
+          (e) => e.kind === "run-subnet" && e.source === id,
+        );
+        edges = edges.filter(
+          (e) => !(e.kind === "run-subnet" && e.source === id),
+        );
+        if (subnetEdge) {
+          nodes = reassignSubnetHostIps(subnetEdge.target, nodes, edges);
+        }
+      }
+
+      if (updated?.kind === "run" && "accessMode" in data && data.accessMode === "vpc") {
+        const subnetEdge = edges.find(
+          (e) => e.kind === "run-subnet" && e.source === id,
+        );
+        if (subnetEdge) {
+          nodes = reassignSubnetRunIps(subnetEdge.target, nodes, edges);
+        }
+      }
+
       return { nodes, edges };
     });
   },
@@ -348,7 +496,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         if (
           (edge.kind === "vm-subnet" ||
             edge.kind === "sql-subnet" ||
-            edge.kind === "gke-subnet") &&
+            edge.kind === "gke-subnet" ||
+            edge.kind === "run-subnet") &&
           (edge.source === id || edge.target === id)
         ) {
           affectedSubnetIds.add(edge.target);
@@ -405,7 +554,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       if (
         next.kind === "vm-subnet" ||
         next.kind === "sql-subnet" ||
-        next.kind === "gke-subnet"
+        next.kind === "gke-subnet" ||
+        next.kind === "run-subnet"
       ) {
         if (next.kind === "vm-subnet") {
           nodes = assignIpToVm(next.source, next.target, nodes, edges);
@@ -437,6 +587,11 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
       if (removed?.kind === "gke-subnet") {
         nodes = clearGkeNetwork(removed.source, nodes);
+        nodes = reassignSubnetHostIps(removed.target, nodes, edges);
+      }
+
+      if (removed?.kind === "run-subnet") {
+        nodes = clearRunNetwork(removed.source, nodes);
         nodes = reassignSubnetHostIps(removed.target, nodes, edges);
       }
 
