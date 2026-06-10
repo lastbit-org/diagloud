@@ -21,6 +21,7 @@ import {
   subnetCidrErrorMessage,
   validateSubnetCidr,
 } from "../../model/subnet";
+import { getNodeDisplayName } from "../../lib/naming";
 import { useDiagramStore } from "../../store/diagramStore";
 import type {
   ArtifactFormat,
@@ -1071,6 +1072,33 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "kms" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="kms-name">Key ring / chave</label>
+            <input
+              id="kms-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="kms-location">Localização</label>
+            <input
+              id="kms-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1 ou global"
+            />
+          </div>
+          <KmsConsumersInfo kms={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
       {selectedNode?.kind === "internet" && (
         <>
           <div className="properties-field">
@@ -1202,6 +1230,125 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
               {Math.round(selectedNode.data.height)} px
             </dd>
           </dl>
+        </>
+      )}
+
+      {selectedNode?.kind === "entra" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="entra-name">Tenant</label>
+            <input
+              id="entra-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <p className="properties-field__hint">
+            Diretório de identidades Microsoft. Ligue usuários de PC, on-premises
+            e cargas de trabalho GCP para documentar autenticação.
+          </p>
+          <EntraConnectionsInfo
+            entra={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "infocard" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="infocard-caption">Legenda</label>
+            <input
+              id="infocard-caption"
+              value={selectedNode.data.caption}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { caption: e.target.value })
+              }
+              placeholder="Texto menor em cima"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="infocard-title">Título</label>
+            <input
+              id="infocard-title"
+              value={selectedNode.data.title}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { title: e.target.value })
+              }
+              placeholder="Texto maior em destaque"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Cartão de identificação visual. Ligue a qualquer recurso para
+            anotar contexto (exceto zonas e outros infocards).
+          </p>
+          <InfocardLinksInfo
+            infocard={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "pcuser" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="pcuser-name">Usuário</label>
+            <input
+              id="pcuser-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <p className="properties-field__hint">
+            Representa um usuário em estação de trabalho. Ligue ao Entra ID,
+            on-premises, VMs ou Cloud Run.
+          </p>
+          <PcUserConnectionsInfo
+            pcuser={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "onprem" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="onprem-name">Nome</label>
+            <input
+              id="onprem-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="onprem-location">Localização</label>
+            <input
+              id="onprem-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="Datacenter / site"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Ambiente local ou datacenter corporativo. Ligue ao Entra ID, Cloud
+            VPN, Cloud Interconnect ou VMs.
+          </p>
+          <OnpremConnectionsInfo
+            onprem={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
         </>
       )}
     </>
@@ -2082,18 +2229,24 @@ function InterconnectVpcInfo({
     (e) =>
       e.kind === "internet-interconnect" && e.target === interconnect.id,
   );
+  const onpremEdge = edges.find(
+    (e) => e.kind === "onprem-interconnect" && e.target === interconnect.id,
+  );
 
-  if (!vpcEdge && !internetEdge) {
+  if (!vpcEdge && !internetEdge && !onpremEdge) {
     return (
       <p className="properties-field__hint">
-        Ligue à VPC (handle inferior) e à Internet (superior) para documentar
-        o link dedicado on-prem.
+        Ligue à VPC (handle inferior), à Internet (superior) ou ao on-premises
+        para documentar o link dedicado.
       </p>
     );
   }
 
   const vpc = vpcEdge
     ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+  const onprem = onpremEdge
+    ? nodes.find((n) => n.id === onpremEdge.source && n.kind === "onprem")
     : undefined;
 
   return (
@@ -2106,8 +2259,14 @@ function InterconnectVpcInfo({
       ) : null}
       {internetEdge ? (
         <>
-          <dt>Internet / on-prem</dt>
+          <dt>Internet</dt>
           <dd>Ligada</dd>
+        </>
+      ) : null}
+      {onprem && onprem.kind === "onprem" ? (
+        <>
+          <dt>On-premises</dt>
+          <dd>{onprem.data.name}</dd>
         </>
       ) : null}
     </dl>
@@ -2129,18 +2288,24 @@ function VpnVpcInfo({
   const internetEdge = edges.find(
     (e) => e.kind === "internet-vpn" && e.target === vpn.id,
   );
+  const onpremEdge = edges.find(
+    (e) => e.kind === "onprem-vpn" && e.target === vpn.id,
+  );
 
-  if (!vpcEdge && !internetEdge) {
+  if (!vpcEdge && !internetEdge && !onpremEdge) {
     return (
       <p className="properties-field__hint">
-        Ligue à VPC (handle inferior) e à Internet (superior) para documentar
-        conectividade híbrida.
+        Ligue à VPC (handle inferior), à Internet (superior) ou ao on-premises
+        para documentar conectividade híbrida.
       </p>
     );
   }
 
   const vpc = vpcEdge
     ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+  const onprem = onpremEdge
+    ? nodes.find((n) => n.id === onpremEdge.source && n.kind === "onprem")
     : undefined;
 
   return (
@@ -2153,8 +2318,14 @@ function VpnVpcInfo({
       ) : null}
       {internetEdge ? (
         <>
-          <dt>Internet / on-prem</dt>
+          <dt>Internet</dt>
           <dd>Ligada</dd>
+        </>
+      ) : null}
+      {onprem && onprem.kind === "onprem" ? (
+        <>
+          <dt>On-premises</dt>
+          <dd>{onprem.data.name}</dd>
         </>
       ) : null}
     </dl>
@@ -2217,6 +2388,120 @@ function NatVpcInfo({
         <>
           <dt>Internet</dt>
           <dd>Ligada</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function KmsConsumersInfo({
+  kms,
+  edges,
+  nodes,
+}: {
+  kms: Extract<DiagramNode, { kind: "kms" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vms = edges
+    .filter((e) => e.kind === "vm-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "gke-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "run-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const buckets = edges
+    .filter((e) => e.kind === "storage-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const sqlInstances = edges
+    .filter((e) => e.kind === "sql-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "sql"))
+    .filter((n): n is Extract<DiagramNode, { kind: "sql" }> => n != null);
+  const datasets = edges
+    .filter((e) => e.kind === "bigquery-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "bigquery"))
+    .filter((n): n is Extract<DiagramNode, { kind: "bigquery" }> => n != null);
+  const firestores = edges
+    .filter((e) => e.kind === "firestore-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "firestore"))
+    .filter((n): n is Extract<DiagramNode, { kind: "firestore" }> => n != null);
+  const spanners = edges
+    .filter((e) => e.kind === "spanner-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "spanner"))
+    .filter((n): n is Extract<DiagramNode, { kind: "spanner" }> => n != null);
+
+  if (
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    buckets.length === 0 &&
+    sqlInstances.length === 0 &&
+    datasets.length === 0 &&
+    firestores.length === 0 &&
+    spanners.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue VMs, GKE, Cloud Run, Storage, Cloud SQL, BigQuery, Firestore ou
+        Spanner para documentar uso de chaves (CMEK).
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {buckets.length > 0 ? (
+        <>
+          <dt>Cloud Storage</dt>
+          <dd>{buckets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {sqlInstances.length > 0 ? (
+        <>
+          <dt>Cloud SQL</dt>
+          <dd>{sqlInstances.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {datasets.length > 0 ? (
+        <>
+          <dt>BigQuery</dt>
+          <dd>{datasets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {firestores.length > 0 ? (
+        <>
+          <dt>Firestore</dt>
+          <dd>{firestores.map((f) => f.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {spanners.length > 0 ? (
+        <>
+          <dt>Cloud Spanner</dt>
+          <dd>{spanners.map((s) => s.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
@@ -2457,6 +2742,272 @@ function VmSubnetInfo({
       </dd>
       <dt>VMs na sub-rede</dt>
       <dd>{vmIds.length}</dd>
+    </dl>
+  );
+}
+
+function InfocardLinksInfo({
+  infocard,
+  edges,
+  nodes,
+}: {
+  infocard: Extract<DiagramNode, { kind: "infocard" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "infocard-link" && e.source === infocard.id)
+    .map((e) => nodes.find((n) => n.id === e.target))
+    .filter((n): n is DiagramNode => n != null);
+
+  if (linked.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue este cartão a outros recursos para identificar contexto no
+        diagrama.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>Recursos ligados</dt>
+      <dd>{linked.map((n) => getNodeDisplayName(n)).join(", ")}</dd>
+    </dl>
+  );
+}
+
+function EntraConnectionsInfo({
+  entra,
+  edges,
+  nodes,
+}: {
+  entra: Extract<DiagramNode, { kind: "entra" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const users = edges
+    .filter((e) => e.kind === "pcuser-entra" && e.target === entra.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pcuser"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pcuser" }> => n != null);
+  const onpremSites = edges
+    .filter((e) => e.kind === "onprem-entra" && e.target === entra.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "onprem"))
+    .filter((n): n is Extract<DiagramNode, { kind: "onprem" }> => n != null);
+  const vms = edges
+    .filter((e) => e.kind === "entra-vm" && e.source === entra.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "entra-run" && e.source === entra.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "entra-gke" && e.source === entra.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+
+  if (
+    users.length === 0 &&
+    onpremSites.length === 0 &&
+    vms.length === 0 &&
+    runs.length === 0 &&
+    clusters.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue usuários de PC, on-premises, VMs, Cloud Run ou GKE para
+        documentar identidade federada.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {users.length > 0 ? (
+        <>
+          <dt>Usuários (PC)</dt>
+          <dd>{users.map((u) => u.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {onpremSites.length > 0 ? (
+        <>
+          <dt>On-premises</dt>
+          <dd>{onpremSites.map((o) => o.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function PcUserConnectionsInfo({
+  pcuser,
+  edges,
+  nodes,
+}: {
+  pcuser: Extract<DiagramNode, { kind: "pcuser" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const entra = edges.find(
+    (e) => e.kind === "pcuser-entra" && e.source === pcuser.id,
+  );
+  const onprem = edges.find(
+    (e) => e.kind === "pcuser-onprem" && e.source === pcuser.id,
+  );
+  const vms = edges
+    .filter((e) => e.kind === "pcuser-vm" && e.source === pcuser.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "pcuser-run" && e.source === pcuser.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+
+  if (!entra && !onprem && vms.length === 0 && runs.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue ao Entra ID, on-premises, VMs ou Cloud Run para documentar
+        acesso do usuário.
+      </p>
+    );
+  }
+
+  const entraNode = entra
+    ? nodes.find((n) => n.id === entra.target && n.kind === "entra")
+    : undefined;
+  const onpremNode = onprem
+    ? nodes.find((n) => n.id === onprem.target && n.kind === "onprem")
+    : undefined;
+
+  return (
+    <dl className="properties-stats">
+      {entraNode && entraNode.kind === "entra" ? (
+        <>
+          <dt>Entra ID</dt>
+          <dd>{entraNode.data.name}</dd>
+        </>
+      ) : null}
+      {onpremNode && onpremNode.kind === "onprem" ? (
+        <>
+          <dt>On-premises</dt>
+          <dd>{onpremNode.data.name}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function OnpremConnectionsInfo({
+  onprem,
+  edges,
+  nodes,
+}: {
+  onprem: Extract<DiagramNode, { kind: "onprem" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const entra = edges.find(
+    (e) => e.kind === "onprem-entra" && e.source === onprem.id,
+  );
+  const vpn = edges.find(
+    (e) => e.kind === "onprem-vpn" && e.source === onprem.id,
+  );
+  const interconnect = edges.find(
+    (e) => e.kind === "onprem-interconnect" && e.source === onprem.id,
+  );
+  const vms = edges
+    .filter((e) => e.kind === "onprem-vm" && e.source === onprem.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const users = edges
+    .filter((e) => e.kind === "pcuser-onprem" && e.target === onprem.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pcuser"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pcuser" }> => n != null);
+
+  if (!entra && !vpn && !interconnect && vms.length === 0 && users.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue ao Entra ID, Cloud VPN, Cloud Interconnect, VMs ou usuários de
+        PC para documentar o ambiente local.
+      </p>
+    );
+  }
+
+  const entraNode = entra
+    ? nodes.find((n) => n.id === entra.target && n.kind === "entra")
+    : undefined;
+  const vpnNode = vpn
+    ? nodes.find((n) => n.id === vpn.target && n.kind === "vpn")
+    : undefined;
+  const interconnectNode = interconnect
+    ? nodes.find(
+        (n) => n.id === interconnect.target && n.kind === "interconnect",
+      )
+    : undefined;
+
+  return (
+    <dl className="properties-stats">
+      {entraNode && entraNode.kind === "entra" ? (
+        <>
+          <dt>Entra ID</dt>
+          <dd>{entraNode.data.name}</dd>
+        </>
+      ) : null}
+      {vpnNode && vpnNode.kind === "vpn" ? (
+        <>
+          <dt>Cloud VPN</dt>
+          <dd>{vpnNode.data.name}</dd>
+        </>
+      ) : null}
+      {interconnectNode && interconnectNode.kind === "interconnect" ? (
+        <>
+          <dt>Cloud Interconnect</dt>
+          <dd>{interconnectNode.data.name}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {users.length > 0 ? (
+        <>
+          <dt>Usuários (PC)</dt>
+          <dd>{users.map((u) => u.data.name).join(", ")}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }

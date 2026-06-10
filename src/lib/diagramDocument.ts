@@ -29,6 +29,7 @@ import {
   type InterconnectProps,
   type FirewallProps,
   type ArtifactProps,
+  type KmsProps,
   type InternetProps,
   type RunProps,
   type PubsubProps,
@@ -38,6 +39,10 @@ import {
   type FirestoreProps,
   type WorkbenchProps,
   type ZoneProps,
+  type EntraProps,
+  type InfocardProps,
+  type PcUserProps,
+  type OnpremProps,
 } from "../types";
 
 export const DIAGRAM_STORAGE_KEY = "diagloud-diagram";
@@ -224,6 +229,20 @@ function parseArtifactData(raw: unknown): ArtifactProps {
   };
 }
 
+function parseKmsData(raw: unknown): KmsProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Cloud KMS inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
+  };
+}
+
 function parsePeeringData(raw: unknown): PeeringProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de VPC Peering inválidos.");
@@ -389,6 +408,47 @@ function parseWorkbenchData(raw: unknown): WorkbenchProps {
     data.internalIp = raw.internalIp;
   }
   return data;
+}
+
+function parseEntraData(raw: unknown): EntraProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Microsoft Entra ID inválidos.");
+  }
+  return { name: raw.name };
+}
+
+function parseInfocardData(raw: unknown): InfocardProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.caption !== "string" ||
+    typeof raw.title !== "string"
+  ) {
+    throw new DiagramParseError("Dados de identificação inválidos.");
+  }
+  return {
+    caption: raw.caption,
+    title: raw.title,
+  };
+}
+
+function parsePcUserData(raw: unknown): PcUserProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de usuário inválidos.");
+  }
+  return { name: raw.name };
+}
+
+function parseOnpremData(raw: unknown): OnpremProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de on-premises inválidos.");
+  }
+  return {
+    name: raw.name,
+    location:
+      typeof raw.location === "string" && raw.location
+        ? raw.location
+        : "Datacenter local",
+  };
 }
 
 function parseZoneData(raw: unknown): ZoneProps {
@@ -595,6 +655,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseArtifactData(data),
       };
+    case "kms":
+      if (!nodeIdMatchesKind(nodeId, "kms")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud KMS.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "kms",
+        position: parsedPosition,
+        zIndex,
+        data: parseKmsData(data),
+      };
     case "internet":
       if (!nodeIdMatchesKind(nodeId, "internet")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Internet.`);
@@ -700,6 +773,58 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseZoneData(data),
       };
+    case "entra":
+      if (!nodeIdMatchesKind(nodeId, "entra")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Microsoft Entra ID.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "entra",
+        position: parsedPosition,
+        zIndex,
+        data: parseEntraData(data),
+      };
+    case "infocard":
+      if (!nodeIdMatchesKind(nodeId, "infocard")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Identificação.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "infocard",
+        position: parsedPosition,
+        zIndex,
+        data: parseInfocardData(data),
+      };
+    case "pcuser":
+      if (!nodeIdMatchesKind(nodeId, "pcuser")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Usuário (PC).`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "pcuser",
+        position: parsedPosition,
+        zIndex,
+        data: parsePcUserData(data),
+      };
+    case "onprem":
+      if (!nodeIdMatchesKind(nodeId, "onprem")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo On-premises.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "onprem",
+        position: parsedPosition,
+        zIndex,
+        data: parseOnpremData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -765,6 +890,26 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "storage-eventarc" &&
     kind !== "eventarc-run" &&
     kind !== "eventarc-gke" &&
+    kind !== "vm-kms" &&
+    kind !== "gke-kms" &&
+    kind !== "run-kms" &&
+    kind !== "storage-kms" &&
+    kind !== "sql-kms" &&
+    kind !== "bigquery-kms" &&
+    kind !== "firestore-kms" &&
+    kind !== "spanner-kms" &&
+    kind !== "pcuser-entra" &&
+    kind !== "pcuser-vm" &&
+    kind !== "pcuser-run" &&
+    kind !== "pcuser-onprem" &&
+    kind !== "entra-vm" &&
+    kind !== "entra-run" &&
+    kind !== "entra-gke" &&
+    kind !== "onprem-entra" &&
+    kind !== "onprem-vpn" &&
+    kind !== "onprem-interconnect" &&
+    kind !== "onprem-vm" &&
+    kind !== "infocard-link" &&
     kind !== "sql-vpc"
   ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
@@ -868,6 +1013,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.artifact === "string"
           ? patterns.artifact
           : DEFAULT_NAMING_PATTERNS.artifact,
+      kms:
+        typeof patterns.kms === "string"
+          ? patterns.kms
+          : DEFAULT_NAMING_PATTERNS.kms,
       internet:
         typeof patterns.internet === "string"
           ? patterns.internet
@@ -904,6 +1053,22 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.zone === "string"
           ? patterns.zone
           : DEFAULT_NAMING_PATTERNS.zone,
+      entra:
+        typeof patterns.entra === "string"
+          ? patterns.entra
+          : DEFAULT_NAMING_PATTERNS.entra,
+      infocard:
+        typeof patterns.infocard === "string"
+          ? patterns.infocard
+          : DEFAULT_NAMING_PATTERNS.infocard,
+      pcuser:
+        typeof patterns.pcuser === "string"
+          ? patterns.pcuser
+          : DEFAULT_NAMING_PATTERNS.pcuser,
+      onprem:
+        typeof patterns.onprem === "string"
+          ? patterns.onprem
+          : DEFAULT_NAMING_PATTERNS.onprem,
     },
   };
 }
@@ -1068,6 +1233,7 @@ function namingMetadataEqual(
     a.patterns.interconnect === b.patterns.interconnect &&
     a.patterns.firewall === b.patterns.firewall &&
     a.patterns.artifact === b.patterns.artifact &&
+    a.patterns.kms === b.patterns.kms &&
     a.patterns.internet === b.patterns.internet &&
     a.patterns.run === b.patterns.run &&
     a.patterns.pubsub === b.patterns.pubsub &&
@@ -1075,7 +1241,12 @@ function namingMetadataEqual(
     a.patterns.bigquery === b.patterns.bigquery &&
     a.patterns.spanner === b.patterns.spanner &&
     a.patterns.firestore === b.patterns.firestore &&
-    a.patterns.workbench === b.patterns.workbench
+    a.patterns.workbench === b.patterns.workbench &&
+    a.patterns.zone === b.patterns.zone &&
+    a.patterns.entra === b.patterns.entra &&
+    a.patterns.infocard === b.patterns.infocard &&
+    a.patterns.pcuser === b.patterns.pcuser &&
+    a.patterns.onprem === b.patterns.onprem
   );
 }
 

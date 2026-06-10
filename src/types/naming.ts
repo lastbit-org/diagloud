@@ -20,6 +20,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   interconnect: "ic-AREA-AMBIENTE",
   firewall: "fw-AREA-AMBIENTE",
   artifact: "gar-AREA-AMBIENTE",
+  kms: "kms-AREA-AMBIENTE",
   internet: "Internet",
   run: "run-AREA-AMBIENTE",
   pubsub: "topic-AREA-AMBIENTE",
@@ -29,6 +30,10 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   firestore: "fs-AREA-AMBIENTE",
   workbench: "wb-AREA-AMBIENTE",
   zone: "zona-AREA-AMBIENTE",
+  entra: "entra-AREA-AMBIENTE",
+  infocard: "info-AREA-AMBIENTE",
+  pcuser: "user-AREA-AMBIENTE",
+  onprem: "onprem-AREA-AMBIENTE",
 };
 
 export const NAMING_TOKEN_HINTS = [

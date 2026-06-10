@@ -1,5 +1,6 @@
 import type { ResourceKind } from "../types";
 import artifactIcon from "./google-cloud-legacy-icons/artifact_registry/artifact_registry.svg";
+import kmsIcon from "./google-cloud-legacy-icons/key_management_service/key_management_service.svg";
 import bigqueryIcon from "./google-cloud-legacy-icons/bigquery/bigquery.svg";
 import spannerIcon from "./google-cloud-legacy-icons/cloud_spanner/cloud_spanner.svg";
 import firestoreIcon from "./google-cloud-legacy-icons/firestore/firestore.svg";
@@ -20,6 +21,10 @@ import vpcIcon from "./google-cloud-legacy-icons/virtual_private_cloud/virtual_p
 import internetIcon from "./icons/internet.svg";
 import peeringIcon from "./icons/vpc-peering.svg";
 import zoneIcon from "./icons/zone.svg";
+import entraIcon from "./icons/entra.svg";
+import infocardIcon from "./icons/infocard.svg";
+import pcUserIcon from "./icons/pc-user.svg";
+import onpremIcon from "./icons/onprem.svg";
 
 /** Ícones oficiais GCP (legacy 24px). Sub-rede usa Cloud Network (sem ícone subnet no pacote). */
 export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
@@ -35,6 +40,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   interconnect: interconnectIcon,
   firewall: firewallIcon,
   artifact: artifactIcon,
+  kms: kmsIcon,
   internet: internetIcon,
   run: runIcon,
   pubsub: pubsubIcon,
@@ -44,6 +50,10 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   firestore: firestoreIcon,
   workbench: workbenchIcon,
   zone: zoneIcon,
+  entra: entraIcon,
+  infocard: infocardIcon,
+  pcuser: pcUserIcon,
+  onprem: onpremIcon,
 };
 
 export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
@@ -59,6 +69,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   interconnect: "Cloud Interconnect",
   firewall: "Firewall",
   artifact: "Artifact Registry",
+  kms: "Cloud KMS",
   internet: "Internet",
   run: "Cloud Run",
   pubsub: "Pub/Sub",
@@ -68,4 +79,8 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   firestore: "Firestore",
   workbench: "Vertex AI Workbench",
   zone: "Zona",
+  entra: "Microsoft Entra ID",
+  infocard: "Identificação",
+  pcuser: "Usuário (PC)",
+  onprem: "On-premises",
 };

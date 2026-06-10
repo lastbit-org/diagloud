@@ -14,6 +14,7 @@ export type ResourceKind =
   | "interconnect"
   | "firewall"
   | "artifact"
+  | "kms"
   | "internet"
   | "run"
   | "pubsub"
@@ -22,7 +23,11 @@ export type ResourceKind =
   | "spanner"
   | "firestore"
   | "workbench"
-  | "zone";
+  | "zone"
+  | "entra"
+  | "infocard"
+  | "pcuser"
+  | "onprem";
 
 export type RunAccessMode = "public" | "vpc";
 
@@ -121,6 +126,12 @@ export type ArtifactProps = {
   format: ArtifactFormat;
 };
 
+export type KmsProps = {
+  /** Nome do key ring ou chave. */
+  name: string;
+  location: string;
+};
+
 export type InternetProps = {
   name: string;
 };
@@ -184,6 +195,27 @@ export type ZoneProps = {
   height: number;
 };
 
+export type EntraProps = {
+  /** Nome do tenant. */
+  name: string;
+};
+
+export type InfocardProps = {
+  /** Texto menor (superior). */
+  caption: string;
+  /** Texto principal em destaque (inferior). */
+  title: string;
+};
+
+export type PcUserProps = {
+  name: string;
+};
+
+export type OnpremProps = {
+  name: string;
+  location: string;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
@@ -197,6 +229,7 @@ export type ResourcePropsByKind = {
   interconnect: InterconnectProps;
   firewall: FirewallProps;
   artifact: ArtifactProps;
+  kms: KmsProps;
   internet: InternetProps;
   run: RunProps;
   pubsub: PubsubProps;
@@ -206,4 +239,8 @@ export type ResourcePropsByKind = {
   firestore: FirestoreProps;
   workbench: WorkbenchProps;
   zone: ZoneProps;
+  entra: EntraProps;
+  infocard: InfocardProps;
+  pcuser: PcUserProps;
+  onprem: OnpremProps;
 };

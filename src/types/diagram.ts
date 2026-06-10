@@ -1,6 +1,7 @@
 import type { NamingPatternByKind } from "./naming";
 import type {
   ArtifactProps,
+  KmsProps,
   GkeProps,
   InternetProps,
   NatProps,
@@ -21,6 +22,10 @@ import type {
   VmProps,
   VpcProps,
   ZoneProps,
+  EntraProps,
+  InfocardProps,
+  PcUserProps,
+  OnpremProps,
 } from "./resources";
 
 export const DIAGRAM_DOCUMENT_VERSION = 1 as const;
@@ -48,6 +53,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "interconnect"; data: InterconnectProps })
   | (NodeBase & { kind: "firewall"; data: FirewallProps })
   | (NodeBase & { kind: "artifact"; data: ArtifactProps })
+  | (NodeBase & { kind: "kms"; data: KmsProps })
   | (NodeBase & { kind: "internet"; data: InternetProps })
   | (NodeBase & { kind: "run"; data: RunProps })
   | (NodeBase & { kind: "pubsub"; data: PubsubProps })
@@ -56,7 +62,11 @@ export type DiagramNode =
   | (NodeBase & { kind: "spanner"; data: SpannerProps })
   | (NodeBase & { kind: "firestore"; data: FirestoreProps })
   | (NodeBase & { kind: "workbench"; data: WorkbenchProps })
-  | (NodeBase & { kind: "zone"; data: ZoneProps });
+  | (NodeBase & { kind: "zone"; data: ZoneProps })
+  | (NodeBase & { kind: "entra"; data: EntraProps })
+  | (NodeBase & { kind: "infocard"; data: InfocardProps })
+  | (NodeBase & { kind: "pcuser"; data: PcUserProps })
+  | (NodeBase & { kind: "onprem"; data: OnpremProps });
 
 export type DiagramEdge = {
   id: string;
@@ -102,7 +112,27 @@ export type DiagramEdge = {
     | "pubsub-eventarc"
     | "storage-eventarc"
     | "eventarc-run"
-    | "eventarc-gke";
+    | "eventarc-gke"
+    | "vm-kms"
+    | "gke-kms"
+    | "run-kms"
+    | "storage-kms"
+    | "sql-kms"
+    | "bigquery-kms"
+    | "firestore-kms"
+    | "spanner-kms"
+    | "pcuser-entra"
+    | "pcuser-vm"
+    | "pcuser-run"
+    | "pcuser-onprem"
+    | "entra-vm"
+    | "entra-run"
+    | "entra-gke"
+    | "onprem-entra"
+    | "onprem-vpn"
+    | "onprem-interconnect"
+    | "onprem-vm"
+    | "infocard-link";
 };
 
 export type DiagramNamingMetadata = {

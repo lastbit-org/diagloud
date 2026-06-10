@@ -81,6 +81,12 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("internet", "interconnect")).toBe(
       "internet-interconnect",
     );
+    expect(getEdgeKind("vm", "kms")).toBe("vm-kms");
+    expect(getEdgeKind("storage", "kms")).toBe("storage-kms");
+    expect(getEdgeKind("sql", "kms")).toBe("sql-kms");
+    expect(getEdgeKind("bigquery", "kms")).toBe("bigquery-kms");
+    expect(getEdgeKind("firestore", "kms")).toBe("firestore-kms");
+    expect(getEdgeKind("spanner", "kms")).toBe("spanner-kms");
     expect(getEdgeKind("subnet", "nat")).toBe("subnet-nat");
     expect(getEdgeKind("gke", "artifact")).toBe("gke-artifact");
     expect(getEdgeKind("vm", "artifact")).toBe("vm-artifact");
@@ -104,6 +110,21 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("storage", "eventarc")).toBe("storage-eventarc");
     expect(getEdgeKind("eventarc", "run")).toBe("eventarc-run");
     expect(getEdgeKind("eventarc", "gke")).toBe("eventarc-gke");
+    expect(getEdgeKind("pcuser", "entra")).toBe("pcuser-entra");
+    expect(getEdgeKind("pcuser", "vm")).toBe("pcuser-vm");
+    expect(getEdgeKind("pcuser", "run")).toBe("pcuser-run");
+    expect(getEdgeKind("pcuser", "onprem")).toBe("pcuser-onprem");
+    expect(getEdgeKind("entra", "vm")).toBe("entra-vm");
+    expect(getEdgeKind("entra", "run")).toBe("entra-run");
+    expect(getEdgeKind("entra", "gke")).toBe("entra-gke");
+    expect(getEdgeKind("onprem", "entra")).toBe("onprem-entra");
+    expect(getEdgeKind("onprem", "vpn")).toBe("onprem-vpn");
+    expect(getEdgeKind("onprem", "interconnect")).toBe("onprem-interconnect");
+    expect(getEdgeKind("onprem", "vm")).toBe("onprem-vm");
+    expect(getEdgeKind("infocard", "vpc")).toBe("infocard-link");
+    expect(getEdgeKind("vm", "infocard")).toBe("infocard-link");
+    expect(getEdgeKind("infocard", "zone")).toBeNull();
+    expect(getEdgeKind("infocard", "infocard")).toBeNull();
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {
@@ -495,6 +516,44 @@ describe("validateConnection", () => {
       { nodes: [...nodes, pubsub], edges: [] },
     );
     expect(result).toMatchObject({ valid: true, edgeKind: "pubsub-storage" });
+  });
+
+  it("aceita VM → Cloud KMS", () => {
+    const kms: DiagramNode = {
+      id: "kms-1",
+      kind: "kms",
+      position: { x: 200, y: 0 },
+      data: { name: "kms-app", location: "southamerica-east1" },
+    };
+    const result = validateConnection(
+      {
+        source: vm.id,
+        target: kms.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: [...nodes, kms], edges: [] },
+    );
+    expect(result).toMatchObject({ valid: true, edgeKind: "vm-kms" });
+  });
+
+  it("aceita Cloud Storage → Cloud KMS", () => {
+    const kms: DiagramNode = {
+      id: "kms-1",
+      kind: "kms",
+      position: { x: 200, y: 0 },
+      data: { name: "kms-bucket", location: "southamerica-east1" },
+    };
+    const result = validateConnection(
+      {
+        source: storage.id,
+        target: kms.id,
+        sourceHandle: egress("right"),
+        targetHandle: ingress("left"),
+      },
+      { nodes: [...nodes, kms], edges: [] },
+    );
+    expect(result).toMatchObject({ valid: true, edgeKind: "storage-kms" });
   });
 
   it("aceita VM → Firestore", () => {

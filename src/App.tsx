@@ -9,6 +9,7 @@ import { useDiagramPersistence } from "./hooks/useDiagramPersistence";
 import { useSelectedNode } from "./hooks/useSelectedNode";
 import { useDiagramStore } from "./store/diagramStore";
 import { GCP_RESOURCE_LABELS } from "./assets/gcpIcons";
+import { getNodeDisplayName } from "./lib/naming";
 import "./App.css";
 
 function AppContent() {
@@ -17,7 +18,7 @@ function AppContent() {
   const selectedNode = useSelectedNode();
 
   const selectionLabel = selectedNode
-    ? `${GCP_RESOURCE_LABELS[selectedNode.kind]}: ${selectedNode.data.name}`
+    ? `${GCP_RESOURCE_LABELS[selectedNode.kind]}: ${getNodeDisplayName(selectedNode)}`
     : "Nenhum nó selecionado";
 
   return (

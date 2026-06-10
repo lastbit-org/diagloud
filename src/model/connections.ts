@@ -6,6 +6,8 @@ import { canAttachWorkbenchToSubnet } from "./workbenchSubnet";
 import { canAttachSqlToSubnet } from "./sqlSubnet";
 import { canAttachHostToSubnet } from "./subnetHosts";
 import { getSubnetNode } from "./subnet";
+import { resolveInfocardLinkKinds } from "../lib/infocardLinks";
+import { INFOCARD_LINK_EDGE_KIND } from "../lib/infocardLinks";
 import { EDGE_ENDPOINTS } from "../types";
 import type { DiagramEdge, DiagramNode, ResourceKind } from "../types";
 
@@ -51,6 +53,16 @@ export function canonicalizeEdgeEndpoints(
   const sourceNode = nodes.find((node) => node.id === edge.source);
   const targetNode = nodes.find((node) => node.id === edge.target);
   if (!sourceNode || !targetNode) {
+    return { source: edge.source, target: edge.target };
+  }
+
+  if (edge.kind === INFOCARD_LINK_EDGE_KIND) {
+    if (sourceNode.kind === "infocard") {
+      return { source: edge.source, target: edge.target };
+    }
+    if (targetNode.kind === "infocard") {
+      return { source: edge.target, target: edge.source };
+    }
     return { source: edge.source, target: edge.target };
   }
 
@@ -125,6 +137,10 @@ export function getEdgeKind(
   from: ResourceKind,
   to: ResourceKind,
 ): DiagramEdge["kind"] | null {
+  if (resolveInfocardLinkKinds(from, to)) {
+    return INFOCARD_LINK_EDGE_KIND;
+  }
+
   for (const [kind, endpoints] of Object.entries(EDGE_ENDPOINTS) as [
     DiagramEdge["kind"],
     (typeof EDGE_ENDPOINTS)[DiagramEdge["kind"]],
@@ -206,6 +222,17 @@ function normalizeConnectionDirection(
 ): { connection: ConnectionInput; edgeKind: DiagramEdge["kind"] } | null {
   let edgeKind = getEdgeKind(sourceNode.kind, targetNode.kind);
   if (edgeKind) {
+    if (edgeKind === INFOCARD_LINK_EDGE_KIND && targetNode.kind === "infocard") {
+      return {
+        edgeKind,
+        connection: {
+          source: connection.target,
+          target: connection.source,
+          sourceHandle: connection.targetHandle,
+          targetHandle: connection.sourceHandle,
+        },
+      };
+    }
     return { connection, edgeKind };
   }
 

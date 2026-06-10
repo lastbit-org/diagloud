@@ -18,6 +18,7 @@ import type {
   InterconnectProps,
   FirewallProps,
   ArtifactProps,
+  KmsProps,
   InternetProps,
   RunProps,
   PubsubProps,
@@ -27,6 +28,10 @@ import type {
   FirestoreProps,
   WorkbenchProps,
   ZoneProps,
+  EntraProps,
+  InfocardProps,
+  PcUserProps,
+  OnpremProps,
 } from "../types";
 
 export function defaultResourceData<K extends ResourceKind>(
@@ -108,6 +113,11 @@ export function defaultResourceData<K extends ResourceKind>(
         location: "southamerica-east1",
         format: "DOCKER",
       } as ArtifactProps as ResourcePropsByKind[K];
+    case "kms":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as KmsProps as ResourcePropsByKind[K];
     case "internet":
       return {
         name: name || "Internet",
@@ -159,6 +169,20 @@ export function defaultResourceData<K extends ResourceKind>(
         width: 320,
         height: 200,
       } as ZoneProps as ResourcePropsByKind[K];
+    case "entra":
+      return { name } as EntraProps as ResourcePropsByKind[K];
+    case "infocard":
+      return {
+        caption: "Legenda",
+        title: name,
+      } as InfocardProps as ResourcePropsByKind[K];
+    case "pcuser":
+      return { name } as PcUserProps as ResourcePropsByKind[K];
+    case "onprem":
+      return {
+        name,
+        location: "Datacenter local",
+      } as OnpremProps as ResourcePropsByKind[K];
   }
 }
 
@@ -189,6 +213,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `fw-${count}`;
     case "artifact":
       return `gar-${count}`;
+    case "kms":
+      return `kms-${count}`;
     case "internet":
       return "Internet";
     case "run":
@@ -207,5 +233,13 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `wb-${count}`;
     case "zone":
       return `zona-${count}`;
+    case "entra":
+      return `entra-${count}`;
+    case "infocard":
+      return `info-${count}`;
+    case "pcuser":
+      return `usuario-${count}`;
+    case "onprem":
+      return `onprem-${count}`;
   }
 }

@@ -1,6 +1,13 @@
 import type { NamingPatternByKind, NamingPlaceholders } from "../types/naming";
 import type { DiagramNode, ResourceKind } from "../types";
 
+export function getNodeDisplayName(node: DiagramNode): string {
+  if (node.kind === "infocard") {
+    return node.data.title.trim() || "Identificação";
+  }
+  return node.data.name;
+}
+
 function slugToken(value: string): string {
   return value
     .trim()
@@ -69,7 +76,9 @@ export function generateResourceName(
 
   const existingNames = nodes
     .filter((node) => node.kind === kind)
-    .map((node) => node.data.name);
+    .map((node) =>
+      node.kind === "infocard" ? node.data.title : node.data.name,
+    );
 
   const seq = nextSequenceFromPattern(pattern, placeholders, existingNames);
   if (seq) {
@@ -109,6 +118,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `fw-${count}`;
     case "artifact":
       return `gar-${count}`;
+    case "kms":
+      return `kms-${count}`;
     case "internet":
       return "Internet";
     case "run":
@@ -127,6 +138,14 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `wb-${count}`;
     case "zone":
       return `zona-${count}`;
+    case "entra":
+      return `entra-${count}`;
+    case "infocard":
+      return `info-${count}`;
+    case "pcuser":
+      return `usuario-${count}`;
+    case "onprem":
+      return `onprem-${count}`;
   }
 }
 

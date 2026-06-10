@@ -1,5 +1,6 @@
 import {
   ArtifactNode,
+  KmsNode,
   BigqueryNode,
   SpannerNode,
   FirestoreNode,
@@ -20,6 +21,10 @@ import {
   VmNode,
   VpcNode,
   ZoneNode,
+  InfocardNode,
+  EntraNode,
+  PcUserNode,
+  OnpremNode,
 } from "../nodes";
 
 export const nodeTypes = {
@@ -35,6 +40,7 @@ export const nodeTypes = {
   interconnect: InterconnectNode,
   firewall: FirewallNode,
   artifact: ArtifactNode,
+  kms: KmsNode,
   internet: InternetNode,
   run: RunNode,
   pubsub: PubsubNode,
@@ -44,4 +50,8 @@ export const nodeTypes = {
   firestore: FirestoreNode,
   workbench: WorkbenchNode,
   zone: ZoneNode,
+  infocard: InfocardNode,
+  entra: EntraNode,
+  pcuser: PcUserNode,
+  onprem: OnpremNode,
 };

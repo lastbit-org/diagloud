@@ -3,7 +3,7 @@ import { issueCountForNode, type DiagramIssue } from "../../model/validation";
 import { resolveEdgeHandles } from "../../lib/dynamicHandles";
 import type { DiagramEdge, DiagramNode } from "../../types";
 import { resolveNodeZIndex } from "../../lib/nodeLayers";
-import type { GcpNodeData, ZoneNodeData } from "../nodes";
+import type { GcpNodeData, InfocardNodeData, ZoneNodeData } from "../nodes";
 
 function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "zone") {
@@ -62,11 +62,25 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "internet") {
     return "Rede pública";
   }
-  if (node.kind === "bigquery" || node.kind === "firestore" || node.kind === "eventarc") {
+  if (
+    node.kind === "bigquery" ||
+    node.kind === "firestore" ||
+    node.kind === "eventarc" ||
+    node.kind === "kms"
+  ) {
     return node.data.location;
   }
   if (node.kind === "spanner") {
     return node.data.config;
+  }
+  if (node.kind === "onprem") {
+    return node.data.location;
+  }
+  if (node.kind === "entra") {
+    return "Identity";
+  }
+  if (node.kind === "pcuser") {
+    return "Usuário";
   }
   return undefined;
 }
@@ -75,7 +89,7 @@ export function toFlowNode(
   node: DiagramNode,
   selected = false,
   issues: DiagramIssue[] = [],
-): Node<GcpNodeData | ZoneNodeData> {
+): Node<GcpNodeData | ZoneNodeData | InfocardNodeData> {
   if (node.kind === "zone") {
     return {
       id: node.id,
@@ -96,6 +110,23 @@ export function toFlowNode(
       style: {
         width: node.data.width,
         height: node.data.height,
+      },
+    };
+  }
+
+  if (node.kind === "infocard") {
+    const issueCount = issueCountForNode(node.id, issues);
+    return {
+      id: node.id,
+      type: "infocard",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      data: {
+        kind: "infocard",
+        caption: node.data.caption,
+        title: node.data.title,
+        issueCount: issueCount > 0 ? issueCount : undefined,
       },
     };
   }

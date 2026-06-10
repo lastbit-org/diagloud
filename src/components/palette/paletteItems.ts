@@ -19,7 +19,8 @@ export type PaletteCategoryId =
   | "databases"
   | "ai"
   | "devtools"
-  | "integration";
+  | "integration"
+  | "hybrid";
 
 export type PaletteCategoryConfig = {
   id: PaletteCategoryId;
@@ -44,6 +45,7 @@ export const PALETTE_CATEGORIES: PaletteCategoryConfig[] = [
   { id: "databases", label: "Bancos de dados (Databases)" },
   { id: "ai", label: "IA (Artificial intelligence)" },
   { id: "integration", label: "Integração (Integration)" },
+  { id: "hybrid", label: "Identidade e híbrido (Hybrid)" },
   { id: "devtools", label: "Ferramentas (Developer tools)" },
 ];
 
@@ -61,6 +63,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "interconnect" ||
     value === "firewall" ||
     value === "artifact" ||
+    value === "kms" ||
     value === "internet" ||
     value === "run" ||
     value === "pubsub" ||
@@ -69,7 +72,11 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "spanner" ||
     value === "firestore" ||
     value === "workbench" ||
-    value === "zone"
+    value === "zone" ||
+    value === "entra" ||
+    value === "infocard" ||
+    value === "pcuser" ||
+    value === "onprem"
   );
 }
 
@@ -80,6 +87,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.zone,
     description: "Agrupamento visual de recursos",
     icon: GCP_RESOURCE_ICONS.zone,
+  },
+  {
+    kind: "infocard",
+    category: "organization",
+    label: GCP_RESOURCE_LABELS.infocard,
+    description: "Legenda curta e título em destaque",
+    icon: GCP_RESOURCE_ICONS.infocard,
   },
   {
     kind: "vpc",
@@ -220,6 +234,34 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.artifact,
     description: "Repositório de imagens e pacotes",
     icon: GCP_RESOURCE_ICONS.artifact,
+  },
+  {
+    kind: "kms",
+    category: "devtools",
+    label: GCP_RESOURCE_LABELS.kms,
+    description: "Chaves de criptografia gerenciadas (CMEK)",
+    icon: GCP_RESOURCE_ICONS.kms,
+  },
+  {
+    kind: "entra",
+    category: "hybrid",
+    label: GCP_RESOURCE_LABELS.entra,
+    description: "Diretório de identidades Microsoft (Entra ID)",
+    icon: GCP_RESOURCE_ICONS.entra,
+  },
+  {
+    kind: "pcuser",
+    category: "hybrid",
+    label: GCP_RESOURCE_LABELS.pcuser,
+    description: "Usuário em estação de trabalho",
+    icon: GCP_RESOURCE_ICONS.pcuser,
+  },
+  {
+    kind: "onprem",
+    category: "hybrid",
+    label: GCP_RESOURCE_LABELS.onprem,
+    description: "Ambiente local / datacenter corporativo",
+    icon: GCP_RESOURCE_ICONS.onprem,
   },
 ];
 

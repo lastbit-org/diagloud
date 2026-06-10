@@ -4,6 +4,10 @@ Editor visual de arquitetura **Google Cloud Platform (GCP)** no navegador. Arras
 
 O Diagloud é pensado para **design reviews**, **documentação de infraestrutura** e **rascunhos de arquitetura** — sem substituir o Terraform ou o console GCP, mas ajudando a comunicar como os componentes se relacionam.
 
+## Link de Acesso
+
+[https://lastbit-org.github.io/diagloud/](https://lastbit-org.github.io/diagloud/)
+
 ## Principais recursos
 
 - **Canvas interativo** com pan, zoom, seleção e empilhamento (trazer para frente / enviar para trás)
@@ -20,28 +24,29 @@ O Diagloud é pensado para **design reviews**, **documentação de infraestrutur
 
 ## Stack
 
-| Camada | Tecnologia |
-|--------|------------|
-| UI | React 19, TypeScript |
+| Camada | Tecnologia                                  |
+| ------ | ------------------------------------------- |
+| UI     | React 19, TypeScript                        |
 | Canvas | [@xyflow/react](https://reactflow.dev/) v12 |
-| Estado | Zustand |
-| Build | Vite 8 |
-| Testes | Vitest |
+| Estado | Zustand                                     |
+| Build  | Vite 8                                      |
+| Testes | Vitest                                      |
 
 ## Recursos disponíveis
 
-Categorias espelham o menu *All products* do GCP:
+Categorias espelham o menu _All products_ do GCP:
 
-| Categoria | Recursos |
-|-----------|----------|
-| **Organização** | Zona |
-| **Rede** | VPC, Sub-rede, Internet, Cloud NAT, VPC Peering, Cloud VPN, Cloud Interconnect, Firewall |
-| **Computação** | VM (Compute Engine), GKE, Cloud Run |
-| **Armazenamento** | Cloud Storage |
-| **Bancos de dados** | Cloud SQL, BigQuery, Cloud Spanner, Firestore |
-| **IA** | Vertex AI Workbench |
-| **Integração** | Pub/Sub, Eventarc |
-| **Ferramentas** | Artifact Registry |
+| Categoria              | Recursos                                                                                 |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| **Organização**        | Zona, Identificação (infocard)                                                           |
+| **Rede**               | VPC, Sub-rede, Internet, Cloud NAT, VPC Peering, Cloud VPN, Cloud Interconnect, Firewall |
+| **Computação**         | VM (Compute Engine), GKE, Cloud Run                                                      |
+| **Armazenamento**      | Cloud Storage                                                                            |
+| **Bancos de dados**    | Cloud SQL, BigQuery, Cloud Spanner, Firestore                                            |
+| **IA**                 | Vertex AI Workbench                                                                      |
+| **Integração**         | Pub/Sub, Eventarc                                                                        |
+| **Identidade e híbrido** | Microsoft Entra ID, Usuário (PC), On-premises                                          |
+| **Ferramentas**        | Artifact Registry, Cloud KMS                                                             |
 
 Ícones oficiais GCP (pacote legacy) onde disponíveis.
 
@@ -57,6 +62,11 @@ Cloud NAT / VPN / Interconnect / Firewall / Peering → VPC
 Internet → Cloud VPN / Cloud Interconnect (híbrido)
 Pub/Sub → Cloud Run, Storage, BigQuery, Spanner, Firestore, Eventarc
 Pub/Sub / Cloud Storage → Eventarc → Cloud Run, GKE
+VM / GKE / Run / Storage / SQL / BigQuery / Firestore / Spanner → Cloud KMS (CMEK)
+Usuário (PC) → Entra ID / On-premises / VM / Cloud Run
+Entra ID → VM / Cloud Run / GKE
+On-premises → Entra ID / Cloud VPN / Cloud Interconnect / VM
+Identificação (infocard) → qualquer recurso (exceto zona e outro infocard)
 ```
 
 Detalhes completos em [`docs/regras-conexao.md`](docs/regras-conexao.md).
@@ -73,12 +83,12 @@ Atalhos úteis: selecione um nó ou aresta e use **Excluir** no cabeçalho ou a 
 
 ## Exportar e importar
 
-| Ação | Formato | Uso |
-|------|---------|-----|
-| Exportar → JSON | `.json` | Reimportar, versionar, integrar com outras ferramentas |
-| Exportar → PNG | imagem 1920×1080 | Slides, Confluence, documentação |
-| Exportar → SVG | vetor | Diagramas escaláveis |
-| Importar | JSON | Restaurar diagrama exportado |
+| Ação            | Formato          | Uso                                                    |
+| --------------- | ---------------- | ------------------------------------------------------ |
+| Exportar → JSON | `.json`          | Reimportar, versionar, integrar com outras ferramentas |
+| Exportar → PNG  | imagem 1920×1080 | Slides, Confluence, documentação                       |
+| Exportar → SVG  | vetor            | Diagramas escaláveis                                   |
+| Importar        | JSON             | Restaurar diagrama exportado                           |
 
 ### Autosave
 
@@ -134,7 +144,7 @@ Cobertura principal: regras de conexão, documento JSON, CIDR, atribuição de I
 
 O projeto está configurado com `base: /diagloud/` no Vite. O workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) publica automaticamente no push para `main`.
 
-Habilite **GitHub Pages** nas configurações do repositório (fonte: *GitHub Actions*).
+Habilite **GitHub Pages** nas configurações do repositório (fonte: _GitHub Actions_).
 
 ## Licença e contribuição
 

@@ -55,6 +55,7 @@ import type {
   InterconnectProps,
   FirewallProps,
   ArtifactProps,
+  KmsProps,
   InternetProps,
   RunProps,
   PubsubProps,
@@ -64,6 +65,10 @@ import type {
   FirestoreProps,
   WorkbenchProps,
   ZoneProps,
+  EntraProps,
+  InfocardProps,
+  PcUserProps,
+  OnpremProps,
 } from "../types";
 
 type DiagramState = {
@@ -98,6 +103,7 @@ type DiagramActions = {
       | Partial<InterconnectProps>
       | Partial<FirewallProps>
       | Partial<ArtifactProps>
+      | Partial<KmsProps>
       | Partial<InternetProps>
       | Partial<RunProps>
       | Partial<PubsubProps>
@@ -105,7 +111,11 @@ type DiagramActions = {
       | Partial<SpannerProps>
       | Partial<FirestoreProps>
       | Partial<WorkbenchProps>
-      | Partial<ZoneProps>,
+      | Partial<ZoneProps>
+      | Partial<EntraProps>
+      | Partial<InfocardProps>
+      | Partial<PcUserProps>
+      | Partial<OnpremProps>,
   ) => void;
   updateNodeDimensions: (id: string, width: number, height: number) => void;
   bringNodeToFront: (id: string) => void;
@@ -246,6 +256,12 @@ function buildNode<K extends ResourceKind>(
         kind: "artifact",
         data: { ...defaultResourceData("artifact", resourceContext), ...data },
       };
+    case "kms":
+      return {
+        ...base,
+        kind: "kms",
+        data: { ...defaultResourceData("kms", resourceContext), ...data },
+      };
     case "internet":
       return {
         ...base,
@@ -300,6 +316,30 @@ function buildNode<K extends ResourceKind>(
         kind: "zone",
         data: { ...defaultResourceData("zone", resourceContext), ...data },
       };
+    case "entra":
+      return {
+        ...base,
+        kind: "entra",
+        data: { ...defaultResourceData("entra", resourceContext), ...data },
+      };
+    case "infocard":
+      return {
+        ...base,
+        kind: "infocard",
+        data: { ...defaultResourceData("infocard", resourceContext), ...data },
+      };
+    case "pcuser":
+      return {
+        ...base,
+        kind: "pcuser",
+        data: { ...defaultResourceData("pcuser", resourceContext), ...data },
+      };
+    case "onprem":
+      return {
+        ...base,
+        kind: "onprem",
+        data: { ...defaultResourceData("onprem", resourceContext), ...data },
+      };
   }
 }
 
@@ -317,6 +357,7 @@ function mergeNodeData(
     | Partial<VpnProps>
     | Partial<InterconnectProps>
     | Partial<ArtifactProps>
+    | Partial<KmsProps>
     | Partial<InternetProps>
     | Partial<RunProps>
     | Partial<PubsubProps>
@@ -324,7 +365,11 @@ function mergeNodeData(
     | Partial<BigqueryProps>
     | Partial<SpannerProps>
     | Partial<WorkbenchProps>
-    | Partial<ZoneProps>,
+    | Partial<ZoneProps>
+    | Partial<EntraProps>
+    | Partial<InfocardProps>
+    | Partial<PcUserProps>
+    | Partial<OnpremProps>,
 ): DiagramNode {
   switch (node.kind) {
     case "vpc":
@@ -387,6 +432,11 @@ function mergeNodeData(
         ...node,
         data: { ...node.data, ...(patch as Partial<ArtifactProps>) },
       };
+    case "kms":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<KmsProps>) },
+      };
     case "internet":
       return {
         ...node,
@@ -431,6 +481,26 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<ZoneProps>) },
+      };
+    case "entra":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<EntraProps>) },
+      };
+    case "infocard":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<InfocardProps>) },
+      };
+    case "pcuser":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<PcUserProps>) },
+      };
+    case "onprem":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<OnpremProps>) },
       };
   }
 }

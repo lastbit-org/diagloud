@@ -4,9 +4,11 @@ import { useDiagramStore } from "../../store/diagramStore";
 import type { DiagramIssue } from "../../model/validation";
 import type { DiagramNode } from "../../types";
 
+import { getNodeDisplayName } from "../../lib/naming";
+
 function nodeLabel(node: DiagramNode | undefined, nodeId: string): string {
   if (!node) return nodeId;
-  return `${GCP_RESOURCE_LABELS[node.kind]}: ${node.data.name}`;
+  return `${GCP_RESOURCE_LABELS[node.kind]}: ${getNodeDisplayName(node)}`;
 }
 
 function IssueRow({

@@ -55,8 +55,12 @@ describe("diagramPersistence", () => {
     const loaded = loadDiagramFromLocalStorage();
     expect(loaded).toBe(true);
     expect(useDiagramStore.getState().nodes).toHaveLength(1);
-    expect(useDiagramStore.getState().nodes[0].data.name).toBe("vpc-test");
-    expect(useDiagramStore.getState().nodes[0].position).toEqual({ x: 10, y: 20 });
+    const node = useDiagramStore.getState().nodes[0];
+    expect(node?.kind).toBe("vpc");
+    if (node?.kind === "vpc") {
+      expect(node.data.name).toBe("vpc-test");
+    }
+    expect(node?.position).toEqual({ x: 10, y: 20 });
   });
 
   it("clearDiagramLocalStorage remove o rascunho", () => {

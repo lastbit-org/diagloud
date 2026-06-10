@@ -1,0 +1,66 @@
+.gcp-infocard {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 120px;
+  max-width: 220px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  box-shadow: var(--shadow);
+}
+
+.gcp-infocard--selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  box-shadow:
+    0 0 0 2px var(--accent-border),
+    var(--shadow);
+}
+
+.gcp-infocard--has-issues:not(.gcp-infocard--selected) {
+  border-color: #e57373;
+}
+
+.gcp-infocard__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #e53935;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.gcp-infocard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.gcp-infocard__caption {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gcp-infocard__title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

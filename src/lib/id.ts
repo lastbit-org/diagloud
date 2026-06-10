@@ -17,6 +17,7 @@ const ID_PREFIXES = [
   "interconnect",
   "firewall",
   "artifact",
+  "kms",
   "internet",
   "run",
   "pubsub",
@@ -26,6 +27,10 @@ const ID_PREFIXES = [
   "firestore",
   "workbench",
   "zone",
+  "entra",
+  "infocard",
+  "pcuser",
+  "onprem",
   "edge",
 ] as const;
 
@@ -57,6 +62,7 @@ export function createId(prefix = "node"): string {
     prefix === "interconnect" ||
     prefix === "firewall" ||
     prefix === "artifact" ||
+    prefix === "kms" ||
     prefix === "internet" ||
     prefix === "run" ||
     prefix === "pubsub" ||
@@ -65,7 +71,11 @@ export function createId(prefix = "node"): string {
     prefix === "spanner" ||
     prefix === "firestore" ||
     prefix === "workbench" ||
-    prefix === "zone"
+    prefix === "zone" ||
+    prefix === "entra" ||
+    prefix === "infocard" ||
+    prefix === "pcuser" ||
+    prefix === "onprem"
   ) {
     return createNodeId(prefix);
   }
@@ -77,7 +87,7 @@ export function isUuid(value: string): boolean {
 }
 
 const ID_PREFIX_PATTERN =
-  /^(vpc|subnet|vm|storage|sql|gke|nat|peering|vpn|interconnect|firewall|artifact|internet|run|pubsub|eventarc|bigquery|spanner|firestore|workbench|zone|edge)-(.+)$/;
+  /^(vpc|subnet|vm|storage|sql|gke|nat|peering|vpn|interconnect|firewall|artifact|kms|internet|run|pubsub|eventarc|bigquery|spanner|firestore|workbench|zone|entra|infocard|pcuser|onprem|edge)-(.+)$/;
 
 function parsePrefixedId(
   id: string,

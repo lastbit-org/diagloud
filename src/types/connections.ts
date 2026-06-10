@@ -30,6 +30,7 @@ import type { ResourceKind } from "./resources";
  * - Pub/Sub → Firestore (`pubsub-firestore`): eventos e sincronização
  * - Pub/Sub / Cloud Storage → Eventarc: fontes de eventos
  * - Eventarc → Cloud Run / GKE (`eventarc-run`, `eventarc-gke`): destinos do roteamento
+ * - Compute e dados → Cloud KMS (`*-kms`): criptografia com chaves gerenciadas (CMEK)
  * - Vertex AI Workbench → Storage / BigQuery / Spanner / Firestore: acesso a dados
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
@@ -72,6 +73,26 @@ export const EDGE_ENDPOINTS = {
   "storage-eventarc": { from: "storage", to: "eventarc" },
   "eventarc-run": { from: "eventarc", to: "run" },
   "eventarc-gke": { from: "eventarc", to: "gke" },
+  "vm-kms": { from: "vm", to: "kms" },
+  "gke-kms": { from: "gke", to: "kms" },
+  "run-kms": { from: "run", to: "kms" },
+  "storage-kms": { from: "storage", to: "kms" },
+  "sql-kms": { from: "sql", to: "kms" },
+  "bigquery-kms": { from: "bigquery", to: "kms" },
+  "firestore-kms": { from: "firestore", to: "kms" },
+  "spanner-kms": { from: "spanner", to: "kms" },
+  "pcuser-entra": { from: "pcuser", to: "entra" },
+  "pcuser-vm": { from: "pcuser", to: "vm" },
+  "pcuser-run": { from: "pcuser", to: "run" },
+  "pcuser-onprem": { from: "pcuser", to: "onprem" },
+  "entra-vm": { from: "entra", to: "vm" },
+  "entra-run": { from: "entra", to: "run" },
+  "entra-gke": { from: "entra", to: "gke" },
+  "onprem-entra": { from: "onprem", to: "entra" },
+  "onprem-vpn": { from: "onprem", to: "vpn" },
+  "onprem-interconnect": { from: "onprem", to: "interconnect" },
+  "onprem-vm": { from: "onprem", to: "vm" },
+  "infocard-link": { from: "infocard", to: "vpc" },
 } as const satisfies Record<
   DiagramEdge["kind"],
   { from: ResourceKind; to: ResourceKind }
