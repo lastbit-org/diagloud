@@ -68,14 +68,26 @@ resource "google_kms_crypto_key" "${resourceName}_key" {
 
   for (const node of nodesOfKind(ctx, "build")) {
     const resourceName = ctx.getTfResourceName(node);
+    const githubEdge = ctx.document.edges.find(
+      (edge) => edge.kind === "github-build" && edge.target === node.id,
+    );
+    const githubNode = githubEdge
+      ? ctx.document.nodes.find(
+          (n) => n.id === githubEdge.source && n.kind === "github",
+        )
+      : undefined;
+    const { owner, name } =
+      githubNode && githubNode.kind === "github"
+        ? parseGithubRepository(githubNode.data.repository)
+        : { owner: "your-org", name: "your-repo" };
 
     blocks.push(`resource "google_cloudbuild_trigger" "${resourceName}" {
   name     = "${escapeHclString(node.data.name)}"
   location = "${escapeHclString(node.data.location)}"
 
   github {
-    owner = "your-org"
-    name  = "your-repo"
+    owner = "${escapeHclString(owner)}"
+    name  = "${escapeHclString(name)}"
     push {
       branch = "^main$"
     }
@@ -95,4 +107,19 @@ function tfRepoId(name: string): string {
     .replace(/[^a-z0-9-]/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "") || "repo";
+}
+
+function parseGithubRepository(repository: string): {
+  owner: string;
+  name: string;
+} {
+  const trimmed = repository.trim();
+  const slash = trimmed.indexOf("/");
+  if (slash > 0) {
+    return {
+      owner: trimmed.slice(0, slash),
+      name: trimmed.slice(slash + 1),
+    };
+  }
+  return { owner: "your-org", name: trimmed || "your-repo" };
 }

@@ -40,6 +40,7 @@ import type {
   InfocardProps,
   PcUserProps,
   OnpremProps,
+  GithubProps,
 } from "../types";
 
 export function defaultResourceData<K extends ResourceKind>(
@@ -227,6 +228,11 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         location: "Datacenter local",
       } as OnpremProps as ResourcePropsByKind[K];
+    case "github":
+      return {
+        name,
+        repository: "org/repository",
+      } as GithubProps as ResourcePropsByKind[K];
   }
 }
 
@@ -301,5 +307,7 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `usuario-${count}`;
     case "onprem":
       return `onprem-${count}`;
+    case "github":
+      return `github-${count}`;
   }
 }

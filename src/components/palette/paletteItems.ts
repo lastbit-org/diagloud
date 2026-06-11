@@ -84,7 +84,8 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "entra" ||
     value === "infocard" ||
     value === "pcuser" ||
-    value === "onprem"
+    value === "onprem" ||
+    value === "github"
   );
 }
 
@@ -298,6 +299,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.build,
     description: "CI/CD — build e deploy de containers",
     icon: GCP_RESOURCE_ICONS.build,
+  },
+  {
+    kind: "github",
+    category: "devtools",
+    label: GCP_RESOURCE_LABELS.github,
+    description: "Repositório de código-fonte no GitHub",
+    icon: GCP_RESOURCE_ICONS.github,
   },
   {
     kind: "kms",

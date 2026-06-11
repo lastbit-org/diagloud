@@ -42,6 +42,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   infocard: "info-AREA-AMBIENTE",
   pcuser: "user-AREA-AMBIENTE",
   onprem: "onprem-AREA-AMBIENTE",
+  github: "github-AREA-AMBIENTE",
 };
 
 export const NAMING_TOKEN_HINTS = [

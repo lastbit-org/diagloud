@@ -599,6 +599,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <GkeSubnetInfo gke={selectedNode} edges={edges} nodes={nodes} />
           <GkeEventarcInfo gke={selectedNode} edges={edges} nodes={nodes} />
+          <GkeGithubInfo gke={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
 
@@ -693,6 +694,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           )}
           <RunSubnetInfo run={selectedNode} edges={edges} nodes={nodes} />
           <RunArtifactInfo run={selectedNode} edges={edges} nodes={nodes} />
+          <RunGithubInfo run={selectedNode} edges={edges} nodes={nodes} />
           <RunEventarcInfo run={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
@@ -1329,8 +1331,9 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             />
           </div>
           <p className="properties-field__hint">
-            CI/CD gerenciado. Ligue ao Artifact Registry para push de imagens,
-            Pub/Sub para triggers e Cloud Storage para código-fonte.
+            CI/CD gerenciado. Ligue ao GitHub para código-fonte, Artifact Registry
+            para push de imagens, Pub/Sub para triggers e Cloud Storage como
+            alternativa ao repositório.
           </p>
           <BuildConnectionsInfo
             build={selectedNode}
@@ -1669,6 +1672,41 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           />
         </>
       )}
+
+      {selectedNode?.kind === "github" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="github-name">Recurso</label>
+            <input
+              id="github-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="github-repository">Repositório</label>
+            <input
+              id="github-repository"
+              value={selectedNode.data.repository}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { repository: e.target.value })
+              }
+              placeholder="org/repository"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Representa um repositório GitHub no diagrama. Ligue ao Cloud Build
+            (CI), Cloud Run (deploy contínuo) ou GKE (GitOps).
+          </p>
+          <GithubConnectionsInfo
+            github={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
     </>
   );
 
@@ -1752,6 +1790,32 @@ function RunArtifactInfo({
   );
 }
 
+function RunGithubInfo({
+  run,
+  edges,
+  nodes,
+}: {
+  run: Extract<DiagramNode, { kind: "run" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "github-run" && e.target === run.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "github"))
+    .filter((n): n is Extract<DiagramNode, { kind: "github" }> => n != null);
+
+  if (linked.length === 0) {
+    return null;
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>GitHub (deploy contínuo)</dt>
+      <dd>{linked.map((g) => g.data.repository || g.data.name).join(", ")}</dd>
+    </dl>
+  );
+}
+
 function RunEventarcInfo({
   run,
   edges,
@@ -1814,6 +1878,32 @@ function GkeEventarcInfo({
     <dl className="properties-stats">
       <dt>Eventarc</dt>
       <dd>{eventarcTriggers.map((e) => e.data.name).join(", ")}</dd>
+    </dl>
+  );
+}
+
+function GkeGithubInfo({
+  gke,
+  edges,
+  nodes,
+}: {
+  gke: Extract<DiagramNode, { kind: "gke" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "github-gke" && e.target === gke.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "github"))
+    .filter((n): n is Extract<DiagramNode, { kind: "github" }> => n != null);
+
+  if (linked.length === 0) {
+    return null;
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>GitHub (GitOps)</dt>
+      <dd>{linked.map((g) => g.data.repository || g.data.name).join(", ")}</dd>
     </dl>
   );
 }
@@ -3228,6 +3318,60 @@ function RouterVpcInfo({
   );
 }
 
+function GithubConnectionsInfo({
+  github,
+  edges,
+  nodes,
+}: {
+  github: Extract<DiagramNode, { kind: "github" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const builds = edges
+    .filter((e) => e.kind === "github-build" && e.source === github.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "build"))
+    .filter((n): n is Extract<DiagramNode, { kind: "build" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "github-run" && e.source === github.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "github-gke" && e.source === github.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+
+  if (builds.length === 0 && runs.length === 0 && clusters.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue ao Cloud Build, Cloud Run ou GKE para documentar CI/CD e deploy.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {builds.length > 0 ? (
+        <>
+          <dt>Cloud Build</dt>
+          <dd>{builds.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function KmsConsumersInfo({
   kms,
   edges,
@@ -3412,6 +3556,10 @@ function BuildConnectionsInfo({
     .filter((e) => e.kind === "storage-build" && e.target === build.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "storage"))
     .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const githubSources = edges
+    .filter((e) => e.kind === "github-build" && e.target === build.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "github"))
+    .filter((n): n is Extract<DiagramNode, { kind: "github" }> => n != null);
   const modelRegistries = edges
     .filter(
       (e) => e.kind === "build-modelregistry" && e.source === build.id,
@@ -3427,6 +3575,7 @@ function BuildConnectionsInfo({
     artifacts.length === 0 &&
     pubsubTriggers.length === 0 &&
     storageSources.length === 0 &&
+    githubSources.length === 0 &&
     modelRegistries.length === 0
   ) {
     return null;
@@ -3450,6 +3599,16 @@ function BuildConnectionsInfo({
         <>
           <dt>Código-fonte (Storage)</dt>
           <dd>{storageSources.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {githubSources.length > 0 ? (
+        <>
+          <dt>GitHub</dt>
+          <dd>
+            {githubSources
+              .map((g) => g.data.repository || g.data.name)
+              .join(", ")}
+          </dd>
         </>
       ) : null}
       {modelRegistries.length > 0 ? (

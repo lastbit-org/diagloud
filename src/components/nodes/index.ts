@@ -37,3 +37,4 @@ export { InfocardNode } from "./InfocardNode";
 export { EntraNode } from "./EntraNode";
 export { PcUserNode } from "./PcUserNode";
 export { OnpremNode } from "./OnpremNode";
+export { GithubNode } from "./GithubNode";

@@ -91,6 +91,7 @@ import type {
   InfocardProps,
   PcUserProps,
   OnpremProps,
+  GithubProps,
 } from "../types";
 
 type DiagramState = {
@@ -148,7 +149,8 @@ type DiagramActions = {
       | Partial<EntraProps>
       | Partial<InfocardProps>
       | Partial<PcUserProps>
-      | Partial<OnpremProps>,
+      | Partial<OnpremProps>
+      | Partial<GithubProps>,
   ) => void;
   updateNodeDimensions: (id: string, width: number, height: number) => void;
   bringNodeToFront: (id: string) => void;
@@ -485,6 +487,12 @@ function buildNode<K extends ResourceKind>(
         kind: "onprem",
         data: { ...defaultResourceData("onprem", resourceContext), ...data },
       };
+    case "github":
+      return {
+        ...base,
+        kind: "github",
+        data: { ...defaultResourceData("github", resourceContext), ...data },
+      };
   }
 }
 
@@ -521,7 +529,8 @@ function mergeNodeData(
     | Partial<EntraProps>
     | Partial<InfocardProps>
     | Partial<PcUserProps>
-    | Partial<OnpremProps>,
+    | Partial<OnpremProps>
+    | Partial<GithubProps>,
 ): DiagramNode {
   switch (node.kind) {
     case "vpc":
@@ -693,6 +702,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<OnpremProps>) },
+      };
+    case "github":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<GithubProps>) },
       };
   }
 }

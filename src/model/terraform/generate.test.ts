@@ -217,6 +217,30 @@ describe("generateTerraform", () => {
     expect(result.files["connections.tf"]).toContain("vm-storage");
   });
 
+  it("usa repositório GitHub ligado no trigger do Cloud Build", () => {
+    const github: DiagramNode = {
+      id: "github-1",
+      kind: "github",
+      position: { x: 0, y: 0 },
+      data: { name: "github-app", repository: "acme/platform-api" },
+    };
+    const build: DiagramNode = {
+      id: "build-1",
+      kind: "build",
+      position: { x: 100, y: 0 },
+      data: { name: "build-ci", location: "southamerica-east1" },
+    };
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: "github-1", target: "build-1", kind: "github-build" },
+    ];
+    const doc = buildDiagramDocument([github, build], edges);
+    const result = generateTerraform(doc, defaultOptions);
+
+    expect(result.files["platform.tf"]).toContain('owner = "acme"');
+    expect(result.files["platform.tf"]).toContain('name  = "platform-api"');
+    expect(result.files["connections.tf"]).toContain("github-build");
+  });
+
   it("avisa recursos visuais não exportados", () => {
     const zone: DiagramNode = {
       id: "zone-1",

@@ -35,7 +35,8 @@ export type ResourceKind =
   | "entra"
   | "infocard"
   | "pcuser"
-  | "onprem";
+  | "onprem"
+  | "github";
 
 export type RunAccessMode = "public" | "vpc";
 
@@ -277,6 +278,13 @@ export type OnpremProps = {
   location: string;
 };
 
+export type GithubProps = {
+  /** Nome do recurso no diagrama. */
+  name: string;
+  /** Nome do repositório (ex.: org/repo). */
+  repository: string;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
@@ -312,4 +320,5 @@ export type ResourcePropsByKind = {
   infocard: InfocardProps;
   pcuser: PcUserProps;
   onprem: OnpremProps;
+  github: GithubProps;
 };

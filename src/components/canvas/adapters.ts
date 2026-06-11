@@ -95,6 +95,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "modelregistry") {
     return node.data.location;
   }
+  if (node.kind === "github") {
+    return node.data.repository;
+  }
   if (node.kind === "onprem") {
     return node.data.location;
   }

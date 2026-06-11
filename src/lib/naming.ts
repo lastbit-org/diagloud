@@ -162,6 +162,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `usuario-${count}`;
     case "onprem":
       return `onprem-${count}`;
+    case "github":
+      return `github-${count}`;
   }
 }
 

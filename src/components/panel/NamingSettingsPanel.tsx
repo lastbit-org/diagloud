@@ -32,6 +32,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "eventarc",
   "artifact",
   "build",
+  "github",
   "kms",
   "entra",
   "pcuser",

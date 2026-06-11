@@ -61,6 +61,7 @@ const SKIPPED_KINDS = new Set<ResourceKind>([
   "entra",
   "pcuser",
   "onprem",
+  "github",
   "internet",
 ]);
 

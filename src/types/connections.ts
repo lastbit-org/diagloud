@@ -23,6 +23,7 @@ import type { ResourceKind } from "./resources";
  * - Cloud Build → Artifact Registry (`build-artifact`): push de imagens
  * - Pub/Sub → Cloud Build (`pubsub-build`): trigger de pipeline
  * - Cloud Storage → Cloud Build (`storage-build`): código-fonte no bucket
+ * - GitHub → Cloud Build / Cloud Run / GKE (`github-build`, `github-run`, `github-gke`): CI/CD e deploy contínuo
  * - Cloud Run → Sub-rede (`run-subnet`): VPC connector (modo VPC)
  * - Pub/Sub → Cloud Run (`pubsub-run`): push subscription / evento
  * - Pub/Sub → Cloud Storage (`pubsub-storage`): exportação para bucket
@@ -73,6 +74,9 @@ export const EDGE_ENDPOINTS = {
   "build-artifact": { from: "build", to: "artifact" },
   "pubsub-build": { from: "pubsub", to: "build" },
   "storage-build": { from: "storage", to: "build" },
+  "github-build": { from: "github", to: "build" },
+  "github-run": { from: "github", to: "run" },
+  "github-gke": { from: "github", to: "gke" },
   "pubsub-run": { from: "pubsub", to: "run" },
   "pubsub-storage": { from: "pubsub", to: "storage" },
   "pubsub-bigquery": { from: "pubsub", to: "bigquery" },

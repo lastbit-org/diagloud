@@ -96,6 +96,9 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("build", "artifact")).toBe("build-artifact");
     expect(getEdgeKind("pubsub", "build")).toBe("pubsub-build");
     expect(getEdgeKind("storage", "build")).toBe("storage-build");
+    expect(getEdgeKind("github", "build")).toBe("github-build");
+    expect(getEdgeKind("github", "run")).toBe("github-run");
+    expect(getEdgeKind("github", "gke")).toBe("github-gke");
     expect(getEdgeKind("spark", "subnet")).toBe("spark-subnet");
     expect(getEdgeKind("spark", "storage")).toBe("spark-storage");
     expect(getEdgeKind("spark", "bigquery")).toBe("spark-bigquery");
@@ -1193,5 +1196,75 @@ describe("validateConnection", () => {
       source: internet.id,
       target: vpn.id,
     });
+  });
+
+  it("aceita GitHub → Cloud Build, Cloud Run e GKE", () => {
+    const github: DiagramNode = {
+      id: "github-1",
+      kind: "github",
+      position: { x: 0, y: 0 },
+      data: { name: "github-app", repository: "my-org/my-repo" },
+    };
+    const build: DiagramNode = {
+      id: "build-1",
+      kind: "build",
+      position: { x: 100, y: 0 },
+      data: { name: "build-ci", location: "southamerica-east1" },
+    };
+    const run: DiagramNode = {
+      id: "run-1",
+      kind: "run",
+      position: { x: 200, y: 0 },
+      data: {
+        name: "run-api",
+        cpu: "1",
+        memory: "512Mi",
+        minInstances: 0,
+        accessMode: "public",
+      },
+    };
+    const gke: DiagramNode = {
+      id: "gke-1",
+      kind: "gke",
+      position: { x: 300, y: 0 },
+      data: { name: "gke-prod", nodeCount: 3, machineType: "e2-medium" },
+    };
+    const diagramNodes = [github, build, run, gke];
+
+    expect(
+      validateConnection(
+        {
+          source: github.id,
+          target: build.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "github-build" });
+
+    expect(
+      validateConnection(
+        {
+          source: github.id,
+          target: run.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "github-run" });
+
+    expect(
+      validateConnection(
+        {
+          source: github.id,
+          target: gke.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "github-gke" });
   });
 });

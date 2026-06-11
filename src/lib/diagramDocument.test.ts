@@ -60,6 +60,7 @@ const sampleDocument: DiagramDocument = {
         infocard: "info-AREA-AMBIENTE",
         pcuser: "user-AREA-AMBIENTE",
         onprem: "onprem-AREA-AMBIENTE",
+        github: "github-AREA-AMBIENTE",
       },
     },
   },

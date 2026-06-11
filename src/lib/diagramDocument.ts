@@ -51,6 +51,7 @@ import {
   type InfocardProps,
   type PcUserProps,
   type OnpremProps,
+  type GithubProps,
 } from "../types";
 
 export const DIAGRAM_STORAGE_KEY = "diagloud-diagram";
@@ -567,6 +568,20 @@ function parseOnpremData(raw: unknown): OnpremProps {
   };
 }
 
+function parseGithubData(raw: unknown): GithubProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.repository !== "string"
+  ) {
+    throw new DiagramParseError("Dados de repositório GitHub inválidos.");
+  }
+  return {
+    name: raw.name,
+    repository: raw.repository,
+  };
+}
+
 function parseZoneData(raw: unknown): ZoneProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de zona inválidos.");
@@ -1045,6 +1060,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseOnpremData(data),
       };
+    case "github":
+      if (!nodeIdMatchesKind(nodeId, "github")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo GitHub.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "github",
+        position: parsedPosition,
+        zIndex,
+        data: parseGithubData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -1094,6 +1122,9 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "build-artifact" &&
     kind !== "pubsub-build" &&
     kind !== "storage-build" &&
+    kind !== "github-build" &&
+    kind !== "github-run" &&
+    kind !== "github-gke" &&
     kind !== "pubsub-run" &&
     kind !== "pubsub-storage" &&
     kind !== "pubsub-bigquery" &&
@@ -1347,6 +1378,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.onprem === "string"
           ? patterns.onprem
           : DEFAULT_NAMING_PATTERNS.onprem,
+      github:
+        typeof patterns.github === "string"
+          ? patterns.github
+          : DEFAULT_NAMING_PATTERNS.github,
     },
   };
 }
@@ -1532,7 +1567,8 @@ function namingMetadataEqual(
     a.patterns.entra === b.patterns.entra &&
     a.patterns.infocard === b.patterns.infocard &&
     a.patterns.pcuser === b.patterns.pcuser &&
-    a.patterns.onprem === b.patterns.onprem
+    a.patterns.onprem === b.patterns.onprem &&
+    a.patterns.github === b.patterns.github
   );
 }
 

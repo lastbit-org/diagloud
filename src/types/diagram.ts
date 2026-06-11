@@ -34,6 +34,7 @@ import type {
   InfocardProps,
   PcUserProps,
   OnpremProps,
+  GithubProps,
 } from "./resources";
 
 export const DIAGRAM_DOCUMENT_VERSION = 1 as const;
@@ -82,7 +83,8 @@ export type DiagramNode =
   | (NodeBase & { kind: "entra"; data: EntraProps })
   | (NodeBase & { kind: "infocard"; data: InfocardProps })
   | (NodeBase & { kind: "pcuser"; data: PcUserProps })
-  | (NodeBase & { kind: "onprem"; data: OnpremProps });
+  | (NodeBase & { kind: "onprem"; data: OnpremProps })
+  | (NodeBase & { kind: "github"; data: GithubProps });
 
 export type DiagramEdge = {
   id: string;
@@ -113,6 +115,9 @@ export type DiagramEdge = {
     | "build-artifact"
     | "pubsub-build"
     | "storage-build"
+    | "github-build"
+    | "github-run"
+    | "github-gke"
     | "pubsub-run"
     | "pubsub-storage"
     | "pubsub-bigquery"

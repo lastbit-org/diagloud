@@ -33,6 +33,7 @@ import {
   EntraNode,
   PcUserNode,
   OnpremNode,
+  GithubNode,
 } from "../nodes";
 
 export const nodeTypes = {
@@ -70,4 +71,5 @@ export const nodeTypes = {
   entra: EntraNode,
   pcuser: PcUserNode,
   onprem: OnpremNode,
+  github: GithubNode,
 };
