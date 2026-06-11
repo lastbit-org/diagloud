@@ -53,6 +53,11 @@
   padding: 8px 10px;
 }
 
+.gcp-node--github {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
 .gcp-node__icon {
   flex-shrink: 0;
   width: 32px;

@@ -6,6 +6,7 @@ import { resolveNodeZIndex } from "../../lib/nodeLayers";
 import type {
   FolderNodeData,
   GcpNodeData,
+  GithubNodeData,
   InfocardNodeData,
   ProjectNodeData,
   ZoneNodeData,
@@ -95,9 +96,6 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "modelregistry") {
     return node.data.location;
   }
-  if (node.kind === "github") {
-    return node.data.repository;
-  }
   if (node.kind === "onprem") {
     return node.data.location;
   }
@@ -112,7 +110,7 @@ export function toFlowNode(
   selected = false,
   issues: DiagramIssue[] = [],
 ): Node<
-  GcpNodeData | ZoneNodeData | InfocardNodeData | FolderNodeData | ProjectNodeData
+  GcpNodeData | ZoneNodeData | InfocardNodeData | FolderNodeData | ProjectNodeData | GithubNodeData
 > {
   if (node.kind === "zone") {
     return {
@@ -182,6 +180,22 @@ export function toFlowNode(
         kind: "infocard",
         caption: node.data.caption,
         title: node.data.title,
+        issueCount: issueCount > 0 ? issueCount : undefined,
+      },
+    };
+  }
+
+  if (node.kind === "github") {
+    const issueCount = issueCountForNode(node.id, issues);
+    return {
+      id: node.id,
+      type: "github",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      data: {
+        kind: "github",
+        label: node.data.repository,
         issueCount: issueCount > 0 ? issueCount : undefined,
       },
     };
