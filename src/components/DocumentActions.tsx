@@ -10,6 +10,7 @@ import {
 import { requestDiagramImageExport } from "../lib/diagramImageExportBridge";
 import { saveDiagramToLocalStorage } from "../lib/diagramPersistence";
 import { useDiagramStore } from "../store/diagramStore";
+import { TerraformExportDialog } from "./TerraformExportDialog";
 import "./document-actions.css";
 
 type ExportKind = "json" | "png" | "svg";
@@ -21,6 +22,7 @@ export function DocumentActions() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [terraformOpen, setTerraformOpen] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackIsError, setFeedbackIsError] = useState(false);
 
@@ -168,9 +170,30 @@ export function DocumentActions() {
                 </span>
               </button>
             </li>
+            <li role="none">
+              <button
+                type="button"
+                role="menuitem"
+                className="document-actions__menu-item"
+                onClick={() => {
+                  setExportOpen(false);
+                  setTerraformOpen(true);
+                }}
+              >
+                Terraform
+                <span className="document-actions__menu-hint">
+                  Código HCL para provisionar
+                </span>
+              </button>
+            </li>
           </ul>
         )}
       </div>
+
+      <TerraformExportDialog
+        open={terraformOpen}
+        onClose={() => setTerraformOpen(false)}
+      />
 
       <button
         type="button"

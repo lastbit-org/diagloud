@@ -1,0 +1,189 @@
+.terraform-export__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(8, 6, 13, 0.45);
+}
+
+.terraform-export__dialog {
+  width: min(720px, 100%);
+  max-height: min(90vh, 900px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.terraform-export__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.terraform-export__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.terraform-export__close {
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.terraform-export__close:hover {
+  background: var(--code-bg);
+  color: var(--text-h);
+}
+
+.terraform-export__body {
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+.terraform-export__intro {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.terraform-export__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .terraform-export__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.terraform-export__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.terraform-export__btn {
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.terraform-export__btn:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.terraform-export__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.terraform-export__btn--primary {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  font-weight: 600;
+}
+
+.terraform-export__preview {
+  margin-top: 16px;
+}
+
+.terraform-export__preview-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.terraform-export__preview-code {
+  width: 100%;
+  min-height: 220px;
+  max-height: 320px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: 13px/1.45 var(--mono);
+  overflow: auto;
+  white-space: pre;
+}
+
+.terraform-export__feedback {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.terraform-export__feedback--error {
+  color: #c62828;
+}
+
+.terraform-export__warnings {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 193, 7, 0.12);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-h);
+}
+
+.terraform-export__warnings ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.terraform-export__file-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.terraform-export__file-tab {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.terraform-export__file-tab--active {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 600;
+}
