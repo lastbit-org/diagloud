@@ -144,6 +144,7 @@ export function defaultResourceData<K extends ResourceKind>(
     case "run":
       return {
         name,
+        imageUrl: "",
         cpu: "1",
         memory: "512Mi",
         minInstances: 0,

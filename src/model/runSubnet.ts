@@ -14,6 +14,7 @@ export function clearRunNetwork(runId: string, nodes: DiagramNode[]): DiagramNod
     if (node.id !== runId || node.kind !== "run") return node;
     const data: RunProps = {
       name: node.data.name,
+      imageUrl: node.data.imageUrl,
       cpu: node.data.cpu,
       memory: node.data.memory,
       minInstances: node.data.minInstances,

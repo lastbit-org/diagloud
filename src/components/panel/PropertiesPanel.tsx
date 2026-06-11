@@ -616,6 +616,20 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             />
           </div>
           <div className="properties-field">
+            <label htmlFor="run-image">Imagem do container</label>
+            <input
+              id="run-image"
+              value={selectedNode.data.imageUrl}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { imageUrl: e.target.value })
+              }
+              placeholder="us-docker.pkg.dev/cloudrun/container/hello"
+            />
+            <span className="properties-field__hint">
+              URL completa da imagem (Artifact Registry, GCR ou Docker Hub).
+            </span>
+          </div>
+          <div className="properties-field">
             <label htmlFor="run-access">Acesso</label>
             <select
               id="run-access"

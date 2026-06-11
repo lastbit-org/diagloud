@@ -120,6 +120,7 @@ describe("generateTerraform", () => {
       position: { x: 100, y: 300 },
       data: {
         name: "service-api",
+        imageUrl: "",
         cpu: "1",
         memory: "512Mi",
         minInstances: 1,

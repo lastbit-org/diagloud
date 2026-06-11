@@ -459,6 +459,7 @@ describe("validateConnection", () => {
       position: { x: 0, y: 0 },
       data: {
         name: "run-1",
+        imageUrl: "",
         cpu: "1",
         memory: "512Mi",
         minInstances: 0,
@@ -484,6 +485,7 @@ describe("validateConnection", () => {
       position: { x: 0, y: 0 },
       data: {
         name: "run-pub",
+        imageUrl: "",
         cpu: "1",
         memory: "512Mi",
         minInstances: 0,
@@ -509,6 +511,7 @@ describe("validateConnection", () => {
       position: { x: 0, y: 0 },
       data: {
         name: "run-1",
+        imageUrl: "",
         cpu: "1",
         memory: "512Mi",
         minInstances: 0,
@@ -1217,6 +1220,7 @@ describe("validateConnection", () => {
       position: { x: 200, y: 0 },
       data: {
         name: "run-api",
+        imageUrl: "",
         cpu: "1",
         memory: "512Mi",
         minInstances: 0,

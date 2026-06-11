@@ -109,7 +109,7 @@ resource "google_container_node_pool" "${resourceName}_pool" {
 
   template {
     containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      image = "${escapeHclString(node.data.imageUrl.trim() || "us-docker.pkg.dev/cloudrun/container/hello")}"
       resources {
         limits = {
           cpu    = "${escapeHclString(node.data.cpu)}"

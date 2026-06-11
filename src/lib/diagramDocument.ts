@@ -350,6 +350,7 @@ function parseRunData(raw: unknown): RunProps {
       : "public";
   const data: RunProps = {
     name: raw.name,
+    imageUrl: typeof raw.imageUrl === "string" ? raw.imageUrl : "",
     cpu: raw.cpu,
     memory: raw.memory,
     minInstances: raw.minInstances,

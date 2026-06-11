@@ -15,6 +15,7 @@ const run: DiagramNode = {
   position: { x: 200, y: 100 },
   data: {
     name: "run-1",
+    imageUrl: "",
     cpu: "1",
     memory: "512Mi",
     minInstances: 0,

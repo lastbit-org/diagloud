@@ -158,6 +158,8 @@ export type InternetProps = {
 
 export type RunProps = {
   name: string;
+  /** URL da imagem do container (ex.: Artifact Registry ou Docker Hub). */
+  imageUrl: string;
   cpu: string;
   memory: string;
   minInstances: number;
