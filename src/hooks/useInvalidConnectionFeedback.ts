@@ -50,6 +50,7 @@ export function useInvalidConnectionFeedback(context: ConnectionValidationContex
 
       setRejectedEdge({
         id: REJECTED_EDGE_ID,
+        type: "smoothstep",
         source: connection.source,
         target: connection.target,
         sourceHandle: connection.sourceHandle,

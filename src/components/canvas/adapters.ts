@@ -207,6 +207,7 @@ export function toFlowEdge(edge: DiagramEdge, selected = false): Edge {
   const { sourceHandle, targetHandle } = resolveEdgeHandles(edge);
   return {
     id: edge.id,
+    type: "smoothstep",
     source: edge.source,
     target: edge.target,
     sourceHandle,

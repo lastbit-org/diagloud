@@ -237,6 +237,7 @@ export function DiagramCanvas() {
         isValidConnection={isValidConnection}
         connectionLineComponent={CustomConnectionLine}
         connectionMode={ConnectionMode.Loose}
+        defaultEdgeOptions={{ type: "smoothstep" }}
         onNodeClick={(_, node) => selectNode(node.id)}
         onEdgeClick={(_, edge) => selectEdge(edge.id)}
         onPaneClick={clearSelection}

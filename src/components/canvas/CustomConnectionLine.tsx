@@ -1,6 +1,6 @@
 import {
   BaseEdge,
-  getBezierPath,
+  getSmoothStepPath,
   type ConnectionLineComponentProps,
 } from "@xyflow/react";
 
@@ -19,7 +19,7 @@ export function CustomConnectionLine({
   toPosition,
   connectionStatus,
 }: ConnectionLineComponentProps) {
-  const [path] = getBezierPath({
+  const [path] = getSmoothStepPath({
     sourceX: fromX,
     sourceY: fromY,
     targetX: toX,
