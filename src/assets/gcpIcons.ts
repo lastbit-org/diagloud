@@ -1,5 +1,6 @@
 import type { ResourceKind } from "../types";
 import artifactIcon from "./google-cloud-legacy-icons/artifact_registry/artifact_registry.svg";
+import buildIcon from "./google-cloud-legacy-icons/cloud_build/cloud_build.svg";
 import kmsIcon from "./google-cloud-legacy-icons/key_management_service/key_management_service.svg";
 import bigqueryIcon from "./google-cloud-legacy-icons/bigquery/bigquery.svg";
 import spannerIcon from "./google-cloud-legacy-icons/cloud_spanner/cloud_spanner.svg";
@@ -21,6 +22,7 @@ import vpcIcon from "./google-cloud-legacy-icons/virtual_private_cloud/virtual_p
 import internetIcon from "./icons/internet.svg";
 import peeringIcon from "./icons/vpc-peering.svg";
 import zoneIcon from "./icons/zone.svg";
+import folderIcon from "./icons/folder.svg";
 import entraIcon from "./icons/entra.svg";
 import infocardIcon from "./icons/infocard.svg";
 import pcUserIcon from "./icons/pc-user.svg";
@@ -40,6 +42,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   interconnect: interconnectIcon,
   firewall: firewallIcon,
   artifact: artifactIcon,
+  build: buildIcon,
   kms: kmsIcon,
   internet: internetIcon,
   run: runIcon,
@@ -50,6 +53,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   firestore: firestoreIcon,
   workbench: workbenchIcon,
   zone: zoneIcon,
+  folder: folderIcon,
   entra: entraIcon,
   infocard: infocardIcon,
   pcuser: pcUserIcon,
@@ -69,6 +73,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   interconnect: "Cloud Interconnect",
   firewall: "Firewall",
   artifact: "Artifact Registry",
+  build: "Cloud Build",
   kms: "Cloud KMS",
   internet: "Internet",
   run: "Cloud Run",
@@ -79,6 +84,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   firestore: "Firestore",
   workbench: "Vertex AI Workbench",
   zone: "Zona",
+  folder: "Pasta",
   entra: "Microsoft Entra ID",
   infocard: "Identificação",
   pcuser: "Usuário (PC)",

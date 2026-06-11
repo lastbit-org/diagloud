@@ -1072,6 +1072,41 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "build" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="build-name">Trigger / pipeline</label>
+            <input
+              id="build-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="build-location">Região</label>
+            <input
+              id="build-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            CI/CD gerenciado. Ligue ao Artifact Registry para push de imagens,
+            Pub/Sub para triggers e Cloud Storage para código-fonte.
+          </p>
+          <BuildConnectionsInfo
+            build={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "kms" && (
         <>
           <div className="properties-field">
@@ -1233,6 +1268,26 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "folder" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="folder-name">Nome</label>
+            <input
+              id="folder-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+              placeholder="Pasta"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Unidade organizacional na hierarquia de recursos GCP (organização →
+            pasta → projeto). Use para documentar a estrutura de governança.
+          </p>
+        </>
+      )}
+
       {selectedNode?.kind === "entra" && (
         <>
           <div className="properties-field">
@@ -1283,7 +1338,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <p className="properties-field__hint">
             Cartão de identificação visual. Ligue a qualquer recurso para
-            anotar contexto (exceto zonas e outros infocards).
+            anotar contexto (exceto zonas).
           </p>
           <InfocardLinksInfo
             infocard={selectedNode}
@@ -2508,6 +2563,60 @@ function KmsConsumersInfo({
   );
 }
 
+function BuildConnectionsInfo({
+  build,
+  edges,
+  nodes,
+}: {
+  build: Extract<DiagramNode, { kind: "build" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const artifacts = edges
+    .filter((e) => e.kind === "build-artifact" && e.source === build.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "artifact"))
+    .filter((n): n is Extract<DiagramNode, { kind: "artifact" }> => n != null);
+  const pubsubTriggers = edges
+    .filter((e) => e.kind === "pubsub-build" && e.target === build.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const storageSources = edges
+    .filter((e) => e.kind === "storage-build" && e.target === build.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+
+  if (
+    artifacts.length === 0 &&
+    pubsubTriggers.length === 0 &&
+    storageSources.length === 0
+  ) {
+    return null;
+  }
+
+  return (
+    <dl className="properties-stats">
+      {artifacts.length > 0 ? (
+        <>
+          <dt>Artifact Registry</dt>
+          <dd>{artifacts.map((a) => a.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {pubsubTriggers.length > 0 ? (
+        <>
+          <dt>Triggers Pub/Sub</dt>
+          <dd>{pubsubTriggers.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {storageSources.length > 0 ? (
+        <>
+          <dt>Código-fonte (Storage)</dt>
+          <dd>{storageSources.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function ArtifactPullInfo({
   artifact,
   edges,
@@ -2529,17 +2638,33 @@ function ArtifactPullInfo({
     .filter((e) => e.kind === "run-artifact" && e.target === artifact.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
     .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const buildPushes = edges
+    .filter((e) => e.kind === "build-artifact" && e.target === artifact.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "build"))
+    .filter((n): n is Extract<DiagramNode, { kind: "build" }> => n != null);
 
-  if (gkePulls.length === 0 && vmPulls.length === 0 && runPulls.length === 0) {
+  if (
+    gkePulls.length === 0 &&
+    vmPulls.length === 0 &&
+    runPulls.length === 0 &&
+    buildPushes.length === 0
+  ) {
     return (
       <p className="properties-field__hint">
-        Ligue GKE, Cloud Run ou VMs para documentar pull de imagens/pacotes.
+        Ligue GKE, Cloud Run, VMs ou Cloud Build para documentar push/pull de
+        imagens e pacotes.
       </p>
     );
   }
 
   return (
     <dl className="properties-stats">
+      {buildPushes.length > 0 ? (
+        <>
+          <dt>Cloud Build</dt>
+          <dd>{buildPushes.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
       {gkePulls.length > 0 ? (
         <>
           <dt>Clusters GKE</dt>

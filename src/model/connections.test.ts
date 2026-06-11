@@ -92,6 +92,9 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vm", "artifact")).toBe("vm-artifact");
     expect(getEdgeKind("run", "subnet")).toBe("run-subnet");
     expect(getEdgeKind("run", "artifact")).toBe("run-artifact");
+    expect(getEdgeKind("build", "artifact")).toBe("build-artifact");
+    expect(getEdgeKind("pubsub", "build")).toBe("pubsub-build");
+    expect(getEdgeKind("storage", "build")).toBe("storage-build");
     expect(getEdgeKind("pubsub", "run")).toBe("pubsub-run");
     expect(getEdgeKind("pubsub", "storage")).toBe("pubsub-storage");
     expect(getEdgeKind("pubsub", "bigquery")).toBe("pubsub-bigquery");
@@ -124,7 +127,7 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("infocard", "vpc")).toBe("infocard-link");
     expect(getEdgeKind("vm", "infocard")).toBe("infocard-link");
     expect(getEdgeKind("infocard", "zone")).toBeNull();
-    expect(getEdgeKind("infocard", "infocard")).toBeNull();
+    expect(getEdgeKind("infocard", "infocard")).toBe("infocard-link");
   });
 
   it("bloqueia VM → VPC e outras ligações inválidas", () => {

@@ -1,6 +1,7 @@
 import type { NamingPatternByKind } from "./naming";
 import type {
   ArtifactProps,
+  BuildProps,
   KmsProps,
   GkeProps,
   InternetProps,
@@ -22,6 +23,7 @@ import type {
   VmProps,
   VpcProps,
   ZoneProps,
+  FolderProps,
   EntraProps,
   InfocardProps,
   PcUserProps,
@@ -53,6 +55,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "interconnect"; data: InterconnectProps })
   | (NodeBase & { kind: "firewall"; data: FirewallProps })
   | (NodeBase & { kind: "artifact"; data: ArtifactProps })
+  | (NodeBase & { kind: "build"; data: BuildProps })
   | (NodeBase & { kind: "kms"; data: KmsProps })
   | (NodeBase & { kind: "internet"; data: InternetProps })
   | (NodeBase & { kind: "run"; data: RunProps })
@@ -63,6 +66,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "firestore"; data: FirestoreProps })
   | (NodeBase & { kind: "workbench"; data: WorkbenchProps })
   | (NodeBase & { kind: "zone"; data: ZoneProps })
+  | (NodeBase & { kind: "folder"; data: FolderProps })
   | (NodeBase & { kind: "entra"; data: EntraProps })
   | (NodeBase & { kind: "infocard"; data: InfocardProps })
   | (NodeBase & { kind: "pcuser"; data: PcUserProps })
@@ -93,6 +97,9 @@ export type DiagramEdge = {
     | "vm-artifact"
     | "run-subnet"
     | "run-artifact"
+    | "build-artifact"
+    | "pubsub-build"
+    | "storage-build"
     | "pubsub-run"
     | "pubsub-storage"
     | "pubsub-bigquery"

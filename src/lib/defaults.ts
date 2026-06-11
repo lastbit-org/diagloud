@@ -18,6 +18,7 @@ import type {
   InterconnectProps,
   FirewallProps,
   ArtifactProps,
+  BuildProps,
   KmsProps,
   InternetProps,
   RunProps,
@@ -28,6 +29,7 @@ import type {
   FirestoreProps,
   WorkbenchProps,
   ZoneProps,
+  FolderProps,
   EntraProps,
   InfocardProps,
   PcUserProps,
@@ -113,6 +115,11 @@ export function defaultResourceData<K extends ResourceKind>(
         location: "southamerica-east1",
         format: "DOCKER",
       } as ArtifactProps as ResourcePropsByKind[K];
+    case "build":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as BuildProps as ResourcePropsByKind[K];
     case "kms":
       return {
         name,
@@ -169,6 +176,8 @@ export function defaultResourceData<K extends ResourceKind>(
         width: 320,
         height: 200,
       } as ZoneProps as ResourcePropsByKind[K];
+    case "folder":
+      return { name } as FolderProps as ResourcePropsByKind[K];
     case "entra":
       return { name } as EntraProps as ResourcePropsByKind[K];
     case "infocard":
@@ -213,6 +222,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `fw-${count}`;
     case "artifact":
       return `gar-${count}`;
+    case "build":
+      return `cb-${count}`;
     case "kms":
       return `kms-${count}`;
     case "internet":
@@ -233,6 +244,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `wb-${count}`;
     case "zone":
       return `zona-${count}`;
+    case "folder":
+      return `folder-${count}`;
     case "entra":
       return `entra-${count}`;
     case "infocard":

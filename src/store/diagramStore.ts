@@ -55,6 +55,7 @@ import type {
   InterconnectProps,
   FirewallProps,
   ArtifactProps,
+  BuildProps,
   KmsProps,
   InternetProps,
   RunProps,
@@ -65,6 +66,7 @@ import type {
   FirestoreProps,
   WorkbenchProps,
   ZoneProps,
+  FolderProps,
   EntraProps,
   InfocardProps,
   PcUserProps,
@@ -103,6 +105,7 @@ type DiagramActions = {
       | Partial<InterconnectProps>
       | Partial<FirewallProps>
       | Partial<ArtifactProps>
+      | Partial<BuildProps>
       | Partial<KmsProps>
       | Partial<InternetProps>
       | Partial<RunProps>
@@ -112,6 +115,7 @@ type DiagramActions = {
       | Partial<FirestoreProps>
       | Partial<WorkbenchProps>
       | Partial<ZoneProps>
+      | Partial<FolderProps>
       | Partial<EntraProps>
       | Partial<InfocardProps>
       | Partial<PcUserProps>
@@ -256,6 +260,12 @@ function buildNode<K extends ResourceKind>(
         kind: "artifact",
         data: { ...defaultResourceData("artifact", resourceContext), ...data },
       };
+    case "build":
+      return {
+        ...base,
+        kind: "build",
+        data: { ...defaultResourceData("build", resourceContext), ...data },
+      };
     case "kms":
       return {
         ...base,
@@ -316,6 +326,12 @@ function buildNode<K extends ResourceKind>(
         kind: "zone",
         data: { ...defaultResourceData("zone", resourceContext), ...data },
       };
+    case "folder":
+      return {
+        ...base,
+        kind: "folder",
+        data: { ...defaultResourceData("folder", resourceContext), ...data },
+      };
     case "entra":
       return {
         ...base,
@@ -357,6 +373,7 @@ function mergeNodeData(
     | Partial<VpnProps>
     | Partial<InterconnectProps>
     | Partial<ArtifactProps>
+    | Partial<BuildProps>
     | Partial<KmsProps>
     | Partial<InternetProps>
     | Partial<RunProps>
@@ -366,6 +383,7 @@ function mergeNodeData(
     | Partial<SpannerProps>
     | Partial<WorkbenchProps>
     | Partial<ZoneProps>
+    | Partial<FolderProps>
     | Partial<EntraProps>
     | Partial<InfocardProps>
     | Partial<PcUserProps>
@@ -432,6 +450,11 @@ function mergeNodeData(
         ...node,
         data: { ...node.data, ...(patch as Partial<ArtifactProps>) },
       };
+    case "build":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<BuildProps>) },
+      };
     case "kms":
       return {
         ...node,
@@ -481,6 +504,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<ZoneProps>) },
+      };
+    case "folder":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<FolderProps>) },
       };
     case "entra":
       return {

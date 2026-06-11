@@ -118,6 +118,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `fw-${count}`;
     case "artifact":
       return `gar-${count}`;
+    case "build":
+      return `cb-${count}`;
     case "kms":
       return `kms-${count}`;
     case "internet":
@@ -138,6 +140,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `wb-${count}`;
     case "zone":
       return `zona-${count}`;
+    case "folder":
+      return `folder-${count}`;
     case "entra":
       return `entra-${count}`;
     case "infocard":

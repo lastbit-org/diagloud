@@ -19,6 +19,9 @@ import type { ResourceKind } from "./resources";
  * - Internet → Cloud NAT (`internet-nat`): saída para a internet
  * - Sub-rede → Cloud NAT (`subnet-nat`): sub-rede com egress via NAT
  * - GKE / VM / Cloud Run → Artifact Registry: pull de imagens
+ * - Cloud Build → Artifact Registry (`build-artifact`): push de imagens
+ * - Pub/Sub → Cloud Build (`pubsub-build`): trigger de pipeline
+ * - Cloud Storage → Cloud Build (`storage-build`): código-fonte no bucket
  * - Cloud Run → Sub-rede (`run-subnet`): VPC connector (modo VPC)
  * - Pub/Sub → Cloud Run (`pubsub-run`): push subscription / evento
  * - Pub/Sub → Cloud Storage (`pubsub-storage`): exportação para bucket
@@ -53,6 +56,9 @@ export const EDGE_ENDPOINTS = {
   "vm-artifact": { from: "vm", to: "artifact" },
   "run-subnet": { from: "run", to: "subnet" },
   "run-artifact": { from: "run", to: "artifact" },
+  "build-artifact": { from: "build", to: "artifact" },
+  "pubsub-build": { from: "pubsub", to: "build" },
+  "storage-build": { from: "storage", to: "build" },
   "pubsub-run": { from: "pubsub", to: "run" },
   "pubsub-storage": { from: "pubsub", to: "storage" },
   "pubsub-bigquery": { from: "pubsub", to: "bigquery" },

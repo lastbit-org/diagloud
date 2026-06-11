@@ -63,6 +63,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "interconnect" ||
     value === "firewall" ||
     value === "artifact" ||
+    value === "build" ||
     value === "kms" ||
     value === "internet" ||
     value === "run" ||
@@ -73,6 +74,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "firestore" ||
     value === "workbench" ||
     value === "zone" ||
+    value === "folder" ||
     value === "entra" ||
     value === "infocard" ||
     value === "pcuser" ||
@@ -87,6 +89,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.zone,
     description: "Agrupamento visual de recursos",
     icon: GCP_RESOURCE_ICONS.zone,
+  },
+  {
+    kind: "folder",
+    category: "organization",
+    label: GCP_RESOURCE_LABELS.folder,
+    description: "Pasta na hierarquia de recursos GCP",
+    icon: GCP_RESOURCE_ICONS.folder,
   },
   {
     kind: "infocard",
@@ -234,6 +243,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.artifact,
     description: "Repositório de imagens e pacotes",
     icon: GCP_RESOURCE_ICONS.artifact,
+  },
+  {
+    kind: "build",
+    category: "devtools",
+    label: GCP_RESOURCE_LABELS.build,
+    description: "CI/CD — build e deploy de containers",
+    icon: GCP_RESOURCE_ICONS.build,
   },
   {
     kind: "kms",

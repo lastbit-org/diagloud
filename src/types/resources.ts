@@ -14,6 +14,7 @@ export type ResourceKind =
   | "interconnect"
   | "firewall"
   | "artifact"
+  | "build"
   | "kms"
   | "internet"
   | "run"
@@ -24,6 +25,7 @@ export type ResourceKind =
   | "firestore"
   | "workbench"
   | "zone"
+  | "folder"
   | "entra"
   | "infocard"
   | "pcuser"
@@ -126,6 +128,12 @@ export type ArtifactProps = {
   format: ArtifactFormat;
 };
 
+export type BuildProps = {
+  /** Nome do trigger ou pipeline. */
+  name: string;
+  location: string;
+};
+
 export type KmsProps = {
   /** Nome do key ring ou chave. */
   name: string;
@@ -195,6 +203,11 @@ export type ZoneProps = {
   height: number;
 };
 
+export type FolderProps = {
+  /** Nome da pasta na hierarquia de recursos GCP. */
+  name: string;
+};
+
 export type EntraProps = {
   /** Nome do tenant. */
   name: string;
@@ -229,6 +242,7 @@ export type ResourcePropsByKind = {
   interconnect: InterconnectProps;
   firewall: FirewallProps;
   artifact: ArtifactProps;
+  build: BuildProps;
   kms: KmsProps;
   internet: InternetProps;
   run: RunProps;
@@ -239,6 +253,7 @@ export type ResourcePropsByKind = {
   firestore: FirestoreProps;
   workbench: WorkbenchProps;
   zone: ZoneProps;
+  folder: FolderProps;
   entra: EntraProps;
   infocard: InfocardProps;
   pcuser: PcUserProps;

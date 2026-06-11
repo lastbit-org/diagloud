@@ -26,12 +26,14 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "pubsub",
   "eventarc",
   "artifact",
+  "build",
   "kms",
   "entra",
   "pcuser",
   "onprem",
   "infocard",
   "zone",
+  "folder",
 ];
 
 export function NamingSettingsPanel() {

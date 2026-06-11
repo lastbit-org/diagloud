@@ -29,6 +29,7 @@ import {
   type InterconnectProps,
   type FirewallProps,
   type ArtifactProps,
+  type BuildProps,
   type KmsProps,
   type InternetProps,
   type RunProps,
@@ -39,6 +40,7 @@ import {
   type FirestoreProps,
   type WorkbenchProps,
   type ZoneProps,
+  type FolderProps,
   type EntraProps,
   type InfocardProps,
   type PcUserProps,
@@ -229,6 +231,20 @@ function parseArtifactData(raw: unknown): ArtifactProps {
   };
 }
 
+function parseBuildData(raw: unknown): BuildProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Cloud Build inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
+  };
+}
+
 function parseKmsData(raw: unknown): KmsProps {
   if (
     !isRecord(raw) ||
@@ -408,6 +424,13 @@ function parseWorkbenchData(raw: unknown): WorkbenchProps {
     data.internalIp = raw.internalIp;
   }
   return data;
+}
+
+function parseFolderData(raw: unknown): FolderProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de pasta inválidos.");
+  }
+  return { name: raw.name };
 }
 
 function parseEntraData(raw: unknown): EntraProps {
@@ -655,6 +678,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseArtifactData(data),
       };
+    case "build":
+      if (!nodeIdMatchesKind(nodeId, "build")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Build.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "build",
+        position: parsedPosition,
+        zIndex,
+        data: parseBuildData(data),
+      };
     case "kms":
       if (!nodeIdMatchesKind(nodeId, "kms")) {
         throw new DiagramParseError(
@@ -773,6 +809,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseZoneData(data),
       };
+    case "folder":
+      if (!nodeIdMatchesKind(nodeId, "folder")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Pasta.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "folder",
+        position: parsedPosition,
+        zIndex,
+        data: parseFolderData(data),
+      };
     case "entra":
       if (!nodeIdMatchesKind(nodeId, "entra")) {
         throw new DiagramParseError(
@@ -870,6 +919,9 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "vm-artifact" &&
     kind !== "run-subnet" &&
     kind !== "run-artifact" &&
+    kind !== "build-artifact" &&
+    kind !== "pubsub-build" &&
+    kind !== "storage-build" &&
     kind !== "pubsub-run" &&
     kind !== "pubsub-storage" &&
     kind !== "pubsub-bigquery" &&
@@ -1013,6 +1065,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.artifact === "string"
           ? patterns.artifact
           : DEFAULT_NAMING_PATTERNS.artifact,
+      build:
+        typeof patterns.build === "string"
+          ? patterns.build
+          : DEFAULT_NAMING_PATTERNS.build,
       kms:
         typeof patterns.kms === "string"
           ? patterns.kms
@@ -1053,6 +1109,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.zone === "string"
           ? patterns.zone
           : DEFAULT_NAMING_PATTERNS.zone,
+      folder:
+        typeof patterns.folder === "string"
+          ? patterns.folder
+          : DEFAULT_NAMING_PATTERNS.folder,
       entra:
         typeof patterns.entra === "string"
           ? patterns.entra
@@ -1233,6 +1293,7 @@ function namingMetadataEqual(
     a.patterns.interconnect === b.patterns.interconnect &&
     a.patterns.firewall === b.patterns.firewall &&
     a.patterns.artifact === b.patterns.artifact &&
+    a.patterns.build === b.patterns.build &&
     a.patterns.kms === b.patterns.kms &&
     a.patterns.internet === b.patterns.internet &&
     a.patterns.run === b.patterns.run &&
@@ -1243,6 +1304,7 @@ function namingMetadataEqual(
     a.patterns.firestore === b.patterns.firestore &&
     a.patterns.workbench === b.patterns.workbench &&
     a.patterns.zone === b.patterns.zone &&
+    a.patterns.folder === b.patterns.folder &&
     a.patterns.entra === b.patterns.entra &&
     a.patterns.infocard === b.patterns.infocard &&
     a.patterns.pcuser === b.patterns.pcuser &&

@@ -2,7 +2,7 @@ import type { ResourceKind } from "../types";
 
 export const INFOCARD_LINK_EDGE_KIND = "infocard-link" as const;
 
-const NON_LINKABLE_KINDS = new Set<ResourceKind>(["zone", "infocard"]);
+const NON_LINKABLE_KINDS = new Set<ResourceKind>(["zone"]);
 
 export function isInfocardLinkable(kind: ResourceKind): boolean {
   return !NON_LINKABLE_KINDS.has(kind);

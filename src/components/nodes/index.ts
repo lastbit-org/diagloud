@@ -1,5 +1,6 @@
 export type { GcpNodeData } from "./BaseNode";
 export { ArtifactNode } from "./ArtifactNode";
+export { BuildNode } from "./BuildNode";
 export { KmsNode } from "./KmsNode";
 export { BigqueryNode } from "./BigqueryNode";
 export { SpannerNode } from "./SpannerNode";
@@ -22,6 +23,7 @@ export { VmNode } from "./VmNode";
 export { VpcNode } from "./VpcNode";
 export type { ZoneNodeData } from "./ZoneNode";
 export { ZoneNode } from "./ZoneNode";
+export { FolderNode } from "./FolderNode";
 export type { InfocardNodeData } from "./InfocardNode";
 export { InfocardNode } from "./InfocardNode";
 export { EntraNode } from "./EntraNode";

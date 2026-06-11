@@ -66,6 +66,7 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     node.kind === "bigquery" ||
     node.kind === "firestore" ||
     node.kind === "eventarc" ||
+    node.kind === "build" ||
     node.kind === "kms"
   ) {
     return node.data.location;
@@ -75,6 +76,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   }
   if (node.kind === "onprem") {
     return node.data.location;
+  }
+  if (node.kind === "folder") {
+    return "Hierarquia";
   }
   if (node.kind === "entra") {
     return "Identity";
