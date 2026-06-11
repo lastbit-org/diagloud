@@ -33,6 +33,7 @@ import type {
   StorageAccessMode,
   StorageClass,
   SparkDeployMode,
+  DataflowPipelineType,
 } from "../../types";
 import "./properties.css";
 
@@ -990,6 +991,78 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "dataflow" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="dataflow-name">Job / pipeline</label>
+            <input
+              id="dataflow-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="dataflow-type">Tipo</label>
+            <select
+              id="dataflow-type"
+              value={selectedNode.data.pipelineType}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  pipelineType: e.target.value as DataflowPipelineType,
+                })
+              }
+            >
+              <option value="batch">Batch</option>
+              <option value="streaming">Streaming</option>
+            </select>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="dataflow-region">Região</label>
+            <input
+              id="dataflow-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+              placeholder="southamerica-east1"
+              readOnly={
+                edges.some(
+                  (e) =>
+                    e.kind === "dataflow-subnet" &&
+                    e.source === selectedNode.id,
+                )
+              }
+              aria-readonly={
+                edges.some(
+                  (e) =>
+                    e.kind === "dataflow-subnet" &&
+                    e.source === selectedNode.id,
+                )
+              }
+            />
+            {edges.some(
+              (e) =>
+                e.kind === "dataflow-subnet" && e.source === selectedNode.id,
+            ) ? (
+              <span className="properties-field__hint">
+                Herdada da sub-rede ao conectar workers na VPC.
+              </span>
+            ) : null}
+          </div>
+          <p className="properties-field__hint">
+            Cloud Dataflow — pipelines Apache Beam gerenciados. Batch processa
+            conjuntos finitos; streaming consome eventos contínuos (ex.: Pub/Sub).
+          </p>
+          <DataflowConnectionsInfo
+            dataflow={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "modelregistry" && (
         <>
           <div className="properties-field">
@@ -1816,6 +1889,10 @@ function PubsubDestinationsInfo({
     .filter((e) => e.kind === "pubsub-airflow" && e.source === pubsub.id)
     .map((e) => nodes.find((n) => n.id === e.target && n.kind === "airflow"))
     .filter((n): n is Extract<DiagramNode, { kind: "airflow" }> => n != null);
+  const dataflowJobs = edges
+    .filter((e) => e.kind === "pubsub-dataflow" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "dataflow"))
+    .filter((n): n is Extract<DiagramNode, { kind: "dataflow" }> => n != null);
   const builds = edges
     .filter((e) => e.kind === "pubsub-build" && e.source === pubsub.id)
     .map((e) => nodes.find((n) => n.id === e.target && n.kind === "build"))
@@ -1829,13 +1906,14 @@ function PubsubDestinationsInfo({
     firestores.length === 0 &&
     eventarcTriggers.length === 0 &&
     airflowEnvs.length === 0 &&
+    dataflowJobs.length === 0 &&
     builds.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         Ligue a Cloud Run, Cloud Storage, BigQuery, Cloud Spanner, Firestore,
-        Eventarc, Managed Airflow ou Cloud Build para documentar subscriptions
-        e exportações.
+        Eventarc, Managed Airflow, Cloud Dataflow ou Cloud Build para documentar
+        subscriptions e exportações.
       </p>
     );
   }
@@ -1882,6 +1960,12 @@ function PubsubDestinationsInfo({
         <>
           <dt>Managed Airflow</dt>
           <dd>{airflowEnvs.map((a) => a.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {dataflowJobs.length > 0 ? (
+        <>
+          <dt>Cloud Dataflow</dt>
+          <dd>{dataflowJobs.map((d) => d.data.name).join(", ")}</dd>
         </>
       ) : null}
       {builds.length > 0 ? (
@@ -2149,6 +2233,114 @@ function ModelRegistryConnectionsInfo({
         <>
           <dt>Cloud KMS</dt>
           <dd>{kmsKeys.map((k) => k.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function DataflowConnectionsInfo({
+  dataflow,
+  edges,
+  nodes,
+}: {
+  dataflow: Extract<DiagramNode, { kind: "dataflow" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const subnetEdge = edges.find(
+    (e) => e.kind === "dataflow-subnet" && e.source === dataflow.id,
+  );
+  const storageEdges = edges.filter(
+    (e) => e.kind === "dataflow-storage" && e.source === dataflow.id,
+  );
+  const bigqueryEdges = edges.filter(
+    (e) => e.kind === "dataflow-bigquery" && e.source === dataflow.id,
+  );
+  const kmsEdges = edges.filter(
+    (e) => e.kind === "dataflow-kms" && e.source === dataflow.id,
+  );
+  const pubsubTriggers = edges
+    .filter((e) => e.kind === "pubsub-dataflow" && e.target === dataflow.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+
+  if (
+    !subnetEdge &&
+    storageEdges.length === 0 &&
+    bigqueryEdges.length === 0 &&
+    kmsEdges.length === 0 &&
+    pubsubTriggers.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud KMS ou Pub/Sub.
+      </p>
+    );
+  }
+
+  const subnet = subnetEdge
+    ? nodes.find((n) => n.id === subnetEdge.target && n.kind === "subnet")
+    : undefined;
+
+  return (
+    <dl className="properties-stats">
+      {subnet && subnet.kind === "subnet" ? (
+        <>
+          <dt>Sub-rede</dt>
+          <dd>{subnet.data.name}</dd>
+        </>
+      ) : null}
+      {storageEdges.length > 0 ? (
+        <>
+          <dt>Cloud Storage</dt>
+          <dd>
+            {storageEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "storage"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "storage" }> =>
+                  n != null,
+              )
+              .map((b) => b.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {bigqueryEdges.length > 0 ? (
+        <>
+          <dt>BigQuery</dt>
+          <dd>
+            {bigqueryEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "bigquery"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "bigquery" }> =>
+                  n != null,
+              )
+              .map((b) => b.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {kmsEdges.length > 0 ? (
+        <>
+          <dt>Cloud KMS</dt>
+          <dd>
+            {kmsEdges
+              .map((e) => nodes.find((n) => n.id === e.target && n.kind === "kms"))
+              .filter((n): n is Extract<DiagramNode, { kind: "kms" }> => n != null)
+              .map((k) => k.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {pubsubTriggers.length > 0 ? (
+        <>
+          <dt>Entrada Pub/Sub</dt>
+          <dd>{pubsubTriggers.map((p) => p.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
@@ -3013,6 +3205,10 @@ function KmsConsumersInfo({
     .filter((e) => e.kind === "airflow-kms" && e.target === kms.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "airflow"))
     .filter((n): n is Extract<DiagramNode, { kind: "airflow" }> => n != null);
+  const dataflowJobs = edges
+    .filter((e) => e.kind === "dataflow-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "dataflow"))
+    .filter((n): n is Extract<DiagramNode, { kind: "dataflow" }> => n != null);
   const modelRegistries = edges
     .filter((e) => e.kind === "modelregistry-kms" && e.target === kms.id)
     .map((e) =>
@@ -3033,13 +3229,14 @@ function KmsConsumersInfo({
     spanners.length === 0 &&
     sparkJobs.length === 0 &&
     airflowEnvs.length === 0 &&
+    dataflowJobs.length === 0 &&
     modelRegistries.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         Ligue VMs, GKE, Cloud Run, Storage, Cloud SQL, BigQuery, Firestore,
-        Spanner, Apache Spark, Managed Airflow ou Model Registry para documentar
-        uso de chaves (CMEK).
+        Spanner, Apache Spark, Managed Airflow, Cloud Dataflow ou Model Registry
+        para documentar uso de chaves (CMEK).
       </p>
     );
   }
@@ -3104,6 +3301,12 @@ function KmsConsumersInfo({
         <>
           <dt>Managed Airflow</dt>
           <dd>{airflowEnvs.map((a) => a.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {dataflowJobs.length > 0 ? (
+        <>
+          <dt>Cloud Dataflow</dt>
+          <dd>{dataflowJobs.map((d) => d.data.name).join(", ")}</dd>
         </>
       ) : null}
       {modelRegistries.length > 0 ? (

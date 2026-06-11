@@ -50,6 +50,7 @@ const sampleDocument: DiagramDocument = {
         workbench: "wb-AREA-AMBIENTE",
         spark: "spark-AREA-AMBIENTE",
         airflow: "composer-AREA-AMBIENTE",
+        dataflow: "dataflow-AREA-AMBIENTE",
         modelregistry: "mr-AREA-AMBIENTE",
         zone: "zona-AREA-AMBIENTE",
         folder: "folder-AREA-AMBIENTE",

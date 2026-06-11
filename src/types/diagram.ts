@@ -16,6 +16,7 @@ import type {
   WorkbenchProps,
   SparkProps,
   AirflowProps,
+  DataflowProps,
   ModelRegistryProps,
   PubsubProps,
   EventarcProps,
@@ -71,6 +72,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "workbench"; data: WorkbenchProps })
   | (NodeBase & { kind: "spark"; data: SparkProps })
   | (NodeBase & { kind: "airflow"; data: AirflowProps })
+  | (NodeBase & { kind: "dataflow"; data: DataflowProps })
   | (NodeBase & { kind: "modelregistry"; data: ModelRegistryProps })
   | (NodeBase & { kind: "zone"; data: ZoneProps })
   | (NodeBase & { kind: "folder"; data: FolderProps })
@@ -133,6 +135,11 @@ export type DiagramEdge = {
     | "airflow-bigquery"
     | "airflow-kms"
     | "pubsub-airflow"
+    | "dataflow-subnet"
+    | "dataflow-storage"
+    | "dataflow-bigquery"
+    | "dataflow-kms"
+    | "pubsub-dataflow"
     | "workbench-modelregistry"
     | "build-modelregistry"
     | "modelregistry-run"

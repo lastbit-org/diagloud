@@ -89,6 +89,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "airflow") {
     return node.data.region;
   }
+  if (node.kind === "dataflow") {
+    return node.data.pipelineType === "streaming" ? "Streaming" : node.data.region;
+  }
   if (node.kind === "modelregistry") {
     return node.data.location;
   }

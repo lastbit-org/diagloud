@@ -47,7 +47,8 @@ export type ConnectionInvalidReason =
   | "subnet-workbench-capacity"
   | "spark-has-subnet"
   | "spark-not-cluster"
-  | "airflow-has-subnet";
+  | "airflow-has-subnet"
+  | "dataflow-has-subnet";
 
 export function canonicalizeEdgeEndpoints(
   edge: Pick<DiagramEdge, "source" | "target" | "kind">,
@@ -533,6 +534,23 @@ export function validateConnection(
   }
 
   if (edgeKind === "airflow-subnet") {
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+  }
+
+  if (
+    edgeKind === "dataflow-subnet" &&
+    context.edges.some(
+      (edge) =>
+        edge.kind === "dataflow-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "dataflow-has-subnet" };
+  }
+
+  if (edgeKind === "dataflow-subnet") {
     const subnet = getSubnetNode(directed.target, context.nodes);
     if (!subnet || !parseCidr(subnet.data.cidr)) {
       return { valid: false, reason: "subnet-invalid-cidr" };

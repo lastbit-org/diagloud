@@ -26,6 +26,7 @@ import {
 } from "../model/workbenchSubnet";
 import { assignSparkSubnetRegion } from "../model/sparkSubnet";
 import { assignAirflowSubnetRegion } from "../model/airflowSubnet";
+import { assignDataflowSubnetRegion } from "../model/dataflowSubnet";
 import {
   clearSqlPrivateNetwork,
   reassignSubnetSqlIps,
@@ -69,6 +70,7 @@ import type {
   WorkbenchProps,
   SparkProps,
   AirflowProps,
+  DataflowProps,
   ModelRegistryProps,
   ZoneProps,
   FolderProps,
@@ -122,6 +124,7 @@ type DiagramActions = {
       | Partial<WorkbenchProps>
       | Partial<SparkProps>
       | Partial<AirflowProps>
+      | Partial<DataflowProps>
       | Partial<ModelRegistryProps>
       | Partial<ZoneProps>
       | Partial<FolderProps>
@@ -342,6 +345,12 @@ function buildNode<K extends ResourceKind>(
         kind: "airflow",
         data: { ...defaultResourceData("airflow", resourceContext), ...data },
       };
+    case "dataflow":
+      return {
+        ...base,
+        kind: "dataflow",
+        data: { ...defaultResourceData("dataflow", resourceContext), ...data },
+      };
     case "modelregistry":
       return {
         ...base,
@@ -421,6 +430,7 @@ function mergeNodeData(
     | Partial<WorkbenchProps>
     | Partial<SparkProps>
     | Partial<AirflowProps>
+    | Partial<DataflowProps>
     | Partial<ModelRegistryProps>
     | Partial<ZoneProps>
     | Partial<FolderProps>
@@ -549,6 +559,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<AirflowProps>) },
+      };
+    case "dataflow":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<DataflowProps>) },
       };
     case "modelregistry":
       return {
@@ -837,7 +852,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         next.kind === "run-subnet" ||
         next.kind === "workbench-subnet" ||
         next.kind === "spark-subnet" ||
-        next.kind === "airflow-subnet"
+        next.kind === "airflow-subnet" ||
+        next.kind === "dataflow-subnet"
       ) {
         if (next.kind === "vm-subnet") {
           nodes = assignIpToVm(next.source, next.target, nodes, edges);
@@ -848,7 +864,14 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         if (next.kind === "airflow-subnet") {
           nodes = assignAirflowSubnetRegion(next.source, next.target, nodes);
         }
-        if (next.kind !== "spark-subnet" && next.kind !== "airflow-subnet") {
+        if (next.kind === "dataflow-subnet") {
+          nodes = assignDataflowSubnetRegion(next.source, next.target, nodes);
+        }
+        if (
+          next.kind !== "spark-subnet" &&
+          next.kind !== "airflow-subnet" &&
+          next.kind !== "dataflow-subnet"
+        ) {
           nodes = reassignSubnetHostIps(next.target, nodes, edges);
         }
       }

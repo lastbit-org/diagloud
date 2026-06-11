@@ -41,6 +41,7 @@ import {
   type WorkbenchProps,
   type SparkProps,
   type AirflowProps,
+  type DataflowProps,
   type ModelRegistryProps,
   type ZoneProps,
   type FolderProps,
@@ -477,6 +478,25 @@ function parseAirflowData(raw: unknown): AirflowProps {
   };
 }
 
+const DATAFLOW_PIPELINE_TYPES = new Set(["batch", "streaming"]);
+
+function parseDataflowData(raw: unknown): DataflowProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string" ||
+    typeof raw.pipelineType !== "string" ||
+    !DATAFLOW_PIPELINE_TYPES.has(raw.pipelineType)
+  ) {
+    throw new DiagramParseError("Dados de Cloud Dataflow inválidos.");
+  }
+  return {
+    name: raw.name,
+    region: raw.region,
+    pipelineType: raw.pipelineType as DataflowProps["pipelineType"],
+  };
+}
+
 function parseFolderData(raw: unknown): FolderProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de pasta inválidos.");
@@ -882,6 +902,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseAirflowData(data),
       };
+    case "dataflow":
+      if (!nodeIdMatchesKind(nodeId, "dataflow")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Dataflow.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "dataflow",
+        position: parsedPosition,
+        zIndex,
+        data: parseDataflowData(data),
+      };
     case "modelregistry":
       if (!nodeIdMatchesKind(nodeId, "modelregistry")) {
         throw new DiagramParseError(
@@ -1057,6 +1090,11 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "airflow-bigquery" &&
     kind !== "airflow-kms" &&
     kind !== "pubsub-airflow" &&
+    kind !== "dataflow-subnet" &&
+    kind !== "dataflow-storage" &&
+    kind !== "dataflow-bigquery" &&
+    kind !== "dataflow-kms" &&
+    kind !== "pubsub-dataflow" &&
     kind !== "workbench-modelregistry" &&
     kind !== "build-modelregistry" &&
     kind !== "modelregistry-run" &&
@@ -1238,6 +1276,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.airflow === "string"
           ? patterns.airflow
           : DEFAULT_NAMING_PATTERNS.airflow,
+      dataflow:
+        typeof patterns.dataflow === "string"
+          ? patterns.dataflow
+          : DEFAULT_NAMING_PATTERNS.dataflow,
       modelregistry:
         typeof patterns.modelregistry === "string"
           ? patterns.modelregistry
@@ -1446,6 +1488,7 @@ function namingMetadataEqual(
     a.patterns.workbench === b.patterns.workbench &&
     a.patterns.spark === b.patterns.spark &&
     a.patterns.airflow === b.patterns.airflow &&
+    a.patterns.dataflow === b.patterns.dataflow &&
     a.patterns.modelregistry === b.patterns.modelregistry &&
     a.patterns.zone === b.patterns.zone &&
     a.patterns.folder === b.patterns.folder &&

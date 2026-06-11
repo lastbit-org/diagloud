@@ -30,6 +30,7 @@ import type {
   WorkbenchProps,
   SparkProps,
   AirflowProps,
+  DataflowProps,
   ModelRegistryProps,
   ZoneProps,
   FolderProps,
@@ -182,6 +183,12 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         region: "southamerica-east1",
       } as AirflowProps as ResourcePropsByKind[K];
+    case "dataflow":
+      return {
+        name,
+        region: "southamerica-east1",
+        pipelineType: "batch",
+      } as DataflowProps as ResourcePropsByKind[K];
     case "modelregistry":
       return {
         name,
@@ -268,6 +275,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `spark-${count}`;
     case "airflow":
       return `composer-${count}`;
+    case "dataflow":
+      return `dataflow-${count}`;
     case "modelregistry":
       return `mr-${count}`;
     case "zone":

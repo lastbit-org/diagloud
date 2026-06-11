@@ -44,6 +44,8 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Apache Spark em modo serverless não se liga à sub-rede. Altere o modo para cluster.",
   "airflow-has-subnet":
     "Este ambiente Managed Airflow já está ligado a uma sub-rede.",
+  "dataflow-has-subnet":
+    "Este job Cloud Dataflow já está ligado a uma sub-rede.",
 };
 
 export function connectionErrorMessage(reason: ConnectionInvalidReason): string {

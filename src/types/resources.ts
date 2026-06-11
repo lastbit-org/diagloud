@@ -26,6 +26,7 @@ export type ResourceKind =
   | "workbench"
   | "spark"
   | "airflow"
+  | "dataflow"
   | "modelregistry"
   | "zone"
   | "folder"
@@ -214,6 +215,16 @@ export type AirflowProps = {
   region: string;
 };
 
+/** `batch` = pipelines em lote; `streaming` = pipelines contínuos. */
+export type DataflowPipelineType = "batch" | "streaming";
+
+export type DataflowProps = {
+  /** Nome do job ou pipeline. */
+  name: string;
+  region: string;
+  pipelineType: DataflowPipelineType;
+};
+
 export type ModelRegistryProps = {
   /** Nome do modelo ou recurso no registry. */
   name: string;
@@ -285,6 +296,7 @@ export type ResourcePropsByKind = {
   workbench: WorkbenchProps;
   spark: SparkProps;
   airflow: AirflowProps;
+  dataflow: DataflowProps;
   modelregistry: ModelRegistryProps;
   zone: ZoneProps;
   folder: FolderProps;

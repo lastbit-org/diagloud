@@ -40,6 +40,9 @@ import type { ResourceKind } from "./resources";
  * - Managed Airflow → Sub-rede (`airflow-subnet`): ambiente Composer na VPC
  * - Managed Airflow → Storage / BigQuery / Cloud KMS: DAGs, dados e criptografia
  * - Pub/Sub → Managed Airflow (`pubsub-airflow`): triggers e sensores
+ * - Cloud Dataflow → Sub-rede (`dataflow-subnet`): workers na VPC
+ * - Cloud Dataflow → Storage / BigQuery / Cloud KMS: leitura, escrita e criptografia
+ * - Pub/Sub → Cloud Dataflow (`pubsub-dataflow`): entrada streaming
  * - Vertex AI Workbench / Cloud Build → Model Registry: registro de modelos
  * - Model Registry → Cloud Run / GKE / Storage / Cloud KMS: deploy e artefatos
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
@@ -91,6 +94,11 @@ export const EDGE_ENDPOINTS = {
   "airflow-bigquery": { from: "airflow", to: "bigquery" },
   "airflow-kms": { from: "airflow", to: "kms" },
   "pubsub-airflow": { from: "pubsub", to: "airflow" },
+  "dataflow-subnet": { from: "dataflow", to: "subnet" },
+  "dataflow-storage": { from: "dataflow", to: "storage" },
+  "dataflow-bigquery": { from: "dataflow", to: "bigquery" },
+  "dataflow-kms": { from: "dataflow", to: "kms" },
+  "pubsub-dataflow": { from: "pubsub", to: "dataflow" },
   "workbench-modelregistry": { from: "workbench", to: "modelregistry" },
   "build-modelregistry": { from: "build", to: "modelregistry" },
   "modelregistry-run": { from: "modelregistry", to: "run" },

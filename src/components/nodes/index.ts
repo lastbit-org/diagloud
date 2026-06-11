@@ -8,6 +8,7 @@ export { FirestoreNode } from "./FirestoreNode";
 export { WorkbenchNode } from "./WorkbenchNode";
 export { SparkNode } from "./SparkNode";
 export { AirflowNode } from "./AirflowNode";
+export { DataflowNode } from "./DataflowNode";
 export { ModelRegistryNode } from "./ModelRegistryNode";
 export { GkeNode } from "./GkeNode";
 export { InternetNode } from "./InternetNode";

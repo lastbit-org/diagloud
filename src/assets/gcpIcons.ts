@@ -8,6 +8,7 @@ import firestoreIcon from "./google-cloud-legacy-icons/firestore/firestore.svg";
 import workbenchIcon from "./google-cloud-legacy-icons/vertexai/vertexai.svg";
 import sparkIcon from "./google-cloud-legacy-icons/dataproc/dataproc.svg";
 import airflowIcon from "./google-cloud-legacy-icons/cloud_composer/cloud_composer.svg";
+import dataflowIcon from "./google-cloud-legacy-icons/dataflow/dataflow.svg";
 import modelRegistryIcon from "./google-cloud-legacy-icons/advanced_agent_modeling/advanced_agent_modeling.svg";
 import natIcon from "./google-cloud-legacy-icons/cloud_nat/cloud_nat.svg";
 import vpnIcon from "./google-cloud-legacy-icons/cloud_vpn/cloud_vpn.svg";
@@ -58,6 +59,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   workbench: workbenchIcon,
   spark: sparkIcon,
   airflow: airflowIcon,
+  dataflow: dataflowIcon,
   modelregistry: modelRegistryIcon,
   zone: zoneIcon,
   folder: folderIcon,
@@ -93,6 +95,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   workbench: "Vertex AI Workbench",
   spark: "Apache Spark",
   airflow: "Managed Airflow",
+  dataflow: "Cloud Dataflow",
   modelregistry: "Model Registry",
   zone: "Zona",
   folder: "Pasta",

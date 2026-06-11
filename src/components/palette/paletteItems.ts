@@ -75,6 +75,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "workbench" ||
     value === "spark" ||
     value === "airflow" ||
+    value === "dataflow" ||
     value === "modelregistry" ||
     value === "zone" ||
     value === "folder" ||
@@ -261,6 +262,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.airflow,
     description: "Orquestração de pipelines (Apache Airflow)",
     icon: GCP_RESOURCE_ICONS.airflow,
+  },
+  {
+    kind: "dataflow",
+    category: "integration",
+    label: GCP_RESOURCE_LABELS.dataflow,
+    description: "Processamento de dados em lote ou streaming",
+    icon: GCP_RESOURCE_ICONS.dataflow,
   },
   {
     kind: "eventarc",
