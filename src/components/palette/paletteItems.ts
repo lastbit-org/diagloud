@@ -58,6 +58,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "sql" ||
     value === "gke" ||
     value === "nat" ||
+    value === "router" ||
     value === "peering" ||
     value === "vpn" ||
     value === "interconnect" ||
@@ -143,6 +144,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.nat,
     description: "Saída para internet sem IP público",
     icon: GCP_RESOURCE_ICONS.nat,
+  },
+  {
+    kind: "router",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.router,
+    description: "Roteador BGP — NAT, VPN e rotas dinâmicas (VPC opcional)",
+    icon: GCP_RESOURCE_ICONS.router,
   },
   {
     kind: "peering",

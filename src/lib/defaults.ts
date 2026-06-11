@@ -12,6 +12,7 @@ import type {
   SubnetProps,
   VmProps,
   VpcProps,
+  RouterProps,
   NatProps,
   PeeringProps,
   VpnProps,
@@ -95,6 +96,11 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         region: "southamerica-east1",
       } as NatProps as ResourcePropsByKind[K];
+    case "router":
+      return {
+        name,
+        region: "southamerica-east1",
+      } as RouterProps as ResourcePropsByKind[K];
     case "peering":
       return {
         name,
@@ -241,6 +247,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `gke-${count}`;
     case "nat":
       return `nat-${count}`;
+    case "router":
+      return `router-${count}`;
     case "peering":
       return `peer-${count}`;
     case "vpn":

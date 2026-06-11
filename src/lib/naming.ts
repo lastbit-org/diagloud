@@ -108,6 +108,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `gke-${count}`;
     case "nat":
       return `nat-${count}`;
+    case "router":
+      return `router-${count}`;
     case "peering":
       return `peer-${count}`;
     case "vpn":

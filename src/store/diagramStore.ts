@@ -64,6 +64,7 @@ import type {
   VmProps,
   VpcProps,
   NatProps,
+  RouterProps,
   PeeringProps,
   VpnProps,
   InterconnectProps,
@@ -122,6 +123,7 @@ type DiagramActions = {
       | Partial<SqlProps>
       | Partial<GkeProps>
       | Partial<NatProps>
+      | Partial<RouterProps>
       | Partial<PeeringProps>
       | Partial<VpnProps>
       | Partial<InterconnectProps>
@@ -315,6 +317,12 @@ function buildNode<K extends ResourceKind>(
         kind: "nat",
         data: { ...defaultResourceData("nat", resourceContext), ...data },
       };
+    case "router":
+      return {
+        ...base,
+        kind: "router",
+        data: { ...defaultResourceData("router", resourceContext), ...data },
+      };
     case "peering":
       return {
         ...base,
@@ -490,6 +498,7 @@ function mergeNodeData(
     | Partial<SqlProps>
     | Partial<GkeProps>
     | Partial<NatProps>
+    | Partial<RouterProps>
     | Partial<PeeringProps>
     | Partial<VpnProps>
     | Partial<InterconnectProps>
@@ -549,6 +558,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<NatProps>) },
+      };
+    case "router":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<RouterProps>) },
       };
     case "peering":
       return {

@@ -11,6 +11,7 @@ import airflowIcon from "./google-cloud-legacy-icons/cloud_composer/cloud_compos
 import dataflowIcon from "./google-cloud-legacy-icons/dataflow/dataflow.svg";
 import modelRegistryIcon from "./google-cloud-legacy-icons/advanced_agent_modeling/advanced_agent_modeling.svg";
 import natIcon from "./google-cloud-legacy-icons/cloud_nat/cloud_nat.svg";
+import routerIcon from "./google-cloud-legacy-icons/cloud_router/cloud_router.svg";
 import vpnIcon from "./google-cloud-legacy-icons/cloud_vpn/cloud_vpn.svg";
 import interconnectIcon from "./google-cloud-legacy-icons/cloud_interconnect/cloud_interconnect.svg";
 import firewallIcon from "./google-cloud-legacy-icons/cloud_firewall_rules/cloud_firewall_rules.svg";
@@ -42,6 +43,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   sql: sqlIcon,
   gke: gkeIcon,
   nat: natIcon,
+  router: routerIcon,
   peering: peeringIcon,
   vpn: vpnIcon,
   interconnect: interconnectIcon,
@@ -78,6 +80,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   sql: "Cloud SQL",
   gke: "GKE",
   nat: "Cloud NAT",
+  router: "Cloud Router",
   peering: "VPC Peering",
   vpn: "Cloud VPN",
   interconnect: "Cloud Interconnect",

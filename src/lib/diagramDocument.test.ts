@@ -33,6 +33,7 @@ const sampleDocument: DiagramDocument = {
         sql: "sql-AREA-AMBIENTE",
         gke: "gke-AREA-AMBIENTE",
         nat: "nat-AREA-AMBIENTE",
+        router: "router-AREA-AMBIENTE",
         peering: "peer-AREA-AMBIENTE",
         vpn: "vpn-AREA-AMBIENTE",
         interconnect: "ic-AREA-AMBIENTE",

@@ -15,6 +15,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   sql: "sql-AREA-AMBIENTE",
   gke: "gke-AREA-AMBIENTE",
   nat: "nat-AREA-AMBIENTE",
+  router: "router-AREA-AMBIENTE",
   peering: "peer-AREA-AMBIENTE",
   vpn: "vpn-AREA-AMBIENTE",
   interconnect: "ic-AREA-AMBIENTE",

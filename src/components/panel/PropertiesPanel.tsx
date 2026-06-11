@@ -1125,6 +1125,32 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "router" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="router-name">Nome</label>
+            <input
+              id="router-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="router-region">Região</label>
+            <input
+              id="router-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <RouterVpcInfo router={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
       {selectedNode?.kind === "peering" && (
         <>
           <div className="properties-field">
@@ -3160,6 +3186,42 @@ function NatVpcInfo({
         <>
           <dt>Internet</dt>
           <dd>Ligada</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function RouterVpcInfo({
+  router,
+  edges,
+  nodes,
+}: {
+  router: Extract<DiagramNode, { kind: "router" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vpcEdge = edges.find(
+    (e) => e.kind === "router-vpc" && e.source === router.id,
+  );
+
+  if (!vpcEdge) {
+    return (
+      <p className="properties-field__hint">
+        Opcional: ligue à VPC (handle inferior) para documentar roteamento BGP,
+        NAT ou VPN. Pode permanecer isolado no diagrama.
+      </p>
+    );
+  }
+
+  const vpc = nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc");
+
+  return (
+    <dl className="properties-stats">
+      {vpc && vpc.kind === "vpc" ? (
+        <>
+          <dt>VPC</dt>
+          <dd>{vpc.data.name}</dd>
         </>
       ) : null}
     </dl>

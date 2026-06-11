@@ -9,6 +9,7 @@ export type ResourceKind =
   | "sql"
   | "gke"
   | "nat"
+  | "router"
   | "peering"
   | "vpn"
   | "interconnect"
@@ -102,6 +103,11 @@ export type GkeProps = {
 };
 
 export type NatProps = {
+  name: string;
+  region: string;
+};
+
+export type RouterProps = {
   name: string;
   region: string;
 };
@@ -279,6 +285,7 @@ export type ResourcePropsByKind = {
   sql: SqlProps;
   gke: GkeProps;
   nat: NatProps;
+  router: RouterProps;
   peering: PeeringProps;
   vpn: VpnProps;
   interconnect: InterconnectProps;

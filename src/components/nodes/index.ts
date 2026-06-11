@@ -13,6 +13,7 @@ export { ModelRegistryNode } from "./ModelRegistryNode";
 export { GkeNode } from "./GkeNode";
 export { InternetNode } from "./InternetNode";
 export { NatNode } from "./NatNode";
+export { RouterNode } from "./RouterNode";
 export { PeeringNode } from "./PeeringNode";
 export { VpnNode } from "./VpnNode";
 export { InterconnectNode } from "./InterconnectNode";

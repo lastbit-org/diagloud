@@ -56,6 +56,22 @@ resource "google_compute_router_nat" "${resourceName}" {
 }`);
   }
 
+  for (const node of nodesOfKind(ctx, "router")) {
+    const vpcId = ctx.graph.vpcForRouter.get(node.id);
+    if (!vpcId) continue;
+    const vpcNode = ctx.document.nodes.find((n) => n.id === vpcId && n.kind === "vpc");
+    if (!vpcNode || vpcNode.kind !== "vpc") continue;
+
+    const resourceName = ctx.getTfResourceName(node);
+    const vpcResourceName = ctx.getTfResourceName(vpcNode);
+
+    blocks.push(`resource "google_compute_router" "${resourceName}" {
+  name    = "${escapeHclString(node.data.name)}"
+  region  = "${escapeHclString(node.data.region)}"
+  network = google_compute_network.${vpcResourceName}.id
+}`);
+  }
+
   for (const node of nodesOfKind(ctx, "firewall")) {
     const vpcId = ctx.graph.vpcForFirewall.get(node.id);
     if (!vpcId) continue;

@@ -24,6 +24,7 @@ import {
   type VmProps,
   type VpcProps,
   type NatProps,
+  type RouterProps,
   type PeeringProps,
   type VpnProps,
   type InterconnectProps,
@@ -210,6 +211,20 @@ function parseNatData(raw: unknown): NatProps {
     typeof raw.region !== "string"
   ) {
     throw new DiagramParseError("Dados de Cloud NAT inválidos.");
+  }
+  return {
+    name: raw.name,
+    region: raw.region,
+  };
+}
+
+function parseRouterData(raw: unknown): RouterProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Cloud Router inválidos.");
   }
   return {
     name: raw.name,
@@ -691,6 +706,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseNatData(data),
       };
+    case "router":
+      if (!nodeIdMatchesKind(nodeId, "router")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Router.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "router",
+        position: parsedPosition,
+        zIndex,
+        data: parseRouterData(data),
+      };
     case "peering":
       if (!nodeIdMatchesKind(nodeId, "peering")) {
         throw new DiagramParseError(
@@ -1050,6 +1078,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "sql-subnet" &&
     kind !== "gke-subnet" &&
     kind !== "nat-vpc" &&
+    kind !== "router-vpc" &&
     kind !== "peering-vpc" &&
     kind !== "vpn-vpc" &&
     kind !== "interconnect-vpc" &&
@@ -1210,6 +1239,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.nat === "string"
           ? patterns.nat
           : DEFAULT_NAMING_PATTERNS.nat,
+      router:
+        typeof patterns.router === "string"
+          ? patterns.router
+          : DEFAULT_NAMING_PATTERNS.router,
       peering:
         typeof patterns.peering === "string"
           ? patterns.peering
@@ -1473,6 +1506,7 @@ function namingMetadataEqual(
     a.patterns.sql === b.patterns.sql &&
     a.patterns.gke === b.patterns.gke &&
     a.patterns.nat === b.patterns.nat &&
+    a.patterns.router === b.patterns.router &&
     a.patterns.peering === b.patterns.peering &&
     a.patterns.vpn === b.patterns.vpn &&
     a.patterns.interconnect === b.patterns.interconnect &&

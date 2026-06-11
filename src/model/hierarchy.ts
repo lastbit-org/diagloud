@@ -20,6 +20,7 @@ export type ResolvedGraph = {
   vpcForSubnet: Map<string, string>;
   subnetForVm: Map<string, string>;
   vpcForNat: Map<string, string>;
+  vpcForRouter: Map<string, string>;
   vpcForFirewall: Map<string, string>;
   vpcForVpn: Map<string, string>;
   vpcForInterconnect: Map<string, string>;
@@ -58,6 +59,9 @@ function applyEdge(
       break;
     case "nat-vpc":
       graph.vpcForNat.set(source, target);
+      break;
+    case "router-vpc":
+      graph.vpcForRouter.set(source, target);
       break;
     case "firewall-vpc":
       graph.vpcForFirewall.set(source, target);
@@ -117,6 +121,7 @@ export function resolveGraph(document: DiagramDocument): ResolvedGraph {
     vpcForSubnet: new Map(),
     subnetForVm: new Map(),
     vpcForNat: new Map(),
+    vpcForRouter: new Map(),
     vpcForFirewall: new Map(),
     vpcForVpn: new Map(),
     vpcForInterconnect: new Map(),

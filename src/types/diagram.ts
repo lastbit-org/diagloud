@@ -6,6 +6,7 @@ import type {
   GkeProps,
   InternetProps,
   NatProps,
+  RouterProps,
   PeeringProps,
   VpnProps,
   InterconnectProps,
@@ -55,6 +56,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "sql"; data: SqlProps })
   | (NodeBase & { kind: "gke"; data: GkeProps })
   | (NodeBase & { kind: "nat"; data: NatProps })
+  | (NodeBase & { kind: "router"; data: RouterProps })
   | (NodeBase & { kind: "peering"; data: PeeringProps })
   | (NodeBase & { kind: "vpn"; data: VpnProps })
   | (NodeBase & { kind: "interconnect"; data: InterconnectProps })
@@ -95,6 +97,7 @@ export type DiagramEdge = {
     | "sql-subnet"
     | "gke-subnet"
     | "nat-vpc"
+    | "router-vpc"
     | "peering-vpc"
     | "vpn-vpc"
     | "interconnect-vpc"

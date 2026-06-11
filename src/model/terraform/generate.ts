@@ -32,6 +32,7 @@ const EXPORTABLE_KINDS = new Set<ResourceKind>([
   "sql",
   "gke",
   "nat",
+  "router",
   "peering",
   "vpn",
   "interconnect",

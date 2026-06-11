@@ -164,6 +164,37 @@ describe("generateTerraform", () => {
     expect(result.files["network.tf"]).toContain("google_compute_firewall");
   });
 
+  it("gera Cloud Router ligado à VPC", () => {
+    const router: DiagramNode = {
+      id: "router-1",
+      kind: "router",
+      position: { x: 200, y: 0 },
+      data: { name: "router-bgp", region: "southamerica-east1" },
+    };
+    const edges: DiagramEdge[] = [
+      validEdges[0],
+      { id: "e3", source: "router-1", target: "vpc-1", kind: "router-vpc" },
+    ];
+    const doc = buildDiagramDocument([vpc, subnet, router], edges);
+    const result = generateTerraform(doc, defaultOptions);
+
+    expect(result.files["network.tf"]).toContain('resource "google_compute_router"');
+    expect(result.files["network.tf"]).toContain("router-bgp");
+  });
+
+  it("ignora Cloud Router isolado na exportação Terraform", () => {
+    const router: DiagramNode = {
+      id: "router-1",
+      kind: "router",
+      position: { x: 200, y: 0 },
+      data: { name: "router-standalone", region: "southamerica-east1" },
+    };
+    const doc = buildDiagramDocument([vpc, subnet, router], validEdges);
+    const result = generateTerraform(doc, defaultOptions);
+
+    expect(result.files["network.tf"] ?? "").not.toContain("router-standalone");
+  });
+
   it("documenta ligações do diagrama em connections.tf", () => {
     const storage: DiagramNode = {
       id: "storage-1",

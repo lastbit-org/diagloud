@@ -72,6 +72,7 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vm", "storage")).toBe("vm-storage");
     expect(getEdgeKind("sql", "subnet")).toBe("sql-subnet");
     expect(getEdgeKind("nat", "vpc")).toBe("nat-vpc");
+    expect(getEdgeKind("router", "vpc")).toBe("router-vpc");
     expect(getEdgeKind("peering", "vpc")).toBe("peering-vpc");
     expect(getEdgeKind("vpn", "vpc")).toBe("vpn-vpc");
     expect(getEdgeKind("interconnect", "vpc")).toBe("interconnect-vpc");
@@ -943,6 +944,34 @@ describe("validateConnection", () => {
       { nodes: [vpc, vpcB, vpn], edges },
     );
     expect(result).toEqual({ valid: false, reason: "vpn-has-vpc" });
+  });
+
+  it("rejeita segunda VPC no mesmo Cloud Router", () => {
+    const router: DiagramNode = {
+      id: "router-1",
+      kind: "router",
+      position: { x: 200, y: 0 },
+      data: { name: "router-1", region: "southamerica-east1" },
+    };
+    const vpcB: DiagramNode = {
+      id: "vpc-2",
+      kind: "vpc",
+      position: { x: 400, y: 0 },
+      data: { name: "vpc-2" },
+    };
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: router.id, target: vpc.id, kind: "router-vpc" },
+    ];
+    const result = validateConnection(
+      {
+        source: router.id,
+        target: vpcB.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [vpc, vpcB, router], edges },
+    );
+    expect(result).toEqual({ valid: false, reason: "router-has-vpc" });
   });
 
   it("aceita Firewall → VPC e normaliza VPC → firewall", () => {
