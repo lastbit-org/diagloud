@@ -118,6 +118,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `ic-${count}`;
     case "firewall":
       return `fw-${count}`;
+    case "dns":
+      return `dns-${count}`;
     case "artifact":
       return `gar-${count}`;
     case "build":

@@ -30,6 +30,7 @@ import type {
   SqlAccessMode,
   SqlEngine,
   FirewallDirection,
+  DnsVisibility,
   StorageAccessMode,
   StorageClass,
   SparkDeployMode,
@@ -347,6 +348,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             edges={edges}
             nodes={nodes}
           />
+          <VpcDnsZonesInfo vpc={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
 
@@ -1328,6 +1330,51 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             edges={edges}
             nodes={nodes}
           />
+        </>
+      )}
+
+      {selectedNode?.kind === "dns" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="dns-name">Nome da zona</label>
+            <input
+              id="dns-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="dns-dns-name">Nome DNS</label>
+            <input
+              id="dns-dns-name"
+              value={selectedNode.data.dnsName}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { dnsName: e.target.value })
+              }
+              placeholder="example.com."
+            />
+            <span className="properties-field__hint">
+              Domínio da zona — inclua o ponto final (ex.: example.com.).
+            </span>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="dns-visibility">Visibilidade</label>
+            <select
+              id="dns-visibility"
+              value={selectedNode.data.visibility}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  visibility: e.target.value as DnsVisibility,
+                })
+              }
+            >
+              <option value="private">Privada (VPC)</option>
+              <option value="public">Pública</option>
+            </select>
+          </div>
+          <DnsVpcInfo dns={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
 
@@ -3234,6 +3281,43 @@ function VpcFirewallRulesInfo({
   );
 }
 
+function VpcDnsZonesInfo({
+  vpc,
+  edges,
+  nodes,
+}: {
+  vpc: Extract<DiagramNode, { kind: "vpc" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const zones = edges
+    .filter((e) => e.kind === "dns-vpc" && e.target === vpc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "dns"))
+    .filter((n): n is Extract<DiagramNode, { kind: "dns" }> => n != null);
+
+  if (zones.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue zonas Cloud DNS a esta VPC para documentar resolução privada.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>Zonas Cloud DNS</dt>
+      <dd>
+        {zones
+          .map(
+            (zone) =>
+              `${zone.data.name} (${zone.data.dnsName.trim() || "example.com."})`,
+          )
+          .join(", ")}
+      </dd>
+    </dl>
+  );
+}
+
 function FirewallVpcInfo({
   firewall,
   edges,
@@ -3265,6 +3349,47 @@ function FirewallVpcInfo({
           <dd>{vpc.data.name}</dd>
         </>
       ) : null}
+    </dl>
+  );
+}
+
+function DnsVpcInfo({
+  dns,
+  edges,
+  nodes,
+}: {
+  dns: Extract<DiagramNode, { kind: "dns" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vpcEdges = edges.filter(
+    (e) => e.kind === "dns-vpc" && e.source === dns.id,
+  );
+
+  if (dns.data.visibility === "public") {
+    return (
+      <p className="properties-field__hint">
+        Zona pública — ligação à VPC é opcional para documentação.
+      </p>
+    );
+  }
+
+  if (vpcEdges.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à VPC (handle inferior) para documentar visibilidade privada.
+      </p>
+    );
+  }
+
+  const vpcs = vpcEdges
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vpc"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vpc" }> => n != null);
+
+  return (
+    <dl className="properties-stats">
+      <dt>VPC{vpcs.length > 1 ? "s" : ""}</dt>
+      <dd>{vpcs.map((vpc) => vpc.data.name).join(", ")}</dd>
     </dl>
   );
 }

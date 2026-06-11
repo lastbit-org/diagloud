@@ -20,6 +20,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   vpn: "vpn-AREA-AMBIENTE",
   interconnect: "ic-AREA-AMBIENTE",
   firewall: "fw-AREA-AMBIENTE",
+  dns: "dns-AREA-AMBIENTE",
   artifact: "gar-AREA-AMBIENTE",
   build: "cb-AREA-AMBIENTE",
   kms: "kms-AREA-AMBIENTE",

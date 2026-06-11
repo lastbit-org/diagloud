@@ -38,6 +38,7 @@ const EXPORTABLE_KINDS = new Set<ResourceKind>([
   "vpn",
   "interconnect",
   "firewall",
+  "dns",
   "artifact",
   "build",
   "kms",

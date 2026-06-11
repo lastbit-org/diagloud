@@ -11,6 +11,7 @@ import type {
   VpnProps,
   InterconnectProps,
   FirewallProps,
+  DnsProps,
   BigqueryProps,
   SpannerProps,
   FirestoreProps,
@@ -63,6 +64,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "vpn"; data: VpnProps })
   | (NodeBase & { kind: "interconnect"; data: InterconnectProps })
   | (NodeBase & { kind: "firewall"; data: FirewallProps })
+  | (NodeBase & { kind: "dns"; data: DnsProps })
   | (NodeBase & { kind: "artifact"; data: ArtifactProps })
   | (NodeBase & { kind: "build"; data: BuildProps })
   | (NodeBase & { kind: "kms"; data: KmsProps })
@@ -106,6 +108,7 @@ export type DiagramEdge = {
     | "vpn-vpc"
     | "interconnect-vpc"
     | "firewall-vpc"
+    | "dns-vpc"
     | "internet-nat"
     | "internet-vpn"
     | "internet-interconnect"

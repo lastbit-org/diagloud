@@ -69,6 +69,7 @@ import type {
   VpnProps,
   InterconnectProps,
   FirewallProps,
+  DnsProps,
   ArtifactProps,
   BuildProps,
   KmsProps,
@@ -130,6 +131,7 @@ type DiagramActions = {
       | Partial<VpnProps>
       | Partial<InterconnectProps>
       | Partial<FirewallProps>
+      | Partial<DnsProps>
       | Partial<ArtifactProps>
       | Partial<BuildProps>
       | Partial<KmsProps>
@@ -353,6 +355,12 @@ function buildNode<K extends ResourceKind>(
         ...base,
         kind: "firewall",
         data: { ...defaultResourceData("firewall", resourceContext), ...data },
+      };
+    case "dns":
+      return {
+        ...base,
+        kind: "dns",
+        data: { ...defaultResourceData("dns", resourceContext), ...data },
       };
     case "artifact":
       return {
@@ -601,6 +609,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<FirewallProps>) },
+      };
+    case "dns":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<DnsProps>) },
       };
     case "artifact":
       return {

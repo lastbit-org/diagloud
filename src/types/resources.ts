@@ -14,6 +14,7 @@ export type ResourceKind =
   | "vpn"
   | "interconnect"
   | "firewall"
+  | "dns"
   | "artifact"
   | "build"
   | "kms"
@@ -133,6 +134,16 @@ export type FirewallDirection = "ingress" | "egress";
 export type FirewallProps = {
   name: string;
   direction: FirewallDirection;
+};
+
+export type DnsVisibility = "public" | "private";
+
+export type DnsProps = {
+  /** Nome da zona gerenciada. */
+  name: string;
+  /** Nome DNS da zona (ex.: example.com.). */
+  dnsName: string;
+  visibility: DnsVisibility;
 };
 
 export type ArtifactProps = {
@@ -319,6 +330,7 @@ export type ResourcePropsByKind = {
   vpn: VpnProps;
   interconnect: InterconnectProps;
   firewall: FirewallProps;
+  dns: DnsProps;
   artifact: ArtifactProps;
   build: BuildProps;
   kms: KmsProps;

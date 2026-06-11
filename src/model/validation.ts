@@ -15,6 +15,7 @@ export type DiagramIssueCode =
   | "orphan-vpn"
   | "orphan-interconnect"
   | "orphan-firewall"
+  | "orphan-dns"
   | "orphan-peering"
   | "orphan-peering-incomplete"
   | "orphan-run-vpc"
@@ -90,6 +91,15 @@ export function collectDiagramIssues(
     edges
       .filter((edge) => edge.kind === "firewall-vpc")
       .map((edge) => edge.source),
+  );
+
+  const dnsIdsOnVpc = new Set(
+    edges
+      .filter((edge) => edge.kind === "dns-vpc")
+      .map((edge) => {
+        const { source } = canonicalizeEdgeEndpoints(edge, nodes);
+        return source;
+      }),
   );
 
   const peeringVpcCounts = new Map<string, number>();
@@ -187,6 +197,19 @@ export function collectDiagramIssues(
         severity: "warning",
         nodeId: node.id,
         message: `Firewall "${node.data.name}" não está ligado a uma VPC.`,
+      });
+    }
+
+    if (
+      node.kind === "dns" &&
+      node.data.visibility === "private" &&
+      !dnsIdsOnVpc.has(node.id)
+    ) {
+      issues.push({
+        code: "orphan-dns",
+        severity: "warning",
+        nodeId: node.id,
+        message: `Cloud DNS "${node.data.name}" (privada) não está ligado a uma VPC.`,
       });
     }
 

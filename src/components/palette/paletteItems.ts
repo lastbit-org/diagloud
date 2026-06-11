@@ -67,6 +67,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "vpn" ||
     value === "interconnect" ||
     value === "firewall" ||
+    value === "dns" ||
     value === "artifact" ||
     value === "build" ||
     value === "kms" ||
@@ -270,6 +271,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.firewall,
     description: "Regra de firewall da VPC",
     icon: GCP_RESOURCE_ICONS.firewall,
+  },
+  {
+    paletteKey: "dns",
+    kind: "dns",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.dns,
+    description: "Zona DNS gerenciada — pública ou privada na VPC",
+    icon: GCP_RESOURCE_ICONS.dns,
   },
   {
     paletteKey: "run",

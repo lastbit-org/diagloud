@@ -29,6 +29,7 @@ import {
   type VpnProps,
   type InterconnectProps,
   type FirewallProps,
+  type DnsProps,
   type ArtifactProps,
   type BuildProps,
   type KmsProps,
@@ -336,6 +337,21 @@ function parseFirewallData(raw: unknown): FirewallProps {
   return {
     name: raw.name,
     direction: raw.direction === "egress" ? "egress" : "ingress",
+  };
+}
+
+function parseDnsData(raw: unknown): DnsProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.dnsName !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Cloud DNS inválidos.");
+  }
+  return {
+    name: raw.name,
+    dnsName: raw.dnsName,
+    visibility: raw.visibility === "public" ? "public" : "private",
   };
 }
 
@@ -829,6 +845,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseFirewallData(data),
       };
+    case "dns":
+      if (!nodeIdMatchesKind(nodeId, "dns")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud DNS.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "dns",
+        position: parsedPosition,
+        zIndex,
+        data: parseDnsData(data),
+      };
     case "artifact":
       if (!nodeIdMatchesKind(nodeId, "artifact")) {
         throw new DiagramParseError(
@@ -1165,6 +1194,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "vpn-vpc" &&
     kind !== "interconnect-vpc" &&
     kind !== "firewall-vpc" &&
+    kind !== "dns-vpc" &&
     kind !== "internet-nat" &&
     kind !== "internet-vpn" &&
     kind !== "internet-interconnect" &&
@@ -1348,6 +1378,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.firewall === "string"
           ? patterns.firewall
           : DEFAULT_NAMING_PATTERNS.firewall,
+      dns:
+        typeof patterns.dns === "string"
+          ? patterns.dns
+          : DEFAULT_NAMING_PATTERNS.dns,
       artifact:
         typeof patterns.artifact === "string"
           ? patterns.artifact
@@ -1608,6 +1642,7 @@ function namingMetadataEqual(
     a.patterns.vpn === b.patterns.vpn &&
     a.patterns.interconnect === b.patterns.interconnect &&
     a.patterns.firewall === b.patterns.firewall &&
+    a.patterns.dns === b.patterns.dns &&
     a.patterns.artifact === b.patterns.artifact &&
     a.patterns.build === b.patterns.build &&
     a.patterns.kms === b.patterns.kms &&

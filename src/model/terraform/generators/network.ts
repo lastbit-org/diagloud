@@ -97,6 +97,50 @@ resource "google_compute_router_nat" "${resourceName}" {
 }`);
   }
 
+  for (const node of nodesOfKind(ctx, "dns")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const dnsName = node.data.dnsName.trim() || "example.com.";
+    const visibility =
+      node.data.visibility === "public" ? "public" : "private";
+    const vpcIds = ctx.graph.vpcForDns.get(node.id) ?? [];
+
+    if (visibility === "private" && vpcIds.length === 0) continue;
+
+    if (visibility === "public" || vpcIds.length === 0) {
+      blocks.push(`resource "google_dns_managed_zone" "${resourceName}" {
+  name       = "${escapeHclString(node.data.name)}"
+  dns_name   = "${escapeHclString(dnsName)}"
+  visibility = "${visibility}"
+}`);
+      continue;
+    }
+
+    const networkBlocks = vpcIds
+      .map((vpcId) => {
+        const vpcNode = ctx.document.nodes.find(
+          (n) => n.id === vpcId && n.kind === "vpc",
+        );
+        if (!vpcNode || vpcNode.kind !== "vpc") return null;
+        const vpcResourceName = ctx.getTfResourceName(vpcNode);
+        return `    networks {
+      network_url = google_compute_network.${vpcResourceName}.id
+    }`;
+      })
+      .filter((block): block is string => block != null);
+
+    if (networkBlocks.length === 0) continue;
+
+    blocks.push(`resource "google_dns_managed_zone" "${resourceName}" {
+  name       = "${escapeHclString(node.data.name)}"
+  dns_name   = "${escapeHclString(dnsName)}"
+  visibility = "private"
+
+  private_visibility_config {
+${networkBlocks.join("\n")}
+  }
+}`);
+  }
+
   for (const node of nodesOfKind(ctx, "vpn")) {
     const vpcId = ctx.graph.vpcForVpn.get(node.id);
     if (!vpcId) continue;

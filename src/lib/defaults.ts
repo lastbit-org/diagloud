@@ -18,6 +18,7 @@ import type {
   VpnProps,
   InterconnectProps,
   FirewallProps,
+  DnsProps,
   ArtifactProps,
   BuildProps,
   KmsProps,
@@ -122,6 +123,12 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         direction: "ingress",
       } as FirewallProps as ResourcePropsByKind[K];
+    case "dns":
+      return {
+        name,
+        dnsName: "example.com.",
+        visibility: "private",
+      } as DnsProps as ResourcePropsByKind[K];
     case "artifact":
       return {
         name,
@@ -275,6 +282,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `ic-${count}`;
     case "firewall":
       return `fw-${count}`;
+    case "dns":
+      return `dns-${count}`;
     case "artifact":
       return `gar-${count}`;
     case "build":

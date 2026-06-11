@@ -436,6 +436,19 @@ export function validateConnection(
     return { valid: false, reason: "firewall-has-vpc" };
   }
 
+  if (edgeKind === "dns-vpc") {
+    if (
+      context.edges.some(
+        (edge) =>
+          edge.kind === "dns-vpc" &&
+          edge.source === directed.source &&
+          edge.target === directed.target,
+      )
+    ) {
+      return { valid: false, reason: "duplicate-edge" };
+    }
+  }
+
   if (edgeKind === "peering-vpc") {
     const peeringVpcEdges = context.edges.filter(
       (edge) => edge.kind === "peering-vpc" && edge.source === directed.source,

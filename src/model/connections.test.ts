@@ -77,6 +77,7 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vpn", "vpc")).toBe("vpn-vpc");
     expect(getEdgeKind("interconnect", "vpc")).toBe("interconnect-vpc");
     expect(getEdgeKind("firewall", "vpc")).toBe("firewall-vpc");
+    expect(getEdgeKind("dns", "vpc")).toBe("dns-vpc");
     expect(getEdgeKind("internet", "nat")).toBe("internet-nat");
     expect(getEdgeKind("internet", "vpn")).toBe("internet-vpn");
     expect(getEdgeKind("internet", "interconnect")).toBe(
@@ -1080,6 +1081,50 @@ describe("validateConnection", () => {
       { nodes: [vpc, firewallA, firewallB], edges },
     );
     expect(result).toMatchObject({ valid: true, edgeKind: "firewall-vpc" });
+  });
+
+  it("aceita Cloud DNS → VPC e permite várias VPCs na mesma zona", () => {
+    const dnsNode: DiagramNode = {
+      id: "dns-1",
+      kind: "dns",
+      position: { x: 200, y: 0 },
+      data: {
+        name: "private-zone",
+        dnsName: "internal.example.com.",
+        visibility: "private",
+      },
+    };
+    const vpcB: DiagramNode = {
+      id: "vpc-2",
+      kind: "vpc",
+      position: { x: 400, y: 0 },
+      data: { name: "vpc-b" },
+    };
+    const diagramNodes = [vpc, vpcB, dnsNode];
+    const first = validateConnection(
+      {
+        source: dnsNode.id,
+        target: vpc.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: diagramNodes, edges: [] },
+    );
+    expect(first).toMatchObject({ valid: true, edgeKind: "dns-vpc" });
+
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: dnsNode.id, target: vpc.id, kind: "dns-vpc" },
+    ];
+    const second = validateConnection(
+      {
+        source: dnsNode.id,
+        target: vpcB.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: diagramNodes, edges },
+    );
+    expect(second).toMatchObject({ valid: true, edgeKind: "dns-vpc" });
   });
 
   it("aceita Vertex AI Workbench → sub-rede e dados", () => {

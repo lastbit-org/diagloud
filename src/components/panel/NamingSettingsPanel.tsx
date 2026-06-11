@@ -15,6 +15,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "vpn",
   "interconnect",
   "firewall",
+  "dns",
   "vm",
   "gke",
   "run",

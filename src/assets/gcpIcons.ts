@@ -16,6 +16,7 @@ import routerIcon from "./google-cloud-legacy-icons/cloud_router/cloud_router.sv
 import vpnIcon from "./google-cloud-legacy-icons/cloud_vpn/cloud_vpn.svg";
 import interconnectIcon from "./google-cloud-legacy-icons/cloud_interconnect/cloud_interconnect.svg";
 import firewallIcon from "./google-cloud-legacy-icons/cloud_firewall_rules/cloud_firewall_rules.svg";
+import dnsIcon from "./google-cloud-legacy-icons/cloud_dns/cloud_dns.svg";
 import subnetIcon from "./google-cloud-legacy-icons/cloud_network/cloud_network.svg";
 import runIcon from "./google-cloud-legacy-icons/cloud_run/cloud_run.svg";
 import gkeIcon from "./google-cloud-legacy-icons/google_kubernetes_engine/google_kubernetes_engine.svg";
@@ -50,6 +51,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   vpn: vpnIcon,
   interconnect: interconnectIcon,
   firewall: firewallIcon,
+  dns: dnsIcon,
   artifact: artifactIcon,
   build: buildIcon,
   kms: kmsIcon,
@@ -89,6 +91,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   vpn: "Cloud VPN",
   interconnect: "Cloud Interconnect",
   firewall: "Firewall",
+  dns: "Cloud DNS",
   artifact: "Artifact Registry",
   build: "Cloud Build",
   kms: "KMS",

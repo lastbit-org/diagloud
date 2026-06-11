@@ -15,6 +15,7 @@ import type { ResourceKind } from "./resources";
  * - Cloud VPN → VPC (`vpn-vpc`): gateway VPN na VPC
  * - Cloud Interconnect → VPC (`interconnect-vpc`): anexo dedicado na VPC
  * - Firewall → VPC (`firewall-vpc`): regra de firewall na VPC
+ * - Cloud DNS → VPC (`dns-vpc`): zona privada visível na VPC
  * - Internet → Cloud VPN (`internet-vpn`): túnel híbrido (on-prem / rede externa)
  * - Internet → Cloud Interconnect (`internet-interconnect`): link dedicado on-prem
  * - Internet → Cloud NAT (`internet-nat`): saída para a internet
@@ -64,6 +65,7 @@ export const EDGE_ENDPOINTS = {
   "vpn-vpc": { from: "vpn", to: "vpc" },
   "interconnect-vpc": { from: "interconnect", to: "vpc" },
   "firewall-vpc": { from: "firewall", to: "vpc" },
+  "dns-vpc": { from: "dns", to: "vpc" },
   "internet-nat": { from: "internet", to: "nat" },
   "internet-vpn": { from: "internet", to: "vpn" },
   "internet-interconnect": { from: "internet", to: "interconnect" },

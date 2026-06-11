@@ -165,6 +165,29 @@ describe("generateTerraform", () => {
     expect(result.files["network.tf"]).toContain("google_compute_firewall");
   });
 
+  it("gera Cloud DNS privado ligado à VPC", () => {
+    const dnsNode: DiagramNode = {
+      id: "dns-1",
+      kind: "dns",
+      position: { x: 200, y: 0 },
+      data: {
+        name: "private-zone",
+        dnsName: "internal.example.com.",
+        visibility: "private",
+      },
+    };
+    const edges: DiagramEdge[] = [
+      validEdges[0],
+      { id: "e3", source: "dns-1", target: "vpc-1", kind: "dns-vpc" },
+    ];
+    const doc = buildDiagramDocument([vpc, subnet, dnsNode], edges);
+    const result = generateTerraform(doc, defaultOptions);
+
+    expect(result.files["network.tf"]).toContain("google_dns_managed_zone");
+    expect(result.files["network.tf"]).toContain("private_visibility_config");
+    expect(result.files["network.tf"]).toContain("internal.example.com.");
+  });
+
   it("gera Cloud Router ligado à VPC", () => {
     const router: DiagramNode = {
       id: "router-1",
