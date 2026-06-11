@@ -35,11 +35,12 @@ export function parseHandleId(id: string): ParsedHandleId | null {
   };
 }
 
+/** Normaliza para o único ponto por lado (`{side}-0`). */
 export function normalizeHandleId(id: string | null | undefined): string | null {
   if (!id) return null;
   const parsed = parseHandleId(id);
   if (!parsed) return null;
-  return makeHandleId(parsed.side, parsed.index);
+  return makeHandleId(parsed.side, 0);
 }
 
 export function isValidHandleId(id: string | null | undefined): boolean {
@@ -59,48 +60,17 @@ export type VisibleHandle = {
   index: number;
 };
 
-function maxIndexUsedOnSide(
-  nodeId: string,
-  side: HandleSide,
-  edges: DiagramEdge[],
-): number {
-  let max = -1;
-  for (const edge of edges) {
-    const handleIds: (string | undefined)[] = [];
-    if (edge.source === nodeId) handleIds.push(edge.sourceHandle);
-    if (edge.target === nodeId) handleIds.push(edge.targetHandle);
-
-    for (const handleId of handleIds) {
-      const normalized = normalizeHandleId(handleId);
-      if (!normalized) continue;
-      const parsed = parseHandleId(normalized);
-      if (!parsed || parsed.side !== side) continue;
-      max = Math.max(max, parsed.index);
-    }
-  }
-  return max;
-}
-
-/** Um ponto por lado; ao conectar, surge o próximo índice no mesmo lado. */
+/** Um ponto fixo por lado; várias arestas podem usar o mesmo handle. */
 export function getVisibleHandlesForNode(
   nodeId: string,
-  edges: DiagramEdge[],
+  _edges: DiagramEdge[],
 ): VisibleHandle[] {
-  const handles: VisibleHandle[] = [];
-
-  for (const side of HANDLE_SIDES) {
-    const maxUsed = maxIndexUsedOnSide(nodeId, side, edges);
-    const count = maxUsed + 2;
-    for (let index = 0; index < count; index++) {
-      handles.push({
-        id: makeHandleId(side, index),
-        side,
-        index,
-      });
-    }
-  }
-
-  return handles;
+  void nodeId;
+  return HANDLE_SIDES.map((side) => ({
+    id: makeHandleId(side, 0),
+    side,
+    index: 0,
+  }));
 }
 
 export function sideToPosition(side: HandleSide): Position {

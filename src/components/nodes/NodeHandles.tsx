@@ -6,18 +6,15 @@ import {
   handleStyle,
   sideToPosition,
 } from "../../lib/dynamicHandles";
-import { useDiagramStore } from "../../store/diagramStore";
 
 type NodeHandlesProps = {
   nodeId: string;
 };
 
 export function NodeHandles({ nodeId }: NodeHandlesProps) {
-  const edges = useDiagramStore((s) => s.edges);
-
   const handles = useMemo(
-    () => getVisibleHandlesForNode(nodeId, edges),
-    [nodeId, edges],
+    () => getVisibleHandlesForNode(nodeId, []),
+    [nodeId],
   );
 
   return (
