@@ -38,6 +38,58 @@ import type {
 } from "../../types";
 import "./properties.css";
 
+function parseIamRolesText(text: string): string[] {
+  return text
+    .split("\n")
+    .map((role) => role.trim())
+    .filter(Boolean);
+}
+
+function IamRolesEditor({
+  nodeId,
+  roles,
+}: {
+  nodeId: string;
+  roles: string[];
+}) {
+  const updateNodeData = useDiagramStore((s) => s.updateNodeData);
+  const [text, setText] = useState(roles.join("\n"));
+
+  useEffect(() => {
+    setText(roles.join("\n"));
+  }, [nodeId, roles]);
+
+  const commit = () => {
+    const parsed = parseIamRolesText(text);
+    const serialized = parsed.join("\n");
+    if (serialized !== roles.join("\n")) {
+      updateNodeData(nodeId, { roles: parsed });
+    }
+    setText(serialized);
+  };
+
+  return (
+    <div className="properties-field">
+      <label htmlFor="iam-roles">Roles</label>
+      <textarea
+        id="iam-roles"
+        rows={5}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={commit}
+        placeholder={
+          "roles/bigquery.dataEditor\nroles/storage.objectViewer\nprojects/meu-proj/roles/customRole"
+        }
+      />
+      <span className="properties-field__hint">
+        Uma role por linha — roles predefinidas (roles/…) ou custom roles
+        (projects/…/roles/…). Exportadas no Terraform ao ligar a Projeto,
+        sub-rede, KMS ou BigQuery.
+      </span>
+    </div>
+  );
+}
+
 function SubnetCidrEditor({
   subnet,
   allSubnets,
@@ -1473,10 +1525,16 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
               />
             </div>
           )}
+          <IamRolesEditor
+            nodeId={selectedNode.id}
+            roles={selectedNode.data.roles}
+          />
           <p className="properties-field__hint">
             O ícone permanece o mesmo; o nó exibe o tipo e os detalhes conforme a
-            opção selecionada.
+            opção selecionada. Ligue ao Projeto, sub-rede, Cloud KMS ou BigQuery
+            para documentar identidade e permissões.
           </p>
+          <IamConnectionsInfo iam={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
 
@@ -3428,6 +3486,71 @@ function RouterVpcInfo({
   );
 }
 
+function IamConnectionsInfo({
+  iam,
+  edges,
+  nodes,
+}: {
+  iam: Extract<DiagramNode, { kind: "iam" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const projects = edges
+    .filter((e) => e.kind === "iam-project" && e.source === iam.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "project"))
+    .filter((n): n is Extract<DiagramNode, { kind: "project" }> => n != null);
+  const subnets = edges
+    .filter((e) => e.kind === "iam-subnet" && e.source === iam.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "subnet"))
+    .filter((n): n is Extract<DiagramNode, { kind: "subnet" }> => n != null);
+  const kmsKeys = edges
+    .filter((e) => e.kind === "iam-kms" && e.source === iam.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "kms"))
+    .filter((n): n is Extract<DiagramNode, { kind: "kms" }> => n != null);
+  const datasets = edges
+    .filter((e) => e.kind === "iam-bigquery" && e.source === iam.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "bigquery"))
+    .filter((n): n is Extract<DiagramNode, { kind: "bigquery" }> => n != null);
+
+  if (
+    projects.length === 0 &&
+    subnets.length === 0 &&
+    kmsKeys.length === 0 &&
+    datasets.length === 0
+  ) {
+    return null;
+  }
+
+  return (
+    <dl className="properties-stats">
+      {projects.length > 0 ? (
+        <>
+          <dt>Projeto</dt>
+          <dd>{projects.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {subnets.length > 0 ? (
+        <>
+          <dt>Sub-rede</dt>
+          <dd>{subnets.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {kmsKeys.length > 0 ? (
+        <>
+          <dt>Cloud KMS</dt>
+          <dd>{kmsKeys.map((k) => k.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {datasets.length > 0 ? (
+        <>
+          <dt>BigQuery</dt>
+          <dd>{datasets.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function GithubConnectionsInfo({
   github,
   edges,
@@ -3543,6 +3666,10 @@ function KmsConsumersInfo({
     .filter(
       (n): n is Extract<DiagramNode, { kind: "modelregistry" }> => n != null,
     );
+  const iams = edges
+    .filter((e) => e.kind === "iam-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "iam"))
+    .filter((n): n is Extract<DiagramNode, { kind: "iam" }> => n != null);
 
   if (
     vms.length === 0 &&
@@ -3556,13 +3683,14 @@ function KmsConsumersInfo({
     sparkJobs.length === 0 &&
     airflowEnvs.length === 0 &&
     dataflowJobs.length === 0 &&
-    modelRegistries.length === 0
+    modelRegistries.length === 0 &&
+    iams.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         Ligue VMs, GKE, Cloud Run, Storage, Cloud SQL, BigQuery, Firestore,
-        Spanner, Apache Spark, Managed Airflow, Cloud Dataflow ou Model Registry
-        para documentar uso de chaves (CMEK).
+        Spanner, Apache Spark, Managed Airflow, Cloud Dataflow, Model Registry
+        ou IAM para documentar uso de chaves (CMEK).
       </p>
     );
   }
@@ -3639,6 +3767,12 @@ function KmsConsumersInfo({
         <>
           <dt>Model Registry</dt>
           <dd>{modelRegistries.map((m) => m.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {iams.length > 0 ? (
+        <>
+          <dt>IAM</dt>
+          <dd>{iams.map((i) => i.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

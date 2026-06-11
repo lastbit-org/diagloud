@@ -167,6 +167,8 @@ export type IamProps = {
   workloadProviderId: string;
   /** E-mail do grupo (variant group). */
   groupEmail: string;
+  /** Roles predefinidas (roles/…) e custom roles (projects/…/roles/…). */
+  roles: string[];
 };
 
 export type InternetProps = {

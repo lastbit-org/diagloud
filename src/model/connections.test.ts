@@ -99,6 +99,10 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("github", "build")).toBe("github-build");
     expect(getEdgeKind("github", "run")).toBe("github-run");
     expect(getEdgeKind("github", "gke")).toBe("github-gke");
+    expect(getEdgeKind("iam", "project")).toBe("iam-project");
+    expect(getEdgeKind("iam", "subnet")).toBe("iam-subnet");
+    expect(getEdgeKind("iam", "kms")).toBe("iam-kms");
+    expect(getEdgeKind("iam", "bigquery")).toBe("iam-bigquery");
     expect(getEdgeKind("spark", "subnet")).toBe("spark-subnet");
     expect(getEdgeKind("spark", "storage")).toBe("spark-storage");
     expect(getEdgeKind("spark", "bigquery")).toBe("spark-bigquery");
@@ -1270,5 +1274,99 @@ describe("validateConnection", () => {
         { nodes: diagramNodes, edges: [] },
       ),
     ).toMatchObject({ valid: true, edgeKind: "github-gke" });
+  });
+
+  it("aceita IAM → Projeto, Sub-rede, KMS e BigQuery", () => {
+    const iam: DiagramNode = {
+      id: "iam-1",
+      kind: "iam",
+      position: { x: 0, y: 0 },
+      data: {
+        name: "iam-app",
+        variant: "iam",
+        serviceAccountEmail: "sa@projeto.iam.gserviceaccount.com",
+        workloadPoolId: "pool-external",
+        workloadProviderId: "provider-github",
+        groupEmail: "eng@example.com",
+        roles: ["roles/viewer"],
+      },
+    };
+    const project: DiagramNode = {
+      id: "project-1",
+      kind: "project",
+      position: { x: 100, y: 0 },
+      data: { name: "proj-prd" },
+    };
+    const subnetNode: DiagramNode = {
+      id: "subnet-2",
+      kind: "subnet",
+      position: { x: 200, y: 0 },
+      data: {
+        name: "sub-app",
+        region: "southamerica-east1",
+        cidr: "10.1.0.0/24",
+      },
+    };
+    const kms: DiagramNode = {
+      id: "kms-1",
+      kind: "kms",
+      position: { x: 300, y: 0 },
+      data: { name: "keyring-app", location: "southamerica-east1" },
+    };
+    const bigquery: DiagramNode = {
+      id: "bigquery-1",
+      kind: "bigquery",
+      position: { x: 400, y: 0 },
+      data: { name: "dataset-app", location: "southamerica-east1" },
+    };
+    const diagramNodes = [iam, project, subnetNode, kms, bigquery];
+
+    expect(
+      validateConnection(
+        {
+          source: iam.id,
+          target: project.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "iam-project" });
+
+    expect(
+      validateConnection(
+        {
+          source: iam.id,
+          target: subnetNode.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "iam-subnet" });
+
+    expect(
+      validateConnection(
+        {
+          source: iam.id,
+          target: kms.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "iam-kms" });
+
+    expect(
+      validateConnection(
+        {
+          source: iam.id,
+          target: bigquery.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "iam-bigquery" });
   });
 });

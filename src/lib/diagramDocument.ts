@@ -289,6 +289,16 @@ function parseIamVariant(raw: unknown): IamVariant {
   return "iam";
 }
 
+function parseIamRoles(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw
+      .filter((role): role is string => typeof role === "string")
+      .map((role) => role.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 function parseIamData(raw: unknown): IamProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de IAM inválidos.");
@@ -308,6 +318,7 @@ function parseIamData(raw: unknown): IamProps {
         : "provider-github",
     groupEmail:
       typeof raw.groupEmail === "string" ? raw.groupEmail : "eng-platform@example.com",
+    roles: parseIamRoles(raw.roles),
   };
 }
 
@@ -1229,6 +1240,10 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "onprem-vm" &&
     kind !== "folder-folder" &&
     kind !== "folder-project" &&
+    kind !== "iam-project" &&
+    kind !== "iam-subnet" &&
+    kind !== "iam-kms" &&
+    kind !== "iam-bigquery" &&
     kind !== "infocard-link" &&
     kind !== "sql-vpc"
   ) {

@@ -218,6 +218,7 @@ export function toFlowNode(
         workloadPoolId: node.data.workloadPoolId,
         workloadProviderId: node.data.workloadProviderId,
         groupEmail: node.data.groupEmail,
+        roles: node.data.roles,
         issueCount: issueCount > 0 ? issueCount : undefined,
       },
     };

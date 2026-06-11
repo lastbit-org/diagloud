@@ -181,6 +181,10 @@ export type DiagramEdge = {
     | "onprem-vm"
     | "folder-folder"
     | "folder-project"
+    | "iam-project"
+    | "iam-subnet"
+    | "iam-kms"
+    | "iam-bigquery"
     | "infocard-link";
 };
 

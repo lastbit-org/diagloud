@@ -49,6 +49,7 @@ import type { ResourceKind } from "./resources";
  * - Model Registry → Cloud Run / GKE / Storage / Cloud KMS: deploy e artefatos
  * - Pasta → Pasta (`folder-folder`): hierarquia organizacional
  * - Pasta → Projeto (`folder-project`): projeto contido na pasta
+ * - IAM → Projeto / Sub-rede / KMS / BigQuery: identidade e permissões
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
 export const EDGE_ENDPOINTS = {
@@ -138,6 +139,10 @@ export const EDGE_ENDPOINTS = {
   "onprem-vm": { from: "onprem", to: "vm" },
   "folder-folder": { from: "folder", to: "folder" },
   "folder-project": { from: "folder", to: "project" },
+  "iam-project": { from: "iam", to: "project" },
+  "iam-subnet": { from: "iam", to: "subnet" },
+  "iam-kms": { from: "iam", to: "kms" },
+  "iam-bigquery": { from: "iam", to: "bigquery" },
   "infocard-link": { from: "infocard", to: "vpc" },
 } as const satisfies Record<
   DiagramEdge["kind"],

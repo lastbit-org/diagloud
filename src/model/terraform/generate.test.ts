@@ -242,6 +242,46 @@ describe("generateTerraform", () => {
     expect(result.files["connections.tf"]).toContain("github-build");
   });
 
+  it("gera IAM bindings com lista de roles ligada ao projeto", () => {
+    const iam: DiagramNode = {
+      id: "iam-1",
+      kind: "iam",
+      position: { x: 0, y: 0 },
+      data: {
+        name: "iam-app",
+        variant: "iam",
+        serviceAccountEmail: "sa-app@meu-proj-dev.iam.gserviceaccount.com",
+        workloadPoolId: "pool-external",
+        workloadProviderId: "provider-github",
+        groupEmail: "eng@example.com",
+        roles: [
+          "roles/bigquery.dataEditor",
+          "projects/meu-proj-dev/roles/customViewer",
+        ],
+      },
+    };
+    const project: DiagramNode = {
+      id: "project-1",
+      kind: "project",
+      position: { x: 100, y: 0 },
+      data: { name: "meu-proj-dev" },
+    };
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: "iam-1", target: "project-1", kind: "iam-project" },
+    ];
+    const doc = buildDiagramDocument([iam, project], edges);
+    const result = generateTerraform(doc, defaultOptions);
+
+    expect(result.files["iam.tf"]).toContain("google_project_iam_member");
+    expect(result.files["iam.tf"]).toContain("roles/bigquery.dataEditor");
+    expect(result.files["iam.tf"]).toContain(
+      "projects/meu-proj-dev/roles/customViewer",
+    );
+    expect(result.files["iam.tf"]).toContain(
+      "serviceAccount:sa-app@meu-proj-dev.iam.gserviceaccount.com",
+    );
+  });
+
   it("avisa recursos visuais não exportados", () => {
     const zone: DiagramNode = {
       id: "zone-1",

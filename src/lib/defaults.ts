@@ -146,6 +146,7 @@ export function defaultResourceData<K extends ResourceKind>(
         workloadPoolId: "pool-external",
         workloadProviderId: "provider-github",
         groupEmail: "eng-platform@example.com",
+        roles: [],
       } as IamProps as ResourcePropsByKind[K];
     case "internet":
       return {

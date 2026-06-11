@@ -14,6 +14,7 @@ const KMS_EDGE_KINDS = [
   "airflow-kms",
   "dataflow-kms",
   "modelregistry-kms",
+  "iam-kms",
 ] as const;
 
 export type ResolvedGraph = {

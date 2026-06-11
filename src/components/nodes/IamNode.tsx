@@ -12,6 +12,7 @@ export type IamNodeData = {
   workloadPoolId: string;
   workloadProviderId: string;
   groupEmail: string;
+  roles: string[];
   issueCount?: number;
 };
 
@@ -22,6 +23,10 @@ const VARIANT_TYPE_LABELS: Record<IamVariant, string> = {
 };
 
 function iamDetail(data: IamNodeData): string {
+  const roleCount = data.roles.filter((role) => role.trim()).length;
+  if (roleCount > 0) {
+    return roleCount === 1 ? "1 role" : `${roleCount} roles`;
+  }
   switch (data.variant) {
     case "iam":
       return data.serviceAccountEmail.trim() || "sa@projeto.iam.gserviceaccount.com";

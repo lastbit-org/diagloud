@@ -2,6 +2,7 @@ import { getNodeDisplayName } from "../../lib/naming";
 import { resolveGraph } from "../hierarchy";
 import { collectDiagramIssues } from "../validation";
 import { createTerraformGenContext } from "./context";
+import { generateIamTerraform } from "./generators/iam";
 import { generateComputeTerraform } from "./generators/compute";
 import { generateConnectionsTerraform } from "./generators/connections";
 import { generateDataTerraform } from "./generators/data";
@@ -62,7 +63,6 @@ const SKIPPED_KINDS = new Set<ResourceKind>([
   "pcuser",
   "onprem",
   "github",
-  "iam",
   "internet",
 ]);
 
@@ -75,6 +75,7 @@ const TERRAFORM_FILE_ORDER = [
   "platform.tf",
   "ml.tf",
   "org.tf",
+  "iam.tf",
   "connections.tf",
 ] as const;
 
@@ -186,6 +187,7 @@ export function generateTerraform(
     ["platform.tf", generatePlatformTerraform(ctx)],
     ["ml.tf", generateMlTerraform(ctx)],
     ["org.tf", generateOrgTerraform(ctx)],
+    ["iam.tf", generateIamTerraform(ctx)],
     ["connections.tf", generateConnectionsTerraform(ctx)],
   ];
 
