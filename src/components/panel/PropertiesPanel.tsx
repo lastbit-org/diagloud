@@ -990,6 +990,42 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "modelregistry" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="modelregistry-name">Modelo</label>
+            <input
+              id="modelregistry-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="modelregistry-location">Localização</label>
+            <input
+              id="modelregistry-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Vertex AI Model Registry — versionamento e deploy de modelos ML.
+            Registre a partir de notebooks ou pipelines e publique em Cloud Run
+            ou GKE.
+          </p>
+          <ModelRegistryConnectionsInfo
+            modelregistry={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "nat" && (
         <>
           <div className="properties-field">
@@ -1882,18 +1918,22 @@ function WorkbenchConnectionsInfo({
   const firestoreEdges = edges.filter(
     (e) => e.kind === "workbench-firestore" && e.source === workbench.id,
   );
+  const modelRegistryEdges = edges.filter(
+    (e) => e.kind === "workbench-modelregistry" && e.source === workbench.id,
+  );
 
   if (
     !subnetEdge &&
     storageEdges.length === 0 &&
     bigqueryEdges.length === 0 &&
     spannerEdges.length === 0 &&
-    firestoreEdges.length === 0
+    firestoreEdges.length === 0 &&
+    modelRegistryEdges.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud Spanner ou
-        Firestore para documentar o ambiente de notebooks.
+        Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud Spanner,
+        Firestore ou Model Registry para documentar o ambiente de notebooks.
       </p>
     );
   }
@@ -1982,6 +2022,133 @@ function WorkbenchConnectionsInfo({
               .map((f) => f.data.name)
               .join(", ")}
           </dd>
+        </>
+      ) : null}
+      {modelRegistryEdges.length > 0 ? (
+        <>
+          <dt>Model Registry</dt>
+          <dd>
+            {modelRegistryEdges
+              .map((e) =>
+                nodes.find(
+                  (n) => n.id === e.target && n.kind === "modelregistry",
+                ),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "modelregistry" }> =>
+                  n != null,
+              )
+              .map((m) => m.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function ModelRegistryConnectionsInfo({
+  modelregistry,
+  edges,
+  nodes,
+}: {
+  modelregistry: Extract<DiagramNode, { kind: "modelregistry" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const workbenches = edges
+    .filter(
+      (e) =>
+        e.kind === "workbench-modelregistry" && e.target === modelregistry.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "workbench"))
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
+    );
+  const builds = edges
+    .filter(
+      (e) => e.kind === "build-modelregistry" && e.target === modelregistry.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "build"))
+    .filter((n): n is Extract<DiagramNode, { kind: "build" }> => n != null);
+  const runs = edges
+    .filter(
+      (e) => e.kind === "modelregistry-run" && e.source === modelregistry.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const clusters = edges
+    .filter(
+      (e) => e.kind === "modelregistry-gke" && e.source === modelregistry.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const buckets = edges
+    .filter(
+      (e) =>
+        e.kind === "modelregistry-storage" && e.source === modelregistry.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const kmsKeys = edges
+    .filter(
+      (e) => e.kind === "modelregistry-kms" && e.source === modelregistry.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "kms"))
+    .filter((n): n is Extract<DiagramNode, { kind: "kms" }> => n != null);
+
+  if (
+    workbenches.length === 0 &&
+    builds.length === 0 &&
+    runs.length === 0 &&
+    clusters.length === 0 &&
+    buckets.length === 0 &&
+    kmsKeys.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue Vertex AI Workbench ou Cloud Build para registro; Cloud Run, GKE,
+        Storage ou Cloud KMS para deploy e artefatos.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {workbenches.length > 0 ? (
+        <>
+          <dt>Vertex AI Workbench</dt>
+          <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {builds.length > 0 ? (
+        <>
+          <dt>Cloud Build</dt>
+          <dd>{builds.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run (deploy)</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE (deploy)</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {buckets.length > 0 ? (
+        <>
+          <dt>Cloud Storage</dt>
+          <dd>{buckets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {kmsKeys.length > 0 ? (
+        <>
+          <dt>Cloud KMS</dt>
+          <dd>{kmsKeys.map((k) => k.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
@@ -2846,6 +3013,14 @@ function KmsConsumersInfo({
     .filter((e) => e.kind === "airflow-kms" && e.target === kms.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "airflow"))
     .filter((n): n is Extract<DiagramNode, { kind: "airflow" }> => n != null);
+  const modelRegistries = edges
+    .filter((e) => e.kind === "modelregistry-kms" && e.target === kms.id)
+    .map((e) =>
+      nodes.find((n) => n.id === e.source && n.kind === "modelregistry"),
+    )
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "modelregistry" }> => n != null,
+    );
 
   if (
     vms.length === 0 &&
@@ -2857,13 +3032,14 @@ function KmsConsumersInfo({
     firestores.length === 0 &&
     spanners.length === 0 &&
     sparkJobs.length === 0 &&
-    airflowEnvs.length === 0
+    airflowEnvs.length === 0 &&
+    modelRegistries.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         Ligue VMs, GKE, Cloud Run, Storage, Cloud SQL, BigQuery, Firestore,
-        Spanner, Apache Spark ou Managed Airflow para documentar uso de chaves
-        (CMEK).
+        Spanner, Apache Spark, Managed Airflow ou Model Registry para documentar
+        uso de chaves (CMEK).
       </p>
     );
   }
@@ -2930,6 +3106,12 @@ function KmsConsumersInfo({
           <dd>{airflowEnvs.map((a) => a.data.name).join(", ")}</dd>
         </>
       ) : null}
+      {modelRegistries.length > 0 ? (
+        <>
+          <dt>Model Registry</dt>
+          <dd>{modelRegistries.map((m) => m.data.name).join(", ")}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }
@@ -2955,11 +3137,22 @@ function BuildConnectionsInfo({
     .filter((e) => e.kind === "storage-build" && e.target === build.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "storage"))
     .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const modelRegistries = edges
+    .filter(
+      (e) => e.kind === "build-modelregistry" && e.source === build.id,
+    )
+    .map((e) =>
+      nodes.find((n) => n.id === e.target && n.kind === "modelregistry"),
+    )
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "modelregistry" }> => n != null,
+    );
 
   if (
     artifacts.length === 0 &&
     pubsubTriggers.length === 0 &&
-    storageSources.length === 0
+    storageSources.length === 0 &&
+    modelRegistries.length === 0
   ) {
     return null;
   }
@@ -2982,6 +3175,12 @@ function BuildConnectionsInfo({
         <>
           <dt>Código-fonte (Storage)</dt>
           <dd>{storageSources.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {modelRegistries.length > 0 ? (
+        <>
+          <dt>Model Registry</dt>
+          <dd>{modelRegistries.map((m) => m.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

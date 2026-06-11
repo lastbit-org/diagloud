@@ -142,6 +142,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `spark-${count}`;
     case "airflow":
       return `composer-${count}`;
+    case "modelregistry":
+      return `mr-${count}`;
     case "zone":
       return `zona-${count}`;
     case "folder":

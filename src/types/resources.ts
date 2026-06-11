@@ -26,6 +26,7 @@ export type ResourceKind =
   | "workbench"
   | "spark"
   | "airflow"
+  | "modelregistry"
   | "zone"
   | "folder"
   | "project"
@@ -213,6 +214,12 @@ export type AirflowProps = {
   region: string;
 };
 
+export type ModelRegistryProps = {
+  /** Nome do modelo ou recurso no registry. */
+  name: string;
+  location: string;
+};
+
 export type ZoneProps = {
   name: string;
   colorId: ZoneColorId;
@@ -278,6 +285,7 @@ export type ResourcePropsByKind = {
   workbench: WorkbenchProps;
   spark: SparkProps;
   airflow: AirflowProps;
+  modelregistry: ModelRegistryProps;
   zone: ZoneProps;
   folder: FolderProps;
   project: ProjectProps;

@@ -41,6 +41,7 @@ import {
   type WorkbenchProps,
   type SparkProps,
   type AirflowProps,
+  type ModelRegistryProps,
   type ZoneProps,
   type FolderProps,
   type ProjectProps,
@@ -445,6 +446,20 @@ function parseSparkData(raw: unknown): SparkProps {
     name: raw.name,
     region: raw.region,
     deployMode: raw.deployMode as SparkProps["deployMode"],
+  };
+}
+
+function parseModelRegistryData(raw: unknown): ModelRegistryProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Model Registry inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
   };
 }
 
@@ -867,6 +882,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseAirflowData(data),
       };
+    case "modelregistry":
+      if (!nodeIdMatchesKind(nodeId, "modelregistry")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Model Registry.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "modelregistry",
+        position: parsedPosition,
+        zIndex,
+        data: parseModelRegistryData(data),
+      };
     case "zone":
       if (!nodeIdMatchesKind(nodeId, "zone")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Zona.`);
@@ -1029,6 +1057,12 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "airflow-bigquery" &&
     kind !== "airflow-kms" &&
     kind !== "pubsub-airflow" &&
+    kind !== "workbench-modelregistry" &&
+    kind !== "build-modelregistry" &&
+    kind !== "modelregistry-run" &&
+    kind !== "modelregistry-gke" &&
+    kind !== "modelregistry-storage" &&
+    kind !== "modelregistry-kms" &&
     kind !== "pubsub-eventarc" &&
     kind !== "storage-eventarc" &&
     kind !== "eventarc-run" &&
@@ -1204,6 +1238,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.airflow === "string"
           ? patterns.airflow
           : DEFAULT_NAMING_PATTERNS.airflow,
+      modelregistry:
+        typeof patterns.modelregistry === "string"
+          ? patterns.modelregistry
+          : DEFAULT_NAMING_PATTERNS.modelregistry,
       zone:
         typeof patterns.zone === "string"
           ? patterns.zone
@@ -1408,6 +1446,7 @@ function namingMetadataEqual(
     a.patterns.workbench === b.patterns.workbench &&
     a.patterns.spark === b.patterns.spark &&
     a.patterns.airflow === b.patterns.airflow &&
+    a.patterns.modelregistry === b.patterns.modelregistry &&
     a.patterns.zone === b.patterns.zone &&
     a.patterns.folder === b.patterns.folder &&
     a.patterns.project === b.patterns.project &&

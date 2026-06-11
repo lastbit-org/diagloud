@@ -40,6 +40,8 @@ import type { ResourceKind } from "./resources";
  * - Managed Airflow → Sub-rede (`airflow-subnet`): ambiente Composer na VPC
  * - Managed Airflow → Storage / BigQuery / Cloud KMS: DAGs, dados e criptografia
  * - Pub/Sub → Managed Airflow (`pubsub-airflow`): triggers e sensores
+ * - Vertex AI Workbench / Cloud Build → Model Registry: registro de modelos
+ * - Model Registry → Cloud Run / GKE / Storage / Cloud KMS: deploy e artefatos
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
 export const EDGE_ENDPOINTS = {
@@ -89,6 +91,12 @@ export const EDGE_ENDPOINTS = {
   "airflow-bigquery": { from: "airflow", to: "bigquery" },
   "airflow-kms": { from: "airflow", to: "kms" },
   "pubsub-airflow": { from: "pubsub", to: "airflow" },
+  "workbench-modelregistry": { from: "workbench", to: "modelregistry" },
+  "build-modelregistry": { from: "build", to: "modelregistry" },
+  "modelregistry-run": { from: "modelregistry", to: "run" },
+  "modelregistry-gke": { from: "modelregistry", to: "gke" },
+  "modelregistry-storage": { from: "modelregistry", to: "storage" },
+  "modelregistry-kms": { from: "modelregistry", to: "kms" },
   "pubsub-eventarc": { from: "pubsub", to: "eventarc" },
   "storage-eventarc": { from: "storage", to: "eventarc" },
   "eventarc-run": { from: "eventarc", to: "run" },

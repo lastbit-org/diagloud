@@ -75,6 +75,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "workbench" ||
     value === "spark" ||
     value === "airflow" ||
+    value === "modelregistry" ||
     value === "zone" ||
     value === "folder" ||
     value === "project" ||
@@ -239,6 +240,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.spark,
     description: "Processamento de dados — cluster ou serverless",
     icon: GCP_RESOURCE_ICONS.spark,
+  },
+  {
+    kind: "modelregistry",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.modelregistry,
+    description: "Registro e versionamento de modelos ML",
+    icon: GCP_RESOURCE_ICONS.modelregistry,
   },
   {
     kind: "pubsub",

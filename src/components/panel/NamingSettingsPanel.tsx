@@ -25,6 +25,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "workbench",
   "spark",
   "airflow",
+  "modelregistry",
   "pubsub",
   "eventarc",
   "artifact",

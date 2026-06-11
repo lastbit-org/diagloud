@@ -69,6 +69,7 @@ import type {
   WorkbenchProps,
   SparkProps,
   AirflowProps,
+  ModelRegistryProps,
   ZoneProps,
   FolderProps,
   ProjectProps,
@@ -121,6 +122,7 @@ type DiagramActions = {
       | Partial<WorkbenchProps>
       | Partial<SparkProps>
       | Partial<AirflowProps>
+      | Partial<ModelRegistryProps>
       | Partial<ZoneProps>
       | Partial<FolderProps>
       | Partial<ProjectProps>
@@ -340,6 +342,15 @@ function buildNode<K extends ResourceKind>(
         kind: "airflow",
         data: { ...defaultResourceData("airflow", resourceContext), ...data },
       };
+    case "modelregistry":
+      return {
+        ...base,
+        kind: "modelregistry",
+        data: {
+          ...defaultResourceData("modelregistry", resourceContext),
+          ...data,
+        },
+      };
     case "zone":
       return {
         ...base,
@@ -410,6 +421,7 @@ function mergeNodeData(
     | Partial<WorkbenchProps>
     | Partial<SparkProps>
     | Partial<AirflowProps>
+    | Partial<ModelRegistryProps>
     | Partial<ZoneProps>
     | Partial<FolderProps>
     | Partial<EntraProps>
@@ -537,6 +549,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<AirflowProps>) },
+      };
+    case "modelregistry":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<ModelRegistryProps>) },
       };
     case "zone":
       return {

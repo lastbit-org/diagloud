@@ -104,6 +104,16 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("airflow", "bigquery")).toBe("airflow-bigquery");
     expect(getEdgeKind("airflow", "kms")).toBe("airflow-kms");
     expect(getEdgeKind("pubsub", "airflow")).toBe("pubsub-airflow");
+    expect(getEdgeKind("workbench", "modelregistry")).toBe(
+      "workbench-modelregistry",
+    );
+    expect(getEdgeKind("build", "modelregistry")).toBe("build-modelregistry");
+    expect(getEdgeKind("modelregistry", "run")).toBe("modelregistry-run");
+    expect(getEdgeKind("modelregistry", "gke")).toBe("modelregistry-gke");
+    expect(getEdgeKind("modelregistry", "storage")).toBe(
+      "modelregistry-storage",
+    );
+    expect(getEdgeKind("modelregistry", "kms")).toBe("modelregistry-kms");
     expect(getEdgeKind("pubsub", "run")).toBe("pubsub-run");
     expect(getEdgeKind("pubsub", "storage")).toBe("pubsub-storage");
     expect(getEdgeKind("pubsub", "bigquery")).toBe("pubsub-bigquery");
