@@ -3,7 +3,12 @@ import { issueCountForNode, type DiagramIssue } from "../../model/validation";
 import { resolveEdgeHandles } from "../../lib/dynamicHandles";
 import type { DiagramEdge, DiagramNode } from "../../types";
 import { resolveNodeZIndex } from "../../lib/nodeLayers";
-import type { GcpNodeData, InfocardNodeData, ZoneNodeData } from "../nodes";
+import type {
+  FolderNodeData,
+  GcpNodeData,
+  InfocardNodeData,
+  ZoneNodeData,
+} from "../nodes";
 
 function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "zone") {
@@ -77,9 +82,6 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "onprem") {
     return node.data.location;
   }
-  if (node.kind === "folder") {
-    return "Hierarquia";
-  }
   if (node.kind === "entra") {
     return "Identity";
   }
@@ -93,7 +95,7 @@ export function toFlowNode(
   node: DiagramNode,
   selected = false,
   issues: DiagramIssue[] = [],
-): Node<GcpNodeData | ZoneNodeData | InfocardNodeData> {
+): Node<GcpNodeData | ZoneNodeData | InfocardNodeData | FolderNodeData> {
   if (node.kind === "zone") {
     return {
       id: node.id,
@@ -114,6 +116,22 @@ export function toFlowNode(
       style: {
         width: node.data.width,
         height: node.data.height,
+      },
+    };
+  }
+
+  if (node.kind === "folder") {
+    const issueCount = issueCountForNode(node.id, issues);
+    return {
+      id: node.id,
+      type: "folder",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      data: {
+        kind: "folder",
+        label: node.data.name,
+        issueCount: issueCount > 0 ? issueCount : undefined,
       },
     };
   }

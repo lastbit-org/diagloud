@@ -48,6 +48,11 @@
   outline: none;
 }
 
+.gcp-node--compact {
+  min-width: 0;
+  padding: 8px 10px;
+}
+
 .gcp-node__icon {
   flex-shrink: 0;
   width: 32px;

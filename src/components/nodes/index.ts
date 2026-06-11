@@ -23,6 +23,7 @@ export { VmNode } from "./VmNode";
 export { VpcNode } from "./VpcNode";
 export type { ZoneNodeData } from "./ZoneNode";
 export { ZoneNode } from "./ZoneNode";
+export type { FolderNodeData } from "./FolderNode";
 export { FolderNode } from "./FolderNode";
 export type { InfocardNodeData } from "./InfocardNode";
 export { InfocardNode } from "./InfocardNode";
