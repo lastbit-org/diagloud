@@ -26,6 +26,7 @@ export type ResourceKind =
   | "workbench"
   | "zone"
   | "folder"
+  | "project"
   | "entra"
   | "infocard"
   | "pcuser"
@@ -208,6 +209,11 @@ export type FolderProps = {
   name: string;
 };
 
+export type ProjectProps = {
+  /** ID ou nome do projeto GCP. */
+  name: string;
+};
+
 export type EntraProps = {
   /** Nome do tenant. */
   name: string;
@@ -254,6 +260,7 @@ export type ResourcePropsByKind = {
   workbench: WorkbenchProps;
   zone: ZoneProps;
   folder: FolderProps;
+  project: ProjectProps;
   entra: EntraProps;
   infocard: InfocardProps;
   pcuser: PcUserProps;

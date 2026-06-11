@@ -7,6 +7,7 @@ import type {
   FolderNodeData,
   GcpNodeData,
   InfocardNodeData,
+  ProjectNodeData,
   ZoneNodeData,
 } from "../nodes";
 
@@ -95,7 +96,9 @@ export function toFlowNode(
   node: DiagramNode,
   selected = false,
   issues: DiagramIssue[] = [],
-): Node<GcpNodeData | ZoneNodeData | InfocardNodeData | FolderNodeData> {
+): Node<
+  GcpNodeData | ZoneNodeData | InfocardNodeData | FolderNodeData | ProjectNodeData
+> {
   if (node.kind === "zone") {
     return {
       id: node.id,
@@ -130,6 +133,22 @@ export function toFlowNode(
       zIndex: resolveNodeZIndex(node),
       data: {
         kind: "folder",
+        label: node.data.name,
+        issueCount: issueCount > 0 ? issueCount : undefined,
+      },
+    };
+  }
+
+  if (node.kind === "project") {
+    const issueCount = issueCountForNode(node.id, issues);
+    return {
+      id: node.id,
+      type: "project",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      data: {
+        kind: "project",
         label: node.data.name,
         issueCount: issueCount > 0 ? issueCount : undefined,
       },

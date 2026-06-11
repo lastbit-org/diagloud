@@ -34,6 +34,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "infocard",
   "zone",
   "folder",
+  "project",
 ];
 
 export function NamingSettingsPanel() {

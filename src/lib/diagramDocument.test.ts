@@ -50,6 +50,7 @@ const sampleDocument: DiagramDocument = {
         workbench: "wb-AREA-AMBIENTE",
         zone: "zona-AREA-AMBIENTE",
         folder: "folder-AREA-AMBIENTE",
+        project: "proj-AREA-AMBIENTE",
         entra: "entra-AREA-AMBIENTE",
         infocard: "info-AREA-AMBIENTE",
         pcuser: "user-AREA-AMBIENTE",

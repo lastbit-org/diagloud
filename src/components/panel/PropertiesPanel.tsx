@@ -1288,6 +1288,26 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "project" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="project-name">Nome / ID</label>
+            <input
+              id="project-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+              placeholder="meu-projeto-gcp"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Projeto GCP — container de recursos faturáveis. Documente a qual
+            projeto os serviços do diagrama pertencem.
+          </p>
+        </>
+      )}
+
       {selectedNode?.kind === "entra" && (
         <>
           <div className="properties-field">

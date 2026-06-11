@@ -29,6 +29,7 @@ const ID_PREFIXES = [
   "workbench",
   "zone",
   "folder",
+  "project",
   "entra",
   "infocard",
   "pcuser",
@@ -76,6 +77,7 @@ export function createId(prefix = "node"): string {
     prefix === "workbench" ||
     prefix === "zone" ||
     prefix === "folder" ||
+    prefix === "project" ||
     prefix === "entra" ||
     prefix === "infocard" ||
     prefix === "pcuser" ||
@@ -91,7 +93,7 @@ export function isUuid(value: string): boolean {
 }
 
 const ID_PREFIX_PATTERN =
-  /^(vpc|subnet|vm|storage|sql|gke|nat|peering|vpn|interconnect|firewall|artifact|build|kms|internet|run|pubsub|eventarc|bigquery|spanner|firestore|workbench|zone|folder|entra|infocard|pcuser|onprem|edge)-(.+)$/;
+  /^(vpc|subnet|vm|storage|sql|gke|nat|peering|vpn|interconnect|firewall|artifact|build|kms|internet|run|pubsub|eventarc|bigquery|spanner|firestore|workbench|zone|folder|project|entra|infocard|pcuser|onprem|edge)-(.+)$/;
 
 function parsePrefixedId(
   id: string,

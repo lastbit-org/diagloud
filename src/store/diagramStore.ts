@@ -67,6 +67,7 @@ import type {
   WorkbenchProps,
   ZoneProps,
   FolderProps,
+  ProjectProps,
   EntraProps,
   InfocardProps,
   PcUserProps,
@@ -116,6 +117,7 @@ type DiagramActions = {
       | Partial<WorkbenchProps>
       | Partial<ZoneProps>
       | Partial<FolderProps>
+      | Partial<ProjectProps>
       | Partial<EntraProps>
       | Partial<InfocardProps>
       | Partial<PcUserProps>
@@ -332,6 +334,12 @@ function buildNode<K extends ResourceKind>(
         kind: "folder",
         data: { ...defaultResourceData("folder", resourceContext), ...data },
       };
+    case "project":
+      return {
+        ...base,
+        kind: "project",
+        data: { ...defaultResourceData("project", resourceContext), ...data },
+      };
     case "entra":
       return {
         ...base,
@@ -509,6 +517,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<FolderProps>) },
+      };
+    case "project":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<ProjectProps>) },
       };
     case "entra":
       return {

@@ -23,6 +23,7 @@ import internetIcon from "./icons/internet.svg";
 import peeringIcon from "./icons/vpc-peering.svg";
 import zoneIcon from "./icons/zone.svg";
 import folderIcon from "./icons/folder.svg";
+import projectIcon from "./google-cloud-legacy-icons/project/project.svg";
 import entraIcon from "./icons/entra.svg";
 import infocardIcon from "./icons/infocard.svg";
 import pcUserIcon from "./icons/pc-user.svg";
@@ -54,6 +55,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   workbench: workbenchIcon,
   zone: zoneIcon,
   folder: folderIcon,
+  project: projectIcon,
   entra: entraIcon,
   infocard: infocardIcon,
   pcuser: pcUserIcon,
@@ -85,6 +87,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   workbench: "Vertex AI Workbench",
   zone: "Zona",
   folder: "Pasta",
+  project: "Projeto",
   entra: "Microsoft Entra ID",
   infocard: "Identificação",
   pcuser: "Usuário (PC)",

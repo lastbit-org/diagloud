@@ -75,6 +75,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "workbench" ||
     value === "zone" ||
     value === "folder" ||
+    value === "project" ||
     value === "entra" ||
     value === "infocard" ||
     value === "pcuser" ||
@@ -96,6 +97,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.folder,
     description: "Pasta na hierarquia de recursos GCP",
     icon: GCP_RESOURCE_ICONS.folder,
+  },
+  {
+    kind: "project",
+    category: "organization",
+    label: GCP_RESOURCE_LABELS.project,
+    description: "Projeto GCP (container de recursos)",
+    icon: GCP_RESOURCE_ICONS.project,
   },
   {
     kind: "infocard",

@@ -41,6 +41,7 @@ import {
   type WorkbenchProps,
   type ZoneProps,
   type FolderProps,
+  type ProjectProps,
   type EntraProps,
   type InfocardProps,
   type PcUserProps,
@@ -429,6 +430,13 @@ function parseWorkbenchData(raw: unknown): WorkbenchProps {
 function parseFolderData(raw: unknown): FolderProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de pasta inválidos.");
+  }
+  return { name: raw.name };
+}
+
+function parseProjectData(raw: unknown): ProjectProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de projeto inválidos.");
   }
   return { name: raw.name };
 }
@@ -822,6 +830,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseFolderData(data),
       };
+    case "project":
+      if (!nodeIdMatchesKind(nodeId, "project")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Projeto.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "project",
+        position: parsedPosition,
+        zIndex,
+        data: parseProjectData(data),
+      };
     case "entra":
       if (!nodeIdMatchesKind(nodeId, "entra")) {
         throw new DiagramParseError(
@@ -1113,6 +1134,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.folder === "string"
           ? patterns.folder
           : DEFAULT_NAMING_PATTERNS.folder,
+      project:
+        typeof patterns.project === "string"
+          ? patterns.project
+          : DEFAULT_NAMING_PATTERNS.project,
       entra:
         typeof patterns.entra === "string"
           ? patterns.entra
@@ -1305,6 +1330,7 @@ function namingMetadataEqual(
     a.patterns.workbench === b.patterns.workbench &&
     a.patterns.zone === b.patterns.zone &&
     a.patterns.folder === b.patterns.folder &&
+    a.patterns.project === b.patterns.project &&
     a.patterns.entra === b.patterns.entra &&
     a.patterns.infocard === b.patterns.infocard &&
     a.patterns.pcuser === b.patterns.pcuser &&

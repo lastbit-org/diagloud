@@ -142,6 +142,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `zona-${count}`;
     case "folder":
       return `folder-${count}`;
+    case "project":
+      return `proj-${count}`;
     case "entra":
       return `entra-${count}`;
     case "infocard":

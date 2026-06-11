@@ -24,6 +24,7 @@ import type {
   VpcProps,
   ZoneProps,
   FolderProps,
+  ProjectProps,
   EntraProps,
   InfocardProps,
   PcUserProps,
@@ -67,6 +68,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "workbench"; data: WorkbenchProps })
   | (NodeBase & { kind: "zone"; data: ZoneProps })
   | (NodeBase & { kind: "folder"; data: FolderProps })
+  | (NodeBase & { kind: "project"; data: ProjectProps })
   | (NodeBase & { kind: "entra"; data: EntraProps })
   | (NodeBase & { kind: "infocard"; data: InfocardProps })
   | (NodeBase & { kind: "pcuser"; data: PcUserProps })

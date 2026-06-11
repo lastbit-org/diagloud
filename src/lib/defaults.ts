@@ -30,6 +30,7 @@ import type {
   WorkbenchProps,
   ZoneProps,
   FolderProps,
+  ProjectProps,
   EntraProps,
   InfocardProps,
   PcUserProps,
@@ -178,6 +179,8 @@ export function defaultResourceData<K extends ResourceKind>(
       } as ZoneProps as ResourcePropsByKind[K];
     case "folder":
       return { name } as FolderProps as ResourcePropsByKind[K];
+    case "project":
+      return { name } as ProjectProps as ResourcePropsByKind[K];
     case "entra":
       return { name } as EntraProps as ResourcePropsByKind[K];
     case "infocard":
@@ -246,6 +249,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `zona-${count}`;
     case "folder":
       return `folder-${count}`;
+    case "project":
+      return `proj-${count}`;
     case "entra":
       return `entra-${count}`;
     case "infocard":

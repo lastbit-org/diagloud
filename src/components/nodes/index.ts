@@ -25,6 +25,8 @@ export type { ZoneNodeData } from "./ZoneNode";
 export { ZoneNode } from "./ZoneNode";
 export type { FolderNodeData } from "./FolderNode";
 export { FolderNode } from "./FolderNode";
+export type { ProjectNodeData } from "./ProjectNode";
+export { ProjectNode } from "./ProjectNode";
 export type { InfocardNodeData } from "./InfocardNode";
 export { InfocardNode } from "./InfocardNode";
 export { EntraNode } from "./EntraNode";
