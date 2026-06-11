@@ -8,6 +8,8 @@ O Diagloud é pensado para **design reviews**, **documentação de infraestrutur
 
 [https://lastbit-org.github.io/diagloud/](https://lastbit-org.github.io/diagloud/)
 
+![Screenshot do Diagloud](https://raw.githubusercontent.com/lastbit-org/diagloud/refs/heads/main/src/assets/print/image.png)
+
 ## Principais recursos
 
 - **Canvas interativo** com pan, zoom, seleção e empilhamento (trazer para frente / enviar para trás)
@@ -36,17 +38,17 @@ O Diagloud é pensado para **design reviews**, **documentação de infraestrutur
 
 Categorias espelham o menu _All products_ do GCP:
 
-| Categoria              | Recursos                                                                                 |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| **Organização**        | Zona, Identificação (infocard)                                                           |
-| **Rede**               | VPC, Sub-rede, Internet, Cloud NAT, VPC Peering, Cloud VPN, Cloud Interconnect, Firewall |
-| **Computação**         | VM (Compute Engine), GKE, Cloud Run                                                      |
-| **Armazenamento**      | Cloud Storage                                                                            |
-| **Bancos de dados**    | Cloud SQL, BigQuery, Cloud Spanner, Firestore                                            |
-| **IA**                 | Vertex AI Workbench                                                                      |
-| **Integração**         | Pub/Sub, Eventarc                                                                        |
-| **Identidade e híbrido** | Microsoft Entra ID, Usuário (PC), On-premises                                          |
-| **Ferramentas**        | Artifact Registry, Cloud KMS                                                             |
+| Categoria                | Recursos                                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| **Organização**          | Zona, Identificação (infocard)                                                           |
+| **Rede**                 | VPC, Sub-rede, Internet, Cloud NAT, VPC Peering, Cloud VPN, Cloud Interconnect, Firewall |
+| **Computação**           | VM (Compute Engine), GKE, Cloud Run                                                      |
+| **Armazenamento**        | Cloud Storage                                                                            |
+| **Bancos de dados**      | Cloud SQL, BigQuery, Cloud Spanner, Firestore                                            |
+| **IA**                   | Vertex AI Workbench                                                                      |
+| **Integração**           | Pub/Sub, Eventarc                                                                        |
+| **Identidade e híbrido** | Microsoft Entra ID, Usuário (PC), On-premises                                            |
+| **Ferramentas**          | Artifact Registry, Cloud KMS                                                             |
 
 Ícones oficiais GCP (pacote legacy) onde disponíveis.
 
