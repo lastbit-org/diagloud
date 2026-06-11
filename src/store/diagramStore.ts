@@ -39,6 +39,17 @@ import {
   sendNodeToBack,
 } from "../lib/nodeLayers";
 import { validateSubnetCidr } from "../model/subnet";
+import {
+  cloneDiagramSnapshot,
+  clearPropertyEditHistoryTimers,
+  isHistoryApplying,
+  recordPropertyEditHistory,
+  resetPropertyEditHistoryArm,
+  setApplyingHistory,
+  snapshotsEqual,
+  trimHistory,
+  type DiagramSnapshot,
+} from "../lib/diagramHistory";
 import type {
   DiagramDocument,
   DiagramEdge,
@@ -86,6 +97,9 @@ type DiagramState = {
   edges: DiagramEdge[];
   selectedNodeId: string | null;
   selectedEdgeId: string | null;
+  past: DiagramSnapshot[];
+  future: DiagramSnapshot[];
+  historyTransactionDepth: number;
 };
 
 type DiagramActions = {
@@ -148,6 +162,12 @@ type DiagramActions = {
   loadDocument: (document: DiagramDocument | LegacyDiagramDocument) => void;
   reset: () => void;
   getDocument: () => DiagramDocument;
+  undo: () => void;
+  redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+  beginHistoryTransaction: () => void;
+  endHistoryTransaction: () => void;
 };
 
 export type DiagramStore = DiagramState & DiagramActions;
@@ -157,7 +177,62 @@ const initialState: DiagramState = {
   edges: [],
   selectedNodeId: null,
   selectedEdgeId: null,
+  past: [],
+  future: [],
+  historyTransactionDepth: 0,
 };
+
+function pushHistorySnapshot(
+  get: () => DiagramStore,
+  set: (
+    partial:
+      | Partial<DiagramState>
+      | ((state: DiagramState) => Partial<DiagramState>),
+  ) => void,
+): void {
+  if (isHistoryApplying() || get().historyTransactionDepth > 0) return;
+
+  const { nodes, edges, past } = get();
+  const snapshot = cloneDiagramSnapshot(nodes, edges);
+  const last = past[past.length - 1];
+  if (last && snapshotsEqual(last, snapshot)) return;
+
+  set({
+    past: trimHistory([...past, snapshot]),
+    future: [],
+  });
+}
+
+function pushPropertyEditHistory(
+  get: () => DiagramStore,
+  set: (
+    partial:
+      | Partial<DiagramState>
+      | ((state: DiagramState) => Partial<DiagramState>),
+  ) => void,
+): void {
+  if (isHistoryApplying() || get().historyTransactionDepth > 0) return;
+
+  const { nodes, edges } = get();
+  recordPropertyEditHistory(cloneDiagramSnapshot(nodes, edges), (snapshot) => {
+    const last = get().past[get().past.length - 1];
+    if (last && snapshotsEqual(last, snapshot)) return;
+    set({
+      past: trimHistory([...get().past, snapshot]),
+      future: [],
+    });
+  });
+}
+
+function clearHistoryState(): Partial<DiagramState> {
+  resetPropertyEditHistoryArm();
+  clearPropertyEditHistoryTimers();
+  return {
+    past: [],
+    future: [],
+    historyTransactionDepth: 0,
+  };
+}
 
 function buildNode<K extends ResourceKind>(
   kind: K,
@@ -625,6 +700,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   ...initialState,
 
   addNode: (kind, position, data) => {
+    pushHistorySnapshot(get, set);
     const nodes = get().nodes;
     const existingSubnetCidrs = nodes
       .filter((n) => n.kind === "subnet")
@@ -656,12 +732,14 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   },
 
   bringNodeToFront: (id) => {
+    pushHistorySnapshot(get, set);
     set((state) => ({
       nodes: bringNodeToFront(state.nodes, id),
     }));
   },
 
   sendNodeToBack: (id) => {
+    pushHistorySnapshot(get, set);
     set((state) => ({
       nodes: sendNodeToBack(state.nodes, id),
     }));
@@ -699,6 +777,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   },
 
   updateNodeData: (id, data) => {
+    pushPropertyEditHistory(get, set);
     set((state) => {
       let nodes = state.nodes.map((node) =>
         node.id === id ? mergeNodeData(node, data) : node,
@@ -759,6 +838,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   },
 
   setSubnetCidr: (id, cidr) => {
+    pushPropertyEditHistory(get, set);
     let applied = false;
     set((state) => {
       const validation = validateSubnetCidr(cidr, id, state.nodes);
@@ -780,6 +860,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   },
 
   removeNode: (id) => {
+    pushHistorySnapshot(get, set);
     set((state) => {
       const affectedSubnetIds = new Set<string>();
       for (const edge of state.edges) {
@@ -818,6 +899,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   },
 
   addEdge: (edge) => {
+    pushHistorySnapshot(get, set);
     set((state) => {
       const resolved = resolveEdgeHandles(edge);
       const sourceHandle = edge.sourceHandle ?? resolved.sourceHandle;
@@ -881,6 +963,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   },
 
   removeEdge: (id) => {
+    pushHistorySnapshot(get, set);
     set((state) => {
       const removed = state.edges.find((edge) => edge.id === id);
       const edges = state.edges.filter((edge) => edge.id !== id);
@@ -952,10 +1035,69 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       edges: normalized.edges,
       selectedNodeId: null,
       selectedEdgeId: null,
+      ...clearHistoryState(),
     });
   },
 
-  reset: () => set(initialState),
+  reset: () => set({ ...initialState, ...clearHistoryState() }),
+
+  undo: () => {
+    const { past, future, nodes, edges } = get();
+    if (past.length === 0) return;
+
+    const previous = past[past.length - 1];
+    const current = cloneDiagramSnapshot(nodes, edges);
+
+    setApplyingHistory(true);
+    set({
+      nodes: structuredClone(previous.nodes),
+      edges: structuredClone(previous.edges),
+      past: past.slice(0, -1),
+      future: [current, ...future],
+      selectedNodeId: null,
+      selectedEdgeId: null,
+    });
+    resetPropertyEditHistoryArm();
+    setApplyingHistory(false);
+  },
+
+  redo: () => {
+    const { past, future, nodes, edges } = get();
+    if (future.length === 0) return;
+
+    const next = future[0];
+    const current = cloneDiagramSnapshot(nodes, edges);
+
+    setApplyingHistory(true);
+    set({
+      nodes: structuredClone(next.nodes),
+      edges: structuredClone(next.edges),
+      past: [...past, current],
+      future: future.slice(1),
+      selectedNodeId: null,
+      selectedEdgeId: null,
+    });
+    resetPropertyEditHistoryArm();
+    setApplyingHistory(false);
+  },
+
+  canUndo: () => get().past.length > 0,
+
+  canRedo: () => get().future.length > 0,
+
+  beginHistoryTransaction: () => {
+    const depth = get().historyTransactionDepth;
+    if (depth === 0) {
+      pushHistorySnapshot(get, set);
+    }
+    set({ historyTransactionDepth: depth + 1 });
+  },
+
+  endHistoryTransaction: () => {
+    set({
+      historyTransactionDepth: Math.max(0, get().historyTransactionDepth - 1),
+    });
+  },
 
   getDocument: () => {
     const { nodes, edges } = get();

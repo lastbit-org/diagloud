@@ -18,6 +18,10 @@ import {
   PALETTE_DRAG_MIME,
 } from "../palette/paletteItems";
 import { isEditableTarget } from "../../lib/keyboard";
+import {
+  isRedoKeyboardEvent,
+  isUndoKeyboardEvent,
+} from "../../lib/diagramHistory";
 import { useInvalidConnectionFeedback } from "../../hooks/useInvalidConnectionFeedback";
 import { useDiagramValidation } from "../../hooks/useDiagramValidation";
 import { validateConnection } from "../../model/connections";
@@ -47,6 +51,14 @@ export function DiagramCanvas() {
   const selectEdge = useDiagramStore((state) => state.selectEdge);
   const clearSelection = useDiagramStore((state) => state.clearSelection);
   const deleteSelection = useDiagramStore((state) => state.deleteSelection);
+  const undo = useDiagramStore((state) => state.undo);
+  const redo = useDiagramStore((state) => state.redo);
+  const beginHistoryTransaction = useDiagramStore(
+    (state) => state.beginHistoryTransaction,
+  );
+  const endHistoryTransaction = useDiagramStore(
+    (state) => state.endHistoryTransaction,
+  );
   const { screenToFlowPosition } = useReactFlow();
 
   const validationContext = useMemo(
@@ -84,18 +96,34 @@ export function DiagramCanvas() {
       const diagramNodes = useDiagramStore.getState().nodes;
 
       for (const change of changes) {
-        if (change.type === "position" && change.position) {
-          updateNodePosition(change.id, change.position);
+        if (change.type === "position") {
+          if (change.dragging === true) {
+            beginHistoryTransaction();
+          }
+          if (change.dragging === false) {
+            endHistoryTransaction();
+          }
+          if (change.position) {
+            updateNodePosition(change.id, change.position);
+          }
         }
-        if (change.type === "dimensions" && change.dimensions) {
-          const diagramNode = diagramNodes.find((node) => node.id === change.id);
-          if (diagramNode?.kind !== "zone") continue;
+        if (change.type === "dimensions") {
+          if (change.resizing === true) {
+            beginHistoryTransaction();
+          }
+          if (change.resizing === false) {
+            endHistoryTransaction();
+          }
+          if (change.dimensions) {
+            const diagramNode = diagramNodes.find((node) => node.id === change.id);
+            if (diagramNode?.kind !== "zone") continue;
 
-          updateNodeDimensions(
-            change.id,
-            Math.round(change.dimensions.width),
-            Math.round(change.dimensions.height),
-          );
+            updateNodeDimensions(
+              change.id,
+              Math.round(change.dimensions.width),
+              Math.round(change.dimensions.height),
+            );
+          }
         }
         if (change.type === "select" && change.selected) {
           selectNode(change.id);
@@ -105,7 +133,7 @@ export function DiagramCanvas() {
         }
       }
     },
-    [removeNode, selectNode, updateNodeDimensions, updateNodePosition],
+    [beginHistoryTransaction, endHistoryTransaction, removeNode, selectNode, updateNodeDimensions, updateNodePosition],
   );
 
   const onEdgesChange = useCallback(
@@ -131,6 +159,18 @@ export function DiagramCanvas() {
         return;
       }
 
+      if (isUndoKeyboardEvent(event)) {
+        event.preventDefault();
+        undo();
+        return;
+      }
+
+      if (isRedoKeyboardEvent(event)) {
+        event.preventDefault();
+        redo();
+        return;
+      }
+
       if (event.key === "Delete" || event.key === "Backspace") {
         if (!selectedNodeId && !selectedEdgeId) return;
         event.preventDefault();
@@ -142,8 +182,10 @@ export function DiagramCanvas() {
   }, [
     clearSelection,
     deleteSelection,
+    redo,
     selectedEdgeId,
     selectedNodeId,
+    undo,
   ]);
 
   const onDragOver = useCallback((event: DragEvent) => {
