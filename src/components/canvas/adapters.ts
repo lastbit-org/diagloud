@@ -98,9 +98,6 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "onprem") {
     return node.data.location;
   }
-  if (node.kind === "entra") {
-    return "Identity";
-  }
   if (node.kind === "pcuser") {
     return "Usuário";
   }

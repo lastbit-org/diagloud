@@ -3,7 +3,7 @@
   box-sizing: border-box;
   min-width: 120px;
   max-width: 220px;
-  padding: 10px 12px;
+  padding: 12px 24px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--code-bg);
@@ -42,8 +42,9 @@
 .gcp-infocard__body {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
-  text-align: left;
+  text-align: center;
 }
 
 .gcp-infocard__caption {
@@ -53,6 +54,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
+  text-align: center;
 }
 
 .gcp-infocard__title {
@@ -63,4 +66,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
+  text-align: center;
 }

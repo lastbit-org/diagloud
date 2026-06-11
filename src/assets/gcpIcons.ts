@@ -28,7 +28,7 @@ import peeringIcon from "./icons/vpc-peering.svg";
 import zoneIcon from "./icons/zone.svg";
 import folderIcon from "./icons/folder.svg";
 import projectIcon from "./google-cloud-legacy-icons/project/project.svg";
-import entraIcon from "./icons/entra.svg";
+import entraIcon from "./ms-entra-id/Microsoft Entra ID color icon.svg";
 import infocardIcon from "./icons/infocard.svg";
 import pcUserIcon from "./icons/pc-user.svg";
 import onpremIcon from "./icons/onprem.svg";
@@ -100,7 +100,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   zone: "Zona",
   folder: "Pasta",
   project: "Projeto",
-  entra: "Microsoft Entra ID",
+  entra: "MICROSOFT ENTRA ID",
   infocard: "Identificação",
   pcuser: "Usuário (PC)",
   onprem: "On-premises",
