@@ -14,6 +14,8 @@ export function PaletteItem({ item }: PaletteItemProps) {
   const { screenToFlowPosition } = useReactFlow();
 
   const addAtViewportCenter = () => {
+    if (!item.kind || item.comingSoon) return;
+
     const center = screenToFlowPosition({
       x: window.innerWidth / 2,
       y: window.innerHeight / 2,
@@ -26,6 +28,11 @@ export function PaletteItem({ item }: PaletteItemProps) {
   };
 
   const onDragStart = (event: DragEvent<HTMLButtonElement>) => {
+    if (!item.kind || item.comingSoon) {
+      event.preventDefault();
+      return;
+    }
+
     event.dataTransfer.setData(PALETTE_DRAG_MIME, item.kind);
     event.dataTransfer.effectAllowed = "move";
   };
@@ -34,11 +41,14 @@ export function PaletteItem({ item }: PaletteItemProps) {
     <li>
       <button
         type="button"
-        className="palette-item"
-        draggable
+        className={`palette-item${item.comingSoon ? " palette-item--soon" : ""}`}
+        draggable={!item.comingSoon && Boolean(item.kind)}
+        disabled={item.comingSoon}
         onDragStart={onDragStart}
         onClick={addAtViewportCenter}
-        aria-label={`Adicionar ${item.label}`}
+        aria-label={
+          item.comingSoon ? `${item.label} — em breve` : `Adicionar ${item.label}`
+        }
       >
         <img
           className="palette-item__icon"

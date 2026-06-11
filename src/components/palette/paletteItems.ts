@@ -2,53 +2,55 @@ import {
   GCP_RESOURCE_ICONS,
   GCP_RESOURCE_LABELS,
 } from "../../assets/gcpIcons";
+import firebaseIcon from "../../assets/google-cloud-legacy-icons/identity_platform/identity_platform.svg";
 import type { ResourceKind } from "../../types";
 
 export const PALETTE_DRAG_MIME = "application/diagloud.resource";
 
-/**
- * Categorias alinhadas ao menu do console GCP (All products / Ver todos os produtos).
- * @see https://console.cloud.google.com/products
- * @see https://cloud.google.com/docs/product-list
- */
 export type PaletteCategoryId =
-  | "organization"
-  | "networking"
+  | "management"
   | "compute"
   | "storage"
+  | "analytics"
+  | "networking"
+  | "serverless"
   | "databases"
-  | "ai"
-  | "devtools"
+  | "appdev"
+  | "cicd"
   | "integration"
-  | "hybrid"
-  | "iam";
+  | "ai"
+  | "security"
+  | "other";
 
 export type PaletteCategoryConfig = {
   id: PaletteCategoryId;
-  /** Rótulo exibido na paleta (equivalente PT do console). */
   label: string;
 };
 
 export type PaletteItemConfig = {
-  kind: ResourceKind;
+  paletteKey: string;
+  kind?: ResourceKind;
   category: PaletteCategoryId;
   label: string;
   description: string;
   icon: string;
+  comingSoon?: boolean;
 };
 
-/** Ordem do painel lateral do console. */
 export const PALETTE_CATEGORIES: PaletteCategoryConfig[] = [
-  { id: "organization", label: "Organização (Diagrama)" },
-  { id: "networking", label: "Rede (Networking)" },
-  { id: "compute", label: "Computação (Compute)" },
-  { id: "storage", label: "Armazenamento (Storage)" },
-  { id: "databases", label: "Bancos de dados (Databases)" },
-  { id: "ai", label: "IA (Artificial intelligence)" },
-  { id: "integration", label: "Integração (Integration)" },
-  { id: "hybrid", label: "Identidade e híbrido (Hybrid)" },
-  { id: "iam", label: "IAM (Identidade e acesso)" },
-  { id: "devtools", label: "Ferramentas (Developer tools)" },
+  { id: "management", label: "Management" },
+  { id: "compute", label: "Compute" },
+  { id: "storage", label: "Storage" },
+  { id: "analytics", label: "Analytics" },
+  { id: "networking", label: "Networking" },
+  { id: "serverless", label: "Serverless" },
+  { id: "databases", label: "Databases" },
+  { id: "appdev", label: "App Development" },
+  { id: "cicd", label: "CI/CD" },
+  { id: "integration", label: "Integration Services" },
+  { id: "ai", label: "Artificial Intelligence" },
+  { id: "security", label: "Security" },
+  { id: "other", label: "Other" },
 ];
 
 export function isPaletteResourceKind(value: string): value is ResourceKind {
@@ -94,104 +96,55 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
 
 export const PALETTE_ITEMS: PaletteItemConfig[] = [
   {
+    paletteKey: "zone",
     kind: "zone",
-    category: "organization",
+    category: "management",
     label: GCP_RESOURCE_LABELS.zone,
     description: "Agrupamento visual de recursos",
     icon: GCP_RESOURCE_ICONS.zone,
   },
   {
+    paletteKey: "folder",
     kind: "folder",
-    category: "organization",
+    category: "management",
     label: GCP_RESOURCE_LABELS.folder,
     description: "Pasta na hierarquia de recursos GCP",
     icon: GCP_RESOURCE_ICONS.folder,
   },
   {
+    paletteKey: "project",
     kind: "project",
-    category: "organization",
+    category: "management",
     label: GCP_RESOURCE_LABELS.project,
     description: "Projeto GCP (container de recursos)",
     icon: GCP_RESOURCE_ICONS.project,
   },
   {
+    paletteKey: "infocard",
     kind: "infocard",
-    category: "organization",
+    category: "management",
     label: GCP_RESOURCE_LABELS.infocard,
     description: "Legenda curta e título em destaque",
     icon: GCP_RESOURCE_ICONS.infocard,
   },
   {
-    kind: "vpc",
-    category: "networking",
-    label: GCP_RESOURCE_LABELS.vpc,
-    description: "Rede virtual privada",
-    icon: GCP_RESOURCE_ICONS.vpc,
+    paletteKey: "iam",
+    kind: "iam",
+    category: "management",
+    label: GCP_RESOURCE_LABELS.iam,
+    description: "Conta de serviço, Workload Identity Federation ou grupo",
+    icon: GCP_RESOURCE_ICONS.iam,
   },
   {
-    kind: "subnet",
-    category: "networking",
-    label: GCP_RESOURCE_LABELS.subnet,
-    description: "Segmento de IP na VPC",
-    icon: GCP_RESOURCE_ICONS.subnet,
-  },
-  {
-    kind: "internet",
-    category: "networking",
-    label: GCP_RESOURCE_LABELS.internet,
-    description: "Rede pública externa",
-    icon: GCP_RESOURCE_ICONS.internet,
-  },
-  {
-    kind: "nat",
-    category: "networking",
-    label: GCP_RESOURCE_LABELS.nat,
-    description: "Saída para internet sem IP público",
-    icon: GCP_RESOURCE_ICONS.nat,
-  },
-  {
-    kind: "router",
-    category: "networking",
-    label: GCP_RESOURCE_LABELS.router,
-    description: "Roteador BGP — NAT, VPN e rotas dinâmicas (VPC opcional)",
-    icon: GCP_RESOURCE_ICONS.router,
-  },
-  {
-    kind: "peering",
-    category: "networking",
-    label: GCP_RESOURCE_LABELS.peering,
-    description: "Conectividade privada entre duas VPCs",
-    icon: GCP_RESOURCE_ICONS.peering,
-  },
-  {
-    kind: "vpn",
-    category: "networking",
-    label: GCP_RESOURCE_LABELS.vpn,
-    description: "Túnel IPsec híbrido com rede externa",
-    icon: GCP_RESOURCE_ICONS.vpn,
-  },
-  {
-    kind: "interconnect",
-    category: "networking",
-    label: GCP_RESOURCE_LABELS.interconnect,
-    description: "Link dedicado de alta largura de banda com on-prem",
-    icon: GCP_RESOURCE_ICONS.interconnect,
-  },
-  {
-    kind: "firewall",
-    category: "networking",
-    label: GCP_RESOURCE_LABELS.firewall,
-    description: "Regra de firewall da VPC",
-    icon: GCP_RESOURCE_ICONS.firewall,
-  },
-  {
+    paletteKey: "vm",
     kind: "vm",
     category: "compute",
     label: GCP_RESOURCE_LABELS.vm,
-    description: "Máquina virtual Compute",
+    description: "Máquina virtual Compute Engine",
     icon: GCP_RESOURCE_ICONS.vm,
   },
   {
+    paletteKey: "gke",
     kind: "gke",
     category: "compute",
     label: GCP_RESOURCE_LABELS.gke,
@@ -199,13 +152,7 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.gke,
   },
   {
-    kind: "run",
-    category: "compute",
-    label: GCP_RESOURCE_LABELS.run,
-    description: "Contêineres serverless gerenciados",
-    icon: GCP_RESOURCE_ICONS.run,
-  },
-  {
+    paletteKey: "storage",
     kind: "storage",
     category: "storage",
     label: GCP_RESOURCE_LABELS.storage,
@@ -213,6 +160,127 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.storage,
   },
   {
+    paletteKey: "bigquery",
+    kind: "bigquery",
+    category: "analytics",
+    label: GCP_RESOURCE_LABELS.bigquery,
+    description: "Data warehouse analítico",
+    icon: GCP_RESOURCE_ICONS.bigquery,
+  },
+  {
+    paletteKey: "pubsub",
+    kind: "pubsub",
+    category: "analytics",
+    label: GCP_RESOURCE_LABELS.pubsub,
+    description: "Mensageria assíncrona (tópicos)",
+    icon: GCP_RESOURCE_ICONS.pubsub,
+  },
+  {
+    paletteKey: "dataflow",
+    kind: "dataflow",
+    category: "analytics",
+    label: GCP_RESOURCE_LABELS.dataflow,
+    description: "Processamento de dados em lote ou streaming",
+    icon: GCP_RESOURCE_ICONS.dataflow,
+  },
+  {
+    paletteKey: "airflow",
+    kind: "airflow",
+    category: "analytics",
+    label: GCP_RESOURCE_LABELS.airflow,
+    description: "Orquestração de pipelines (Apache Airflow)",
+    icon: GCP_RESOURCE_ICONS.airflow,
+  },
+  {
+    paletteKey: "spark",
+    kind: "spark",
+    category: "analytics",
+    label: GCP_RESOURCE_LABELS.spark,
+    description: "Processamento de dados — cluster ou serverless",
+    icon: GCP_RESOURCE_ICONS.spark,
+  },
+  {
+    paletteKey: "vpc",
+    kind: "vpc",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.vpc,
+    description: "Rede virtual privada",
+    icon: GCP_RESOURCE_ICONS.vpc,
+  },
+  {
+    paletteKey: "subnet",
+    kind: "subnet",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.subnet,
+    description: "Segmento de IP na VPC",
+    icon: GCP_RESOURCE_ICONS.subnet,
+  },
+  {
+    paletteKey: "internet",
+    kind: "internet",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.internet,
+    description: "Rede pública externa",
+    icon: GCP_RESOURCE_ICONS.internet,
+  },
+  {
+    paletteKey: "nat",
+    kind: "nat",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.nat,
+    description: "Saída para internet sem IP público",
+    icon: GCP_RESOURCE_ICONS.nat,
+  },
+  {
+    paletteKey: "router",
+    kind: "router",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.router,
+    description: "Roteador BGP — NAT, VPN e rotas dinâmicas (VPC opcional)",
+    icon: GCP_RESOURCE_ICONS.router,
+  },
+  {
+    paletteKey: "peering",
+    kind: "peering",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.peering,
+    description: "Conectividade privada entre duas VPCs",
+    icon: GCP_RESOURCE_ICONS.peering,
+  },
+  {
+    paletteKey: "vpn",
+    kind: "vpn",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.vpn,
+    description: "Túnel IPsec híbrido com rede externa",
+    icon: GCP_RESOURCE_ICONS.vpn,
+  },
+  {
+    paletteKey: "interconnect",
+    kind: "interconnect",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.interconnect,
+    description: "Link dedicado de alta largura de banda com on-prem",
+    icon: GCP_RESOURCE_ICONS.interconnect,
+  },
+  {
+    paletteKey: "firewall",
+    kind: "firewall",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.firewall,
+    description: "Regra de firewall da VPC",
+    icon: GCP_RESOURCE_ICONS.firewall,
+  },
+  {
+    paletteKey: "run",
+    kind: "run",
+    category: "serverless",
+    label: GCP_RESOURCE_LABELS.run,
+    description: "Contêineres serverless gerenciados",
+    icon: GCP_RESOURCE_ICONS.run,
+  },
+  {
+    paletteKey: "sql",
     kind: "sql",
     category: "databases",
     label: GCP_RESOURCE_LABELS.sql,
@@ -220,20 +288,7 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.sql,
   },
   {
-    kind: "bigquery",
-    category: "databases",
-    label: GCP_RESOURCE_LABELS.bigquery,
-    description: "Data warehouse analítico",
-    icon: GCP_RESOURCE_ICONS.bigquery,
-  },
-  {
-    kind: "spanner",
-    category: "databases",
-    label: GCP_RESOURCE_LABELS.spanner,
-    description: "Banco relacional globalmente distribuído",
-    icon: GCP_RESOURCE_ICONS.spanner,
-  },
-  {
+    paletteKey: "firestore",
     kind: "firestore",
     category: "databases",
     label: GCP_RESOURCE_LABELS.firestore,
@@ -241,48 +296,55 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.firestore,
   },
   {
-    kind: "workbench",
-    category: "ai",
-    label: GCP_RESOURCE_LABELS.workbench,
-    description: "Notebooks gerenciados na Vertex AI",
-    icon: GCP_RESOURCE_ICONS.workbench,
+    paletteKey: "spanner",
+    kind: "spanner",
+    category: "databases",
+    label: GCP_RESOURCE_LABELS.spanner,
+    description: "Banco relacional globalmente distribuído",
+    icon: GCP_RESOURCE_ICONS.spanner,
   },
   {
-    kind: "spark",
-    category: "ai",
-    label: GCP_RESOURCE_LABELS.spark,
-    description: "Processamento de dados — cluster ou serverless",
-    icon: GCP_RESOURCE_ICONS.spark,
+    paletteKey: "firebase",
+    category: "appdev",
+    label: "Firebase (em breve)",
+    description: "Plataforma de apps móveis e web",
+    icon: firebaseIcon,
+    comingSoon: true,
   },
   {
+    paletteKey: "build",
+    kind: "build",
+    category: "cicd",
+    label: GCP_RESOURCE_LABELS.build,
+    description: "CI/CD — build e deploy de containers",
+    icon: GCP_RESOURCE_ICONS.build,
+  },
+  {
+    paletteKey: "artifact",
+    kind: "artifact",
+    category: "cicd",
+    label: GCP_RESOURCE_LABELS.artifact,
+    description: "Repositório de imagens e pacotes",
+    icon: GCP_RESOURCE_ICONS.artifact,
+  },
+  {
+    paletteKey: "modelregistry",
     kind: "modelregistry",
-    category: "ai",
+    category: "cicd",
     label: GCP_RESOURCE_LABELS.modelregistry,
     description: "Registro e versionamento de modelos ML",
     icon: GCP_RESOURCE_ICONS.modelregistry,
   },
   {
-    kind: "pubsub",
-    category: "integration",
-    label: GCP_RESOURCE_LABELS.pubsub,
-    description: "Mensageria assíncrona (tópicos)",
-    icon: GCP_RESOURCE_ICONS.pubsub,
+    paletteKey: "github",
+    kind: "github",
+    category: "cicd",
+    label: GCP_RESOURCE_LABELS.github,
+    description: "Repositório de código-fonte no GitHub",
+    icon: GCP_RESOURCE_ICONS.github,
   },
   {
-    kind: "airflow",
-    category: "integration",
-    label: GCP_RESOURCE_LABELS.airflow,
-    description: "Orquestração de pipelines (Apache Airflow)",
-    icon: GCP_RESOURCE_ICONS.airflow,
-  },
-  {
-    kind: "dataflow",
-    category: "integration",
-    label: GCP_RESOURCE_LABELS.dataflow,
-    description: "Processamento de dados em lote ou streaming",
-    icon: GCP_RESOURCE_ICONS.dataflow,
-  },
-  {
+    paletteKey: "eventarc",
     kind: "eventarc",
     category: "integration",
     label: GCP_RESOURCE_LABELS.eventarc,
@@ -290,60 +352,52 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.eventarc,
   },
   {
-    kind: "artifact",
-    category: "devtools",
-    label: GCP_RESOURCE_LABELS.artifact,
-    description: "Repositório de imagens e pacotes",
-    icon: GCP_RESOURCE_ICONS.artifact,
+    paletteKey: "workbench",
+    kind: "workbench",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.workbench,
+    description: "Notebooks gerenciados na Vertex AI",
+    icon: GCP_RESOURCE_ICONS.workbench,
   },
   {
-    kind: "build",
-    category: "devtools",
-    label: GCP_RESOURCE_LABELS.build,
-    description: "CI/CD — build e deploy de containers",
-    icon: GCP_RESOURCE_ICONS.build,
+    paletteKey: "notebook",
+    category: "ai",
+    label: "Notebook (em breve)",
+    description: "Instância de notebook gerenciada",
+    icon: GCP_RESOURCE_ICONS.workbench,
+    comingSoon: true,
   },
   {
-    kind: "github",
-    category: "devtools",
-    label: GCP_RESOURCE_LABELS.github,
-    description: "Repositório de código-fonte no GitHub",
-    icon: GCP_RESOURCE_ICONS.github,
-  },
-  {
+    paletteKey: "kms",
     kind: "kms",
-    category: "devtools",
+    category: "security",
     label: GCP_RESOURCE_LABELS.kms,
     description: "Chaves de criptografia gerenciadas (CMEK)",
     icon: GCP_RESOURCE_ICONS.kms,
   },
   {
-    kind: "iam",
-    category: "iam",
-    label: GCP_RESOURCE_LABELS.iam,
-    description: "Conta de serviço, Workload Identity Federation ou grupo",
-    icon: GCP_RESOURCE_ICONS.iam,
-  },
-  {
-    kind: "entra",
-    category: "hybrid",
-    label: GCP_RESOURCE_LABELS.entra,
-    description: "Diretório de identidades Microsoft (Entra ID)",
-    icon: GCP_RESOURCE_ICONS.entra,
-  },
-  {
+    paletteKey: "pcuser",
     kind: "pcuser",
-    category: "hybrid",
+    category: "other",
     label: GCP_RESOURCE_LABELS.pcuser,
     description: "Usuário em estação de trabalho",
     icon: GCP_RESOURCE_ICONS.pcuser,
   },
   {
+    paletteKey: "onprem",
     kind: "onprem",
-    category: "hybrid",
+    category: "other",
     label: GCP_RESOURCE_LABELS.onprem,
     description: "Ambiente local / datacenter corporativo",
     icon: GCP_RESOURCE_ICONS.onprem,
+  },
+  {
+    paletteKey: "entra",
+    kind: "entra",
+    category: "other",
+    label: GCP_RESOURCE_LABELS.entra,
+    description: "Diretório de identidades Microsoft (Entra ID)",
+    icon: GCP_RESOURCE_ICONS.entra,
   },
 ];
 

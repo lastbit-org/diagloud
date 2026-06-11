@@ -1091,7 +1091,7 @@ function parseNode(raw: unknown): DiagramNode {
     case "pcuser":
       if (!nodeIdMatchesKind(nodeId, "pcuser")) {
         throw new DiagramParseError(
-          `ID "${nodeId}" não corresponde ao tipo Usuário (PC).`,
+          `ID "${nodeId}" não corresponde ao tipo Usuário.`,
         );
       }
       return {
