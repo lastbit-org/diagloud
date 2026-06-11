@@ -148,6 +148,9 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("onprem", "vpn")).toBe("onprem-vpn");
     expect(getEdgeKind("onprem", "interconnect")).toBe("onprem-interconnect");
     expect(getEdgeKind("onprem", "vm")).toBe("onprem-vm");
+    expect(getEdgeKind("folder", "folder")).toBe("folder-folder");
+    expect(getEdgeKind("folder", "project")).toBe("folder-project");
+    expect(getEdgeKind("project", "folder")).toBeNull();
     expect(getEdgeKind("infocard", "vpc")).toBe("infocard-link");
     expect(getEdgeKind("vm", "infocard")).toBe("infocard-link");
     expect(getEdgeKind("infocard", "zone")).toBeNull();

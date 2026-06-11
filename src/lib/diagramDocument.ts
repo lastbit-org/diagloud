@@ -1124,6 +1124,8 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "onprem-vpn" &&
     kind !== "onprem-interconnect" &&
     kind !== "onprem-vm" &&
+    kind !== "folder-folder" &&
+    kind !== "folder-project" &&
     kind !== "infocard-link" &&
     kind !== "sql-vpc"
   ) {

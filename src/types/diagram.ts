@@ -169,6 +169,8 @@ export type DiagramEdge = {
     | "onprem-vpn"
     | "onprem-interconnect"
     | "onprem-vm"
+    | "folder-folder"
+    | "folder-project"
     | "infocard-link";
 };
 

@@ -1492,6 +1492,11 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             Unidade organizacional na hierarquia de recursos GCP (organização →
             pasta → projeto). Use para documentar a estrutura de governança.
           </p>
+          <FolderConnectionsInfo
+            folder={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
         </>
       )}
 
@@ -1512,6 +1517,11 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             Projeto GCP — container de recursos faturáveis. Documente a qual
             projeto os serviços do diagrama pertencem.
           </p>
+          <ProjectConnectionsInfo
+            project={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
         </>
       )}
 
@@ -3640,6 +3650,96 @@ function VmSubnetInfo({
       </dd>
       <dt>VMs na sub-rede</dt>
       <dd>{vmIds.length}</dd>
+    </dl>
+  );
+}
+
+function FolderConnectionsInfo({
+  folder,
+  edges,
+  nodes,
+}: {
+  folder: Extract<DiagramNode, { kind: "folder" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const parentFolders = edges
+    .filter((e) => e.kind === "folder-folder" && e.target === folder.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "folder"))
+    .filter((n): n is Extract<DiagramNode, { kind: "folder" }> => n != null);
+  const childFolders = edges
+    .filter((e) => e.kind === "folder-folder" && e.source === folder.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "folder"))
+    .filter((n): n is Extract<DiagramNode, { kind: "folder" }> => n != null);
+  const projects = edges
+    .filter((e) => e.kind === "folder-project" && e.source === folder.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "project"))
+    .filter((n): n is Extract<DiagramNode, { kind: "project" }> => n != null);
+
+  if (
+    parentFolders.length === 0 &&
+    childFolders.length === 0 &&
+    projects.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue a outras pastas (subpastas) ou a projetos para documentar a
+        hierarquia.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {parentFolders.length > 0 ? (
+        <>
+          <dt>Pasta pai</dt>
+          <dd>{parentFolders.map((f) => f.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {childFolders.length > 0 ? (
+        <>
+          <dt>Subpastas</dt>
+          <dd>{childFolders.map((f) => f.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {projects.length > 0 ? (
+        <>
+          <dt>Projetos</dt>
+          <dd>{projects.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function ProjectConnectionsInfo({
+  project,
+  edges,
+  nodes,
+}: {
+  project: Extract<DiagramNode, { kind: "project" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const parentFolders = edges
+    .filter((e) => e.kind === "folder-project" && e.target === project.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "folder"))
+    .filter((n): n is Extract<DiagramNode, { kind: "folder" }> => n != null);
+
+  if (parentFolders.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue a uma pasta para documentar em qual unidade organizacional o
+        projeto está contido.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>Pasta</dt>
+      <dd>{parentFolders.map((f) => f.data.name).join(", ")}</dd>
     </dl>
   );
 }

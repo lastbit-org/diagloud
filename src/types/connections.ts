@@ -45,6 +45,8 @@ import type { ResourceKind } from "./resources";
  * - Pub/Sub → Cloud Dataflow (`pubsub-dataflow`): entrada streaming
  * - Vertex AI Workbench / Cloud Build → Model Registry: registro de modelos
  * - Model Registry → Cloud Run / GKE / Storage / Cloud KMS: deploy e artefatos
+ * - Pasta → Pasta (`folder-folder`): hierarquia organizacional
+ * - Pasta → Projeto (`folder-project`): projeto contido na pasta
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
 export const EDGE_ENDPOINTS = {
@@ -128,6 +130,8 @@ export const EDGE_ENDPOINTS = {
   "onprem-vpn": { from: "onprem", to: "vpn" },
   "onprem-interconnect": { from: "onprem", to: "interconnect" },
   "onprem-vm": { from: "onprem", to: "vm" },
+  "folder-folder": { from: "folder", to: "folder" },
+  "folder-project": { from: "folder", to: "project" },
   "infocard-link": { from: "infocard", to: "vpc" },
 } as const satisfies Record<
   DiagramEdge["kind"],
