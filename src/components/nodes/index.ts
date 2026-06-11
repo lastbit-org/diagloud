@@ -6,6 +6,8 @@ export { BigqueryNode } from "./BigqueryNode";
 export { SpannerNode } from "./SpannerNode";
 export { FirestoreNode } from "./FirestoreNode";
 export { WorkbenchNode } from "./WorkbenchNode";
+export { SparkNode } from "./SparkNode";
+export { AirflowNode } from "./AirflowNode";
 export { GkeNode } from "./GkeNode";
 export { InternetNode } from "./InternetNode";
 export { NatNode } from "./NatNode";

@@ -24,6 +24,8 @@ import {
   clearWorkbenchNetwork,
   reassignSubnetWorkbenchIps,
 } from "../model/workbenchSubnet";
+import { assignSparkSubnetRegion } from "../model/sparkSubnet";
+import { assignAirflowSubnetRegion } from "../model/airflowSubnet";
 import {
   clearSqlPrivateNetwork,
   reassignSubnetSqlIps,
@@ -65,6 +67,8 @@ import type {
   SpannerProps,
   FirestoreProps,
   WorkbenchProps,
+  SparkProps,
+  AirflowProps,
   ZoneProps,
   FolderProps,
   ProjectProps,
@@ -115,6 +119,8 @@ type DiagramActions = {
       | Partial<SpannerProps>
       | Partial<FirestoreProps>
       | Partial<WorkbenchProps>
+      | Partial<SparkProps>
+      | Partial<AirflowProps>
       | Partial<ZoneProps>
       | Partial<FolderProps>
       | Partial<ProjectProps>
@@ -322,6 +328,18 @@ function buildNode<K extends ResourceKind>(
         kind: "workbench",
         data: { ...defaultResourceData("workbench", resourceContext), ...data },
       };
+    case "spark":
+      return {
+        ...base,
+        kind: "spark",
+        data: { ...defaultResourceData("spark", resourceContext), ...data },
+      };
+    case "airflow":
+      return {
+        ...base,
+        kind: "airflow",
+        data: { ...defaultResourceData("airflow", resourceContext), ...data },
+      };
     case "zone":
       return {
         ...base,
@@ -390,6 +408,8 @@ function mergeNodeData(
     | Partial<BigqueryProps>
     | Partial<SpannerProps>
     | Partial<WorkbenchProps>
+    | Partial<SparkProps>
+    | Partial<AirflowProps>
     | Partial<ZoneProps>
     | Partial<FolderProps>
     | Partial<EntraProps>
@@ -507,6 +527,16 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<WorkbenchProps>) },
+      };
+    case "spark":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<SparkProps>) },
+      };
+    case "airflow":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<AirflowProps>) },
       };
     case "zone":
       return {
@@ -788,12 +818,22 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         next.kind === "sql-subnet" ||
         next.kind === "gke-subnet" ||
         next.kind === "run-subnet" ||
-        next.kind === "workbench-subnet"
+        next.kind === "workbench-subnet" ||
+        next.kind === "spark-subnet" ||
+        next.kind === "airflow-subnet"
       ) {
         if (next.kind === "vm-subnet") {
           nodes = assignIpToVm(next.source, next.target, nodes, edges);
         }
-        nodes = reassignSubnetHostIps(next.target, nodes, edges);
+        if (next.kind === "spark-subnet") {
+          nodes = assignSparkSubnetRegion(next.source, next.target, nodes);
+        }
+        if (next.kind === "airflow-subnet") {
+          nodes = assignAirflowSubnetRegion(next.source, next.target, nodes);
+        }
+        if (next.kind !== "spark-subnet" && next.kind !== "airflow-subnet") {
+          nodes = reassignSubnetHostIps(next.target, nodes, edges);
+        }
       }
 
       return { edges, nodes };

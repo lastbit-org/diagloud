@@ -39,6 +39,8 @@ import {
   type SpannerProps,
   type FirestoreProps,
   type WorkbenchProps,
+  type SparkProps,
+  type AirflowProps,
   type ZoneProps,
   type FolderProps,
   type ProjectProps,
@@ -427,6 +429,39 @@ function parseWorkbenchData(raw: unknown): WorkbenchProps {
   return data;
 }
 
+const SPARK_DEPLOY_MODES = new Set(["cluster", "serverless"]);
+
+function parseSparkData(raw: unknown): SparkProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string" ||
+    typeof raw.deployMode !== "string" ||
+    !SPARK_DEPLOY_MODES.has(raw.deployMode)
+  ) {
+    throw new DiagramParseError("Dados de Apache Spark inválidos.");
+  }
+  return {
+    name: raw.name,
+    region: raw.region,
+    deployMode: raw.deployMode as SparkProps["deployMode"],
+  };
+}
+
+function parseAirflowData(raw: unknown): AirflowProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Managed Airflow inválidos.");
+  }
+  return {
+    name: raw.name,
+    region: raw.region,
+  };
+}
+
 function parseFolderData(raw: unknown): FolderProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de pasta inválidos.");
@@ -806,6 +841,32 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseWorkbenchData(data),
       };
+    case "spark":
+      if (!nodeIdMatchesKind(nodeId, "spark")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Apache Spark.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "spark",
+        position: parsedPosition,
+        zIndex,
+        data: parseSparkData(data),
+      };
+    case "airflow":
+      if (!nodeIdMatchesKind(nodeId, "airflow")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Managed Airflow.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "airflow",
+        position: parsedPosition,
+        zIndex,
+        data: parseAirflowData(data),
+      };
     case "zone":
       if (!nodeIdMatchesKind(nodeId, "zone")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Zona.`);
@@ -959,6 +1020,15 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "run-firestore" &&
     kind !== "pubsub-firestore" &&
     kind !== "workbench-firestore" &&
+    kind !== "spark-subnet" &&
+    kind !== "spark-storage" &&
+    kind !== "spark-bigquery" &&
+    kind !== "spark-kms" &&
+    kind !== "airflow-subnet" &&
+    kind !== "airflow-storage" &&
+    kind !== "airflow-bigquery" &&
+    kind !== "airflow-kms" &&
+    kind !== "pubsub-airflow" &&
     kind !== "pubsub-eventarc" &&
     kind !== "storage-eventarc" &&
     kind !== "eventarc-run" &&
@@ -1126,6 +1196,14 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.workbench === "string"
           ? patterns.workbench
           : DEFAULT_NAMING_PATTERNS.workbench,
+      spark:
+        typeof patterns.spark === "string"
+          ? patterns.spark
+          : DEFAULT_NAMING_PATTERNS.spark,
+      airflow:
+        typeof patterns.airflow === "string"
+          ? patterns.airflow
+          : DEFAULT_NAMING_PATTERNS.airflow,
       zone:
         typeof patterns.zone === "string"
           ? patterns.zone
@@ -1328,6 +1406,8 @@ function namingMetadataEqual(
     a.patterns.spanner === b.patterns.spanner &&
     a.patterns.firestore === b.patterns.firestore &&
     a.patterns.workbench === b.patterns.workbench &&
+    a.patterns.spark === b.patterns.spark &&
+    a.patterns.airflow === b.patterns.airflow &&
     a.patterns.zone === b.patterns.zone &&
     a.patterns.folder === b.patterns.folder &&
     a.patterns.project === b.patterns.project &&

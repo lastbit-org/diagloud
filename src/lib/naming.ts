@@ -138,6 +138,10 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `fs-${count}`;
     case "workbench":
       return `wb-${count}`;
+    case "spark":
+      return `spark-${count}`;
+    case "airflow":
+      return `composer-${count}`;
     case "zone":
       return `zona-${count}`;
     case "folder":

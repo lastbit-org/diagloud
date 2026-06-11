@@ -95,6 +95,15 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("build", "artifact")).toBe("build-artifact");
     expect(getEdgeKind("pubsub", "build")).toBe("pubsub-build");
     expect(getEdgeKind("storage", "build")).toBe("storage-build");
+    expect(getEdgeKind("spark", "subnet")).toBe("spark-subnet");
+    expect(getEdgeKind("spark", "storage")).toBe("spark-storage");
+    expect(getEdgeKind("spark", "bigquery")).toBe("spark-bigquery");
+    expect(getEdgeKind("spark", "kms")).toBe("spark-kms");
+    expect(getEdgeKind("airflow", "subnet")).toBe("airflow-subnet");
+    expect(getEdgeKind("airflow", "storage")).toBe("airflow-storage");
+    expect(getEdgeKind("airflow", "bigquery")).toBe("airflow-bigquery");
+    expect(getEdgeKind("airflow", "kms")).toBe("airflow-kms");
+    expect(getEdgeKind("pubsub", "airflow")).toBe("pubsub-airflow");
     expect(getEdgeKind("pubsub", "run")).toBe("pubsub-run");
     expect(getEdgeKind("pubsub", "storage")).toBe("pubsub-storage");
     expect(getEdgeKind("pubsub", "bigquery")).toBe("pubsub-bigquery");

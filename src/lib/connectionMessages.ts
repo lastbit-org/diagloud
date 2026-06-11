@@ -38,6 +38,12 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Este Vertex AI Workbench já está ligado a uma sub-rede.",
   "subnet-workbench-capacity":
     "Não há mais endereços de IP na sub-rede para Vertex AI Workbench (após VMs, SQL, GKE e Cloud Run).",
+  "spark-has-subnet":
+    "Este Apache Spark (cluster) já está ligado a uma sub-rede.",
+  "spark-not-cluster":
+    "Apache Spark em modo serverless não se liga à sub-rede. Altere o modo para cluster.",
+  "airflow-has-subnet":
+    "Este ambiente Managed Airflow já está ligado a uma sub-rede.",
 };
 
 export function connectionErrorMessage(reason: ConnectionInvalidReason): string {

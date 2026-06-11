@@ -73,6 +73,8 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "spanner" ||
     value === "firestore" ||
     value === "workbench" ||
+    value === "spark" ||
+    value === "airflow" ||
     value === "zone" ||
     value === "folder" ||
     value === "project" ||
@@ -232,11 +234,25 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.workbench,
   },
   {
+    kind: "spark",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.spark,
+    description: "Processamento de dados — cluster ou serverless",
+    icon: GCP_RESOURCE_ICONS.spark,
+  },
+  {
     kind: "pubsub",
     category: "integration",
     label: GCP_RESOURCE_LABELS.pubsub,
     description: "Mensageria assíncrona (tópicos)",
     icon: GCP_RESOURCE_ICONS.pubsub,
+  },
+  {
+    kind: "airflow",
+    category: "integration",
+    label: GCP_RESOURCE_LABELS.airflow,
+    description: "Orquestração de pipelines (Apache Airflow)",
+    icon: GCP_RESOURCE_ICONS.airflow,
   },
   {
     kind: "eventarc",

@@ -28,6 +28,8 @@ import type {
   SpannerProps,
   FirestoreProps,
   WorkbenchProps,
+  SparkProps,
+  AirflowProps,
   ZoneProps,
   FolderProps,
   ProjectProps,
@@ -168,6 +170,17 @@ export function defaultResourceData<K extends ResourceKind>(
         region: "southamerica-east1",
         machineType: DEFAULT_WORKBENCH_MACHINE_TYPE,
       } as WorkbenchProps as ResourcePropsByKind[K];
+    case "spark":
+      return {
+        name,
+        region: "southamerica-east1",
+        deployMode: "serverless",
+      } as SparkProps as ResourcePropsByKind[K];
+    case "airflow":
+      return {
+        name,
+        region: "southamerica-east1",
+      } as AirflowProps as ResourcePropsByKind[K];
     case "zone":
       return {
         name,
@@ -245,6 +258,10 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `fs-${count}`;
     case "workbench":
       return `wb-${count}`;
+    case "spark":
+      return `spark-${count}`;
+    case "airflow":
+      return `composer-${count}`;
     case "zone":
       return `zona-${count}`;
     case "folder":

@@ -80,6 +80,15 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "spanner") {
     return node.data.config;
   }
+  if (node.kind === "spark") {
+    if (node.data.deployMode === "serverless") {
+      return "Serverless";
+    }
+    return node.data.region;
+  }
+  if (node.kind === "airflow") {
+    return node.data.region;
+  }
   if (node.kind === "onprem") {
     return node.data.location;
   }

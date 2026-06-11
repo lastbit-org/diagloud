@@ -44,7 +44,10 @@ export type ConnectionInvalidReason =
   | "run-not-vpc"
   | "subnet-run-capacity"
   | "workbench-has-subnet"
-  | "subnet-workbench-capacity";
+  | "subnet-workbench-capacity"
+  | "spark-has-subnet"
+  | "spark-not-cluster"
+  | "airflow-has-subnet";
 
 export function canonicalizeEdgeEndpoints(
   edge: Pick<DiagramEdge, "source" | "target" | "kind">,
@@ -492,6 +495,47 @@ export function validateConnection(
       )
     ) {
       return { valid: false, reason: "subnet-workbench-capacity" };
+    }
+  }
+
+  if (
+    edgeKind === "spark-subnet" &&
+    context.edges.some(
+      (edge) =>
+        edge.kind === "spark-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "spark-has-subnet" };
+  }
+
+  if (edgeKind === "spark-subnet") {
+    const sparkNode = context.nodes.find(
+      (node): node is Extract<DiagramNode, { kind: "spark" }> =>
+        node.id === directed.source && node.kind === "spark",
+    );
+    if (!sparkNode || sparkNode.data.deployMode !== "cluster") {
+      return { valid: false, reason: "spark-not-cluster" };
+    }
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+  }
+
+  if (
+    edgeKind === "airflow-subnet" &&
+    context.edges.some(
+      (edge) =>
+        edge.kind === "airflow-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "airflow-has-subnet" };
+  }
+
+  if (edgeKind === "airflow-subnet") {
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
     }
   }
 

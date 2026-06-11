@@ -14,6 +14,8 @@ import type {
   SpannerProps,
   FirestoreProps,
   WorkbenchProps,
+  SparkProps,
+  AirflowProps,
   PubsubProps,
   EventarcProps,
   RunProps,
@@ -66,6 +68,8 @@ export type DiagramNode =
   | (NodeBase & { kind: "spanner"; data: SpannerProps })
   | (NodeBase & { kind: "firestore"; data: FirestoreProps })
   | (NodeBase & { kind: "workbench"; data: WorkbenchProps })
+  | (NodeBase & { kind: "spark"; data: SparkProps })
+  | (NodeBase & { kind: "airflow"; data: AirflowProps })
   | (NodeBase & { kind: "zone"; data: ZoneProps })
   | (NodeBase & { kind: "folder"; data: FolderProps })
   | (NodeBase & { kind: "project"; data: ProjectProps })
@@ -118,6 +122,15 @@ export type DiagramEdge = {
     | "run-firestore"
     | "pubsub-firestore"
     | "workbench-firestore"
+    | "spark-subnet"
+    | "spark-storage"
+    | "spark-bigquery"
+    | "spark-kms"
+    | "airflow-subnet"
+    | "airflow-storage"
+    | "airflow-bigquery"
+    | "airflow-kms"
+    | "pubsub-airflow"
     | "pubsub-eventarc"
     | "storage-eventarc"
     | "eventarc-run"

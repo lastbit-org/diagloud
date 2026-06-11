@@ -23,6 +23,8 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "spanner",
   "firestore",
   "workbench",
+  "spark",
+  "airflow",
   "pubsub",
   "eventarc",
   "artifact",

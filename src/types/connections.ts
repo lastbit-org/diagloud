@@ -35,6 +35,11 @@ import type { ResourceKind } from "./resources";
  * - Eventarc → Cloud Run / GKE (`eventarc-run`, `eventarc-gke`): destinos do roteamento
  * - Compute e dados → Cloud KMS (`*-kms`): criptografia com chaves gerenciadas (CMEK)
  * - Vertex AI Workbench → Storage / BigQuery / Spanner / Firestore: acesso a dados
+ * - Apache Spark → Sub-rede (`spark-subnet`, modo cluster): execução na VPC
+ * - Apache Spark → Storage / BigQuery / Cloud KMS: leitura de dados e criptografia
+ * - Managed Airflow → Sub-rede (`airflow-subnet`): ambiente Composer na VPC
+ * - Managed Airflow → Storage / BigQuery / Cloud KMS: DAGs, dados e criptografia
+ * - Pub/Sub → Managed Airflow (`pubsub-airflow`): triggers e sensores
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
 export const EDGE_ENDPOINTS = {
@@ -75,6 +80,15 @@ export const EDGE_ENDPOINTS = {
   "run-firestore": { from: "run", to: "firestore" },
   "pubsub-firestore": { from: "pubsub", to: "firestore" },
   "workbench-firestore": { from: "workbench", to: "firestore" },
+  "spark-subnet": { from: "spark", to: "subnet" },
+  "spark-storage": { from: "spark", to: "storage" },
+  "spark-bigquery": { from: "spark", to: "bigquery" },
+  "spark-kms": { from: "spark", to: "kms" },
+  "airflow-subnet": { from: "airflow", to: "subnet" },
+  "airflow-storage": { from: "airflow", to: "storage" },
+  "airflow-bigquery": { from: "airflow", to: "bigquery" },
+  "airflow-kms": { from: "airflow", to: "kms" },
+  "pubsub-airflow": { from: "pubsub", to: "airflow" },
   "pubsub-eventarc": { from: "pubsub", to: "eventarc" },
   "storage-eventarc": { from: "storage", to: "eventarc" },
   "eventarc-run": { from: "eventarc", to: "run" },

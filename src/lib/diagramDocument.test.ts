@@ -48,6 +48,8 @@ const sampleDocument: DiagramDocument = {
         spanner: "spanner-AREA-AMBIENTE",
         firestore: "fs-AREA-AMBIENTE",
         workbench: "wb-AREA-AMBIENTE",
+        spark: "spark-AREA-AMBIENTE",
+        airflow: "composer-AREA-AMBIENTE",
         zone: "zona-AREA-AMBIENTE",
         folder: "folder-AREA-AMBIENTE",
         project: "proj-AREA-AMBIENTE",

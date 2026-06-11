@@ -24,6 +24,8 @@ export type ResourceKind =
   | "spanner"
   | "firestore"
   | "workbench"
+  | "spark"
+  | "airflow"
   | "zone"
   | "folder"
   | "project"
@@ -195,6 +197,22 @@ export type WorkbenchProps = {
   internalIp?: string;
 };
 
+/** `cluster` = Dataproc em VPC; `serverless` = batches serverless. */
+export type SparkDeployMode = "cluster" | "serverless";
+
+export type SparkProps = {
+  /** Nome do job, cluster ou batch. */
+  name: string;
+  region: string;
+  deployMode: SparkDeployMode;
+};
+
+export type AirflowProps = {
+  /** Nome do ambiente Cloud Composer. */
+  name: string;
+  region: string;
+};
+
 export type ZoneProps = {
   name: string;
   colorId: ZoneColorId;
@@ -258,6 +276,8 @@ export type ResourcePropsByKind = {
   spanner: SpannerProps;
   firestore: FirestoreProps;
   workbench: WorkbenchProps;
+  spark: SparkProps;
+  airflow: AirflowProps;
   zone: ZoneProps;
   folder: FolderProps;
   project: ProjectProps;
