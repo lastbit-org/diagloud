@@ -43,6 +43,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   pcuser: "user-AREA-AMBIENTE",
   onprem: "onprem-AREA-AMBIENTE",
   github: "github-AREA-AMBIENTE",
+  iam: "iam-AREA-AMBIENTE",
 };
 
 export const NAMING_TOKEN_HINTS = [

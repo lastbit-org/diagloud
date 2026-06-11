@@ -124,6 +124,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `cb-${count}`;
     case "kms":
       return `kms-${count}`;
+    case "iam":
+      return `iam-${count}`;
     case "internet":
       return "Internet";
     case "run":

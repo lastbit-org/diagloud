@@ -61,6 +61,7 @@ const sampleDocument: DiagramDocument = {
         pcuser: "user-AREA-AMBIENTE",
         onprem: "onprem-AREA-AMBIENTE",
         github: "github-AREA-AMBIENTE",
+        iam: "iam-AREA-AMBIENTE",
       },
     },
   },

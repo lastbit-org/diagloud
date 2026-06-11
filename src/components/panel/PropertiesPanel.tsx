@@ -34,6 +34,7 @@ import type {
   StorageClass,
   SparkDeployMode,
   DataflowPipelineType,
+  IamVariant,
 } from "../../types";
 import "./properties.css";
 
@@ -1381,6 +1382,101 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             />
           </div>
           <KmsConsumersInfo kms={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
+      {selectedNode?.kind === "iam" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="iam-name">Recurso</label>
+            <input
+              id="iam-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="iam-variant">Tipo</label>
+            <select
+              id="iam-variant"
+              value={selectedNode.data.variant}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  variant: e.target.value as IamVariant,
+                })
+              }
+            >
+              <option value="iam">IAM (conta de serviço)</option>
+              <option value="workload_identity">
+                Workload Identity Federation
+              </option>
+              <option value="group">Grupo</option>
+            </select>
+          </div>
+          {selectedNode.data.variant === "iam" && (
+            <div className="properties-field">
+              <label htmlFor="iam-sa-email">E-mail da conta de serviço</label>
+              <input
+                id="iam-sa-email"
+                value={selectedNode.data.serviceAccountEmail}
+                onChange={(e) =>
+                  updateNodeData(selectedNode.id, {
+                    serviceAccountEmail: e.target.value,
+                  })
+                }
+                placeholder="sa-app@projeto.iam.gserviceaccount.com"
+              />
+            </div>
+          )}
+          {selectedNode.data.variant === "workload_identity" && (
+            <>
+              <div className="properties-field">
+                <label htmlFor="iam-pool-id">Pool ID</label>
+                <input
+                  id="iam-pool-id"
+                  value={selectedNode.data.workloadPoolId}
+                  onChange={(e) =>
+                    updateNodeData(selectedNode.id, {
+                      workloadPoolId: e.target.value,
+                    })
+                  }
+                  placeholder="pool-external"
+                />
+              </div>
+              <div className="properties-field">
+                <label htmlFor="iam-provider-id">Provider ID</label>
+                <input
+                  id="iam-provider-id"
+                  value={selectedNode.data.workloadProviderId}
+                  onChange={(e) =>
+                    updateNodeData(selectedNode.id, {
+                      workloadProviderId: e.target.value,
+                    })
+                  }
+                  placeholder="provider-github"
+                />
+              </div>
+            </>
+          )}
+          {selectedNode.data.variant === "group" && (
+            <div className="properties-field">
+              <label htmlFor="iam-group-email">E-mail do grupo</label>
+              <input
+                id="iam-group-email"
+                value={selectedNode.data.groupEmail}
+                onChange={(e) =>
+                  updateNodeData(selectedNode.id, { groupEmail: e.target.value })
+                }
+                placeholder="eng-platform@example.com"
+              />
+            </div>
+          )}
+          <p className="properties-field__hint">
+            O ícone permanece o mesmo; o nó exibe o tipo e os detalhes conforme a
+            opção selecionada.
+          </p>
         </>
       )}
 

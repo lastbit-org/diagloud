@@ -39,3 +39,5 @@ export { EntraNode } from "./EntraNode";
 export { PcUserNode } from "./PcUserNode";
 export { OnpremNode } from "./OnpremNode";
 export { GithubNode } from "./GithubNode";
+export type { IamNodeData } from "./IamNode";
+export { IamNode } from "./IamNode";

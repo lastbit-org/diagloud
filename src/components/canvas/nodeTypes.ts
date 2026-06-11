@@ -34,6 +34,7 @@ import {
   PcUserNode,
   OnpremNode,
   GithubNode,
+  IamNode,
 } from "../nodes";
 
 export const nodeTypes = {
@@ -72,4 +73,5 @@ export const nodeTypes = {
   pcuser: PcUserNode,
   onprem: OnpremNode,
   github: GithubNode,
+  iam: IamNode,
 };

@@ -40,6 +40,7 @@ import type {
   InfocardProps,
   PcUserProps,
   OnpremProps,
+  IamProps,
   GithubProps,
 } from "../types";
 
@@ -137,6 +138,15 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         location: "southamerica-east1",
       } as KmsProps as ResourcePropsByKind[K];
+    case "iam":
+      return {
+        name,
+        variant: "iam",
+        serviceAccountEmail: "sa-app@projeto.iam.gserviceaccount.com",
+        workloadPoolId: "pool-external",
+        workloadProviderId: "provider-github",
+        groupEmail: "eng-platform@example.com",
+      } as IamProps as ResourcePropsByKind[K];
     case "internet":
       return {
         name: name || "Internet",
@@ -270,6 +280,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `cb-${count}`;
     case "kms":
       return `kms-${count}`;
+    case "iam":
+      return `iam-${count}`;
     case "internet":
       return "Internet";
     case "run":

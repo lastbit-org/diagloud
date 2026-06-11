@@ -7,6 +7,7 @@ import type {
   FolderNodeData,
   GcpNodeData,
   GithubNodeData,
+  IamNodeData,
   InfocardNodeData,
   ProjectNodeData,
   ZoneNodeData,
@@ -110,7 +111,7 @@ export function toFlowNode(
   selected = false,
   issues: DiagramIssue[] = [],
 ): Node<
-  GcpNodeData | ZoneNodeData | InfocardNodeData | FolderNodeData | ProjectNodeData | GithubNodeData
+  GcpNodeData | ZoneNodeData | InfocardNodeData | FolderNodeData | ProjectNodeData | GithubNodeData | IamNodeData
 > {
   if (node.kind === "zone") {
     return {
@@ -196,6 +197,27 @@ export function toFlowNode(
       data: {
         kind: "github",
         label: node.data.repository,
+        issueCount: issueCount > 0 ? issueCount : undefined,
+      },
+    };
+  }
+
+  if (node.kind === "iam") {
+    const issueCount = issueCountForNode(node.id, issues);
+    return {
+      id: node.id,
+      type: "iam",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      data: {
+        kind: "iam",
+        label: node.data.name,
+        variant: node.data.variant,
+        serviceAccountEmail: node.data.serviceAccountEmail,
+        workloadPoolId: node.data.workloadPoolId,
+        workloadProviderId: node.data.workloadProviderId,
+        groupEmail: node.data.groupEmail,
         issueCount: issueCount > 0 ? issueCount : undefined,
       },
     };

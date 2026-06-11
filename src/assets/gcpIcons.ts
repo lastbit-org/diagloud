@@ -2,6 +2,7 @@ import type { ResourceKind } from "../types";
 import artifactIcon from "./google-cloud-legacy-icons/artifact_registry/artifact_registry.svg";
 import buildIcon from "./google-cloud-legacy-icons/cloud_build/cloud_build.svg";
 import kmsIcon from "./google-cloud-legacy-icons/key_management_service/key_management_service.svg";
+import iamIcon from "./google-cloud-legacy-icons/identity_and_access_management/identity_and_access_management.svg";
 import bigqueryIcon from "./google-cloud-legacy-icons/bigquery/bigquery.svg";
 import spannerIcon from "./google-cloud-legacy-icons/cloud_spanner/cloud_spanner.svg";
 import firestoreIcon from "./google-cloud-legacy-icons/firestore/firestore.svg";
@@ -52,6 +53,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   artifact: artifactIcon,
   build: buildIcon,
   kms: kmsIcon,
+  iam: iamIcon,
   internet: internetIcon,
   run: runIcon,
   pubsub: pubsubIcon,
@@ -90,6 +92,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   artifact: "Artifact Registry",
   build: "Cloud Build",
   kms: "Cloud KMS",
+  iam: "IAM",
   internet: "Internet",
   run: "Cloud Run",
   pubsub: "Pub/Sub",

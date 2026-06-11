@@ -92,6 +92,7 @@ import type {
   PcUserProps,
   OnpremProps,
   GithubProps,
+  IamProps,
 } from "../types";
 
 type DiagramState = {
@@ -150,7 +151,8 @@ type DiagramActions = {
       | Partial<InfocardProps>
       | Partial<PcUserProps>
       | Partial<OnpremProps>
-      | Partial<GithubProps>,
+      | Partial<GithubProps>
+      | Partial<IamProps>,
   ) => void;
   updateNodeDimensions: (id: string, width: number, height: number) => void;
   bringNodeToFront: (id: string) => void;
@@ -370,6 +372,12 @@ function buildNode<K extends ResourceKind>(
         kind: "kms",
         data: { ...defaultResourceData("kms", resourceContext), ...data },
       };
+    case "iam":
+      return {
+        ...base,
+        kind: "iam",
+        data: { ...defaultResourceData("iam", resourceContext), ...data },
+      };
     case "internet":
       return {
         ...base,
@@ -530,7 +538,8 @@ function mergeNodeData(
     | Partial<InfocardProps>
     | Partial<PcUserProps>
     | Partial<OnpremProps>
-    | Partial<GithubProps>,
+    | Partial<GithubProps>
+    | Partial<IamProps>,
 ): DiagramNode {
   switch (node.kind) {
     case "vpc":
@@ -607,6 +616,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<KmsProps>) },
+      };
+    case "iam":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<IamProps>) },
       };
     case "internet":
       return {

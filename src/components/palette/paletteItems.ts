@@ -20,7 +20,8 @@ export type PaletteCategoryId =
   | "ai"
   | "devtools"
   | "integration"
-  | "hybrid";
+  | "hybrid"
+  | "iam";
 
 export type PaletteCategoryConfig = {
   id: PaletteCategoryId;
@@ -46,6 +47,7 @@ export const PALETTE_CATEGORIES: PaletteCategoryConfig[] = [
   { id: "ai", label: "IA (Artificial intelligence)" },
   { id: "integration", label: "Integração (Integration)" },
   { id: "hybrid", label: "Identidade e híbrido (Hybrid)" },
+  { id: "iam", label: "IAM (Identidade e acesso)" },
   { id: "devtools", label: "Ferramentas (Developer tools)" },
 ];
 
@@ -85,7 +87,8 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "infocard" ||
     value === "pcuser" ||
     value === "onprem" ||
-    value === "github"
+    value === "github" ||
+    value === "iam"
   );
 }
 
@@ -313,6 +316,13 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.kms,
     description: "Chaves de criptografia gerenciadas (CMEK)",
     icon: GCP_RESOURCE_ICONS.kms,
+  },
+  {
+    kind: "iam",
+    category: "iam",
+    label: GCP_RESOURCE_LABELS.iam,
+    description: "Conta de serviço, Workload Identity Federation ou grupo",
+    icon: GCP_RESOURCE_ICONS.iam,
   },
   {
     kind: "entra",

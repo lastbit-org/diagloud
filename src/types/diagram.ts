@@ -35,6 +35,7 @@ import type {
   PcUserProps,
   OnpremProps,
   GithubProps,
+  IamProps,
 } from "./resources";
 
 export const DIAGRAM_DOCUMENT_VERSION = 1 as const;
@@ -84,7 +85,8 @@ export type DiagramNode =
   | (NodeBase & { kind: "infocard"; data: InfocardProps })
   | (NodeBase & { kind: "pcuser"; data: PcUserProps })
   | (NodeBase & { kind: "onprem"; data: OnpremProps })
-  | (NodeBase & { kind: "github"; data: GithubProps });
+  | (NodeBase & { kind: "github"; data: GithubProps })
+  | (NodeBase & { kind: "iam"; data: IamProps });
 
 export type DiagramEdge = {
   id: string;

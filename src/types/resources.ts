@@ -36,7 +36,8 @@ export type ResourceKind =
   | "infocard"
   | "pcuser"
   | "onprem"
-  | "github";
+  | "github"
+  | "iam";
 
 export type RunAccessMode = "public" | "vpc";
 
@@ -150,6 +151,22 @@ export type KmsProps = {
   /** Nome do key ring ou chave. */
   name: string;
   location: string;
+};
+
+export type IamVariant = "iam" | "workload_identity" | "group";
+
+export type IamProps = {
+  /** Nome do recurso no diagrama. */
+  name: string;
+  variant: IamVariant;
+  /** E-mail da conta de serviço (variant iam). */
+  serviceAccountEmail: string;
+  /** ID do pool (variant workload_identity). */
+  workloadPoolId: string;
+  /** ID do provedor externo (variant workload_identity). */
+  workloadProviderId: string;
+  /** E-mail do grupo (variant group). */
+  groupEmail: string;
 };
 
 export type InternetProps = {
@@ -323,4 +340,5 @@ export type ResourcePropsByKind = {
   pcuser: PcUserProps;
   onprem: OnpremProps;
   github: GithubProps;
+  iam: IamProps;
 };

@@ -34,6 +34,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "build",
   "github",
   "kms",
+  "iam",
   "entra",
   "pcuser",
   "onprem",

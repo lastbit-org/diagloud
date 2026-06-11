@@ -32,6 +32,8 @@ import {
   type ArtifactProps,
   type BuildProps,
   type KmsProps,
+  type IamProps,
+  type IamVariant,
   type InternetProps,
   type RunProps,
   type PubsubProps,
@@ -277,6 +279,35 @@ function parseKmsData(raw: unknown): KmsProps {
   return {
     name: raw.name,
     location: raw.location,
+  };
+}
+
+function parseIamVariant(raw: unknown): IamVariant {
+  if (raw === "workload_identity" || raw === "group" || raw === "iam") {
+    return raw;
+  }
+  return "iam";
+}
+
+function parseIamData(raw: unknown): IamProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de IAM inválidos.");
+  }
+  return {
+    name: raw.name,
+    variant: parseIamVariant(raw.variant),
+    serviceAccountEmail:
+      typeof raw.serviceAccountEmail === "string"
+        ? raw.serviceAccountEmail
+        : "sa-app@projeto.iam.gserviceaccount.com",
+    workloadPoolId:
+      typeof raw.workloadPoolId === "string" ? raw.workloadPoolId : "pool-external",
+    workloadProviderId:
+      typeof raw.workloadProviderId === "string"
+        ? raw.workloadProviderId
+        : "provider-github",
+    groupEmail:
+      typeof raw.groupEmail === "string" ? raw.groupEmail : "eng-platform@example.com",
   };
 }
 
@@ -826,6 +857,17 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseKmsData(data),
       };
+    case "iam":
+      if (!nodeIdMatchesKind(nodeId, "iam")) {
+        throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo IAM.`);
+      }
+      return {
+        id: nodeId,
+        kind: "iam",
+        position: parsedPosition,
+        zIndex,
+        data: parseIamData(data),
+      };
     case "internet":
       if (!nodeIdMatchesKind(nodeId, "internet")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Internet.`);
@@ -1303,6 +1345,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.kms === "string"
           ? patterns.kms
           : DEFAULT_NAMING_PATTERNS.kms,
+      iam:
+        typeof patterns.iam === "string"
+          ? patterns.iam
+          : DEFAULT_NAMING_PATTERNS.iam,
       internet:
         typeof patterns.internet === "string"
           ? patterns.internet
@@ -1550,6 +1596,7 @@ function namingMetadataEqual(
     a.patterns.artifact === b.patterns.artifact &&
     a.patterns.build === b.patterns.build &&
     a.patterns.kms === b.patterns.kms &&
+    a.patterns.iam === b.patterns.iam &&
     a.patterns.internet === b.patterns.internet &&
     a.patterns.run === b.patterns.run &&
     a.patterns.pubsub === b.patterns.pubsub &&
