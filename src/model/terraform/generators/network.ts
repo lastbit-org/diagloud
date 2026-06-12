@@ -228,18 +228,13 @@ resource "google_compute_network_peering" "${resourceName}_b_to_a" {
 
   for (const node of nodesOfKind(ctx, "psc")) {
     const resourceName = ctx.getTfResourceName(node);
-    const vpcId = ctx.graph.vpcForPsc.get(node.id);
     const subnetId = ctx.graph.subnetForPsc.get(node.id);
-    const vpcNode = vpcId ? findNode(ctx.document.nodes, vpcId) : undefined;
-    const subnetNode = subnetId ? findNode(ctx.document.nodes, subnetId) : undefined;
-    const networkBlock =
-      vpcNode?.kind === "vpc" && subnetNode?.kind === "subnet"
-        ? `
-  network    = google_compute_network.${ctx.getTfResourceName(vpcNode)}.id
-  subnetwork = google_compute_subnetwork.${ctx.getTfResourceName(subnetNode)}.id`
-        : vpcNode?.kind === "vpc"
-          ? `\n  network = google_compute_network.${ctx.getTfResourceName(vpcNode)}.id`
-          : "";
+    const chain = subnetId ? vpcNodeForSubnet(ctx, subnetId) : undefined;
+    const networkBlock = chain
+      ? `
+  network    = google_compute_network.${ctx.getTfResourceName(chain.vpc)}.id
+  subnetwork = google_compute_subnetwork.${ctx.getTfResourceName(chain.subnet)}.id`
+      : "";
 
     blocks.push(`resource "google_compute_forwarding_rule" "${resourceName}" {
   name   = "${escapeHclString(node.data.name)}"

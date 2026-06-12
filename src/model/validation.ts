@@ -19,6 +19,7 @@ export type DiagramIssueCode =
   | "orphan-peering"
   | "orphan-peering-incomplete"
   | "orphan-run-vpc"
+  | "orphan-psc"
   | "orphan-eventarc"
   | "subnet-without-vpc"
   | "subnet-invalid-cidr"
@@ -120,6 +121,12 @@ export function collectDiagramIssues(
       .filter(
         (edge) => edge.kind === "eventarc-run" || edge.kind === "eventarc-gke",
       )
+      .map((edge) => edge.source),
+  );
+
+  const pscIdsOnSubnet = new Set(
+    edges
+      .filter((edge) => edge.kind === "psc-subnet")
       .map((edge) => edge.source),
   );
 
@@ -264,6 +271,15 @@ export function collectDiagramIssues(
         severity: "warning",
         nodeId: node.id,
         message: `Eventarc "${node.data.name}" não tem destino (Cloud Run ou GKE).`,
+      });
+    }
+
+    if (node.kind === "psc" && !pscIdsOnSubnet.has(node.id)) {
+      issues.push({
+        code: "orphan-psc",
+        severity: "error",
+        nodeId: node.id,
+        message: `Private Service Connect "${node.data.name}" não está ligado a uma sub-rede.`,
       });
     }
   }

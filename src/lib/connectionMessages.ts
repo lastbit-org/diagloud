@@ -46,6 +46,10 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Este Notebook (Vertex AI) já está ligado a uma sub-rede.",
   "subnet-notebook-capacity":
     "Não há mais endereços de IP na sub-rede para Notebook (após VMs, SQL, GKE, Cloud Run e Workbench).",
+  "psc-has-subnet":
+    "Este endpoint Private Service Connect já está ligado a uma sub-rede.",
+  "subnet-psc-capacity":
+    "Não há mais endereços de IP na sub-rede para Private Service Connect.",
   "spark-has-subnet":
     "Este Apache Spark (cluster) já está ligado a uma sub-rede.",
   "spark-not-cluster":

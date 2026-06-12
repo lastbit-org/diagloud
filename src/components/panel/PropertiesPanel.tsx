@@ -1734,10 +1734,24 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             <input
               id="psc-region"
               value={selectedNode.data.region}
-              onChange={(e) =>
-                updateNodeData(selectedNode.id, { region: e.target.value })
-              }
+              readOnly
+              aria-readonly
             />
+            <span className="properties-field__hint">
+              Herdada da sub-rede ao conectar o endpoint.
+            </span>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="psc-ip">IP interno</label>
+            <input
+              id="psc-ip"
+              value={selectedNode.data.internalIp ?? "—"}
+              readOnly
+              aria-readonly
+            />
+            <span className="properties-field__hint">
+              Atribuído ao ligar à sub-rede (IP privado do endpoint PSC).
+            </span>
           </div>
           <PscConnectionsInfo psc={selectedNode} edges={edges} nodes={nodes} />
         </>
@@ -5491,7 +5505,6 @@ function PscConnectionsInfo({
   edges: ReturnType<typeof useDiagramStore.getState>["edges"];
   nodes: DiagramNode[];
 }) {
-  const vpcEdge = edges.find((e) => e.kind === "psc-vpc" && e.source === psc.id);
   const subnetEdge = edges.find(
     (e) => e.kind === "psc-subnet" && e.source === psc.id,
   );
@@ -5511,16 +5524,19 @@ function PscConnectionsInfo({
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
     .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
 
-  const vpc = vpcEdge
-    ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
-    : undefined;
   const subnet = subnetEdge
     ? nodes.find((n) => n.id === subnetEdge.target && n.kind === "subnet")
     : undefined;
+  const vpc = subnet
+    ? edges
+        .filter((e) => e.kind === "subnet-vpc" && e.source === subnet.id)
+        .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vpc"))
+        .find((n): n is Extract<DiagramNode, { kind: "vpc" }> => n != null)
+    : undefined;
 
   if (
-    !vpc &&
     !subnet &&
+    !vpc &&
     sqlEdges.length === 0 &&
     vms.length === 0 &&
     clusters.length === 0 &&
@@ -5528,23 +5544,24 @@ function PscConnectionsInfo({
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue à VPC, sub-rede, Cloud SQL ou consumidores (VM, GKE, Cloud Run).
+        Ligue à sub-rede (IP privado na VPC), Cloud SQL (destino gerenciado) ou
+        consumidores (VM, GKE, Cloud Run).
       </p>
     );
   }
 
   return (
     <dl className="properties-stats">
-      {vpc && vpc.kind === "vpc" ? (
-        <>
-          <dt>VPC</dt>
-          <dd>{vpc.data.name}</dd>
-        </>
-      ) : null}
       {subnet && subnet.kind === "subnet" ? (
         <>
           <dt>Sub-rede</dt>
           <dd>{subnet.data.name}</dd>
+        </>
+      ) : null}
+      {vpc && vpc.kind === "vpc" ? (
+        <>
+          <dt>VPC</dt>
+          <dd>{vpc.data.name}</dd>
         </>
       ) : null}
       {sqlEdges.length > 0 ? (

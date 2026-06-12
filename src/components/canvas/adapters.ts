@@ -115,7 +115,7 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     return node.data.constraintId;
   }
   if (node.kind === "psc") {
-    return node.data.region;
+    return node.data.internalIp ?? node.data.region;
   }
   if (node.kind === "secretmanager") {
     return node.data.location;

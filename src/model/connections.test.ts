@@ -158,7 +158,8 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("spark", "bigtable")).toBe("spark-bigtable");
     expect(getEdgeKind("notebook", "subnet")).toBe("notebook-subnet");
     expect(getEdgeKind("internet", "loadbalancer")).toBe("internet-loadbalancer");
-    expect(getEdgeKind("psc", "vpc")).toBe("psc-vpc");
+    expect(getEdgeKind("psc", "subnet")).toBe("psc-subnet");
+    expect(getEdgeKind("psc", "vpc")).toBeNull();
     expect(getEdgeKind("vm", "secretmanager")).toBe("vm-secretmanager");
     expect(getEdgeKind("orgpolicy", "project")).toBe("orgpolicy-project");
     expect(getEdgeKind("vm", "spanner")).toBe("vm-spanner");

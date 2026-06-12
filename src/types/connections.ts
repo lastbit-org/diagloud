@@ -68,7 +68,9 @@ import type { ResourceKind } from "./resources";
  * - Organization Policy → Pasta / Projeto (opcional; pode ficar isolada no diagrama)
  * - Cloud Load Balancing → VM / GKE / Cloud Run / VPC (backends e LB interno)
  * - Internet → Cloud Load Balancing (entrada pública)
- * - Private Service Connect → VPC / Sub-rede / Cloud SQL; consumido por VM / GKE / Cloud Run
+ * - Private Service Connect → Sub-rede (endpoint com IP privado; VPC via sub-rede)
+ * - PSC → serviço gerenciado (ex.: Cloud SQL via service attachment)
+ * - VM / GKE / Cloud Run → PSC (consumidores do endpoint)
  * - Compute e CI/CD → Secret Manager; Secret Manager → Cloud KMS (CMEK)
  * - Pasta → Projeto (`folder-project`): projeto contido na pasta
  * - IAM → Projeto / Sub-rede / KMS / BigQuery: identidade e permissões
@@ -228,7 +230,6 @@ export const EDGE_ENDPOINTS = {
   "loadbalancer-vpc": { from: "loadbalancer", to: "vpc" },
   "orgpolicy-folder": { from: "orgpolicy", to: "folder" },
   "orgpolicy-project": { from: "orgpolicy", to: "project" },
-  "psc-vpc": { from: "psc", to: "vpc" },
   "psc-subnet": { from: "psc", to: "subnet" },
   "psc-sql": { from: "psc", to: "sql" },
   "vm-psc": { from: "vm", to: "psc" },

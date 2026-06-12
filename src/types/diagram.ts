@@ -264,7 +264,6 @@ export type DiagramEdge = {
     | "loadbalancer-vpc"
     | "orgpolicy-folder"
     | "orgpolicy-project"
-    | "psc-vpc"
     | "psc-subnet"
     | "psc-sql"
     | "vm-psc"

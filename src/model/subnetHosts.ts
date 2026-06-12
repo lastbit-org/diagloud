@@ -42,6 +42,12 @@ function getNotebookIdsOnSubnet(
     .map((edge) => edge.source);
 }
 
+function getPscIdsOnSubnet(subnetId: string, edges: DiagramEdge[]): string[] {
+  return edges
+    .filter((edge) => edge.kind === "psc-subnet" && edge.target === subnetId)
+    .map((edge) => edge.source);
+}
+
 export type SubnetHostCounts = {
   vm: number;
   sql: number;
@@ -49,6 +55,7 @@ export type SubnetHostCounts = {
   run: number;
   workbench: number;
   notebook: number;
+  psc: number;
 };
 
 export function countSubnetAttachedHosts(
@@ -62,6 +69,7 @@ export function countSubnetAttachedHosts(
     run: getRunIdsOnSubnet(subnetId, edges).length,
     workbench: getWorkbenchIdsOnSubnet(subnetId, edges).length,
     notebook: getNotebookIdsOnSubnet(subnetId, edges).length,
+    psc: getPscIdsOnSubnet(subnetId, edges).length,
   };
 }
 
@@ -72,7 +80,8 @@ export function totalSubnetAttachedHosts(counts: SubnetHostCounts): number {
     counts.gke +
     counts.run +
     counts.workbench +
-    counts.notebook
+    counts.notebook +
+    counts.psc
   );
 }
 
@@ -119,4 +128,19 @@ export function notebookHostIndexOffset(
 ): number {
   const counts = countSubnetAttachedHosts(subnetId, edges);
   return counts.vm + counts.sql + counts.gke + counts.run + counts.workbench;
+}
+
+export function pscHostIndexOffset(
+  subnetId: string,
+  edges: DiagramEdge[],
+): number {
+  const counts = countSubnetAttachedHosts(subnetId, edges);
+  return (
+    counts.vm +
+    counts.sql +
+    counts.gke +
+    counts.run +
+    counts.workbench +
+    counts.notebook
+  );
 }

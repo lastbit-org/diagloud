@@ -307,7 +307,7 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     kind: "psc",
     category: "networking",
     label: GCP_RESOURCE_LABELS.psc,
-    description: "Conectividade privada a serviços Google ou de terceiros",
+    description: "Endpoint PSC com IP privado na sub-rede da VPC",
     icon: GCP_RESOURCE_ICONS.psc,
   },
   {

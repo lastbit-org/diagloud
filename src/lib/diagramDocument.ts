@@ -745,6 +745,7 @@ function parsePscData(raw: unknown): PscProps {
   return {
     name: raw.name,
     region: raw.region,
+    ...(typeof raw.internalIp === "string" ? { internalIp: raw.internalIp } : {}),
   };
 }
 
@@ -1548,7 +1549,6 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "loadbalancer-vpc" &&
     kind !== "orgpolicy-folder" &&
     kind !== "orgpolicy-project" &&
-    kind !== "psc-vpc" &&
     kind !== "psc-subnet" &&
     kind !== "psc-sql" &&
     kind !== "vm-psc" &&

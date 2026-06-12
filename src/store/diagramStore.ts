@@ -35,6 +35,10 @@ import {
   clearSqlPrivateNetwork,
   reassignSubnetSqlIps,
 } from "../model/sqlSubnet";
+import {
+  clearPscNetwork,
+  reassignSubnetPscIps,
+} from "../model/pscSubnet";
 import { resolveEdgeHandles } from "../lib/dynamicHandles";
 import { validateConnection } from "../model/connections";
 import {
@@ -858,6 +862,7 @@ function reassignSubnetHostIps(
   next = reassignSubnetRunIps(subnetId, next, edges);
   next = reassignSubnetWorkbenchIps(subnetId, next, edges);
   next = reassignSubnetNotebookIps(subnetId, next, edges);
+  next = reassignSubnetPscIps(subnetId, next, edges);
   return next;
 }
 
@@ -1035,7 +1040,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
             edge.kind === "gke-subnet" ||
             edge.kind === "run-subnet" ||
             edge.kind === "workbench-subnet" ||
-            edge.kind === "notebook-subnet") &&
+            edge.kind === "notebook-subnet" ||
+            edge.kind === "psc-subnet") &&
           (edge.source === id || edge.target === id)
         ) {
           affectedSubnetIds.add(edge.target);
@@ -1100,6 +1106,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         next.kind === "run-subnet" ||
         next.kind === "workbench-subnet" ||
         next.kind === "notebook-subnet" ||
+        next.kind === "psc-subnet" ||
         next.kind === "spark-subnet" ||
         next.kind === "airflow-subnet" ||
         next.kind === "dataflow-subnet"
@@ -1165,6 +1172,11 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
       if (removed?.kind === "notebook-subnet") {
         nodes = clearNotebookNetwork(removed.source, nodes);
+        nodes = reassignSubnetHostIps(removed.target, nodes, edges);
+      }
+
+      if (removed?.kind === "psc-subnet") {
+        nodes = clearPscNetwork(removed.source, nodes);
         nodes = reassignSubnetHostIps(removed.target, nodes, edges);
       }
 

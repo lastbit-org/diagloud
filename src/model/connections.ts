@@ -4,6 +4,7 @@ import { canAttachGkeToSubnet } from "./gkeSubnet";
 import { canAttachRunToSubnet } from "./runSubnet";
 import { canAttachWorkbenchToSubnet } from "./workbenchSubnet";
 import { canAttachNotebookToSubnet } from "./notebookSubnet";
+import { canAttachPscToSubnet } from "./pscSubnet";
 import { canAttachSqlToSubnet } from "./sqlSubnet";
 import { canAttachHostToSubnet } from "./subnetHosts";
 import { getSubnetNode } from "./subnet";
@@ -95,6 +96,8 @@ export type ConnectionInvalidReason =
   | "subnet-workbench-capacity"
   | "notebook-has-subnet"
   | "subnet-notebook-capacity"
+  | "psc-has-subnet"
+  | "subnet-psc-capacity"
   | "spark-has-subnet"
   | "spark-not-cluster"
   | "airflow-has-subnet"
@@ -634,6 +637,25 @@ export function validateConnection(
       !canAttachNotebookToSubnet(directed.target, context.nodes, context.edges)
     ) {
       return { valid: false, reason: "subnet-notebook-capacity" };
+    }
+  }
+
+  if (
+    edgeKind === "psc-subnet" &&
+    context.edges.some(
+      (edge) => edge.kind === "psc-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "psc-has-subnet" };
+  }
+
+  if (edgeKind === "psc-subnet") {
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+    if (!canAttachPscToSubnet(directed.target, context.nodes, context.edges)) {
+      return { valid: false, reason: "subnet-psc-capacity" };
     }
   }
 

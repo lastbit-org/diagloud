@@ -362,9 +362,12 @@ export type OrgPolicyProps = {
 };
 
 export type PscProps = {
-  /** Nome do endpoint ou service attachment. */
+  /** Nome do endpoint PSC (IP privado na sub-rede). */
   name: string;
+  /** Região — herdada da sub-rede ao conectar. */
   region: string;
+  /** IP interno do endpoint na sub-rede. */
+  internalIp?: string;
 };
 
 export type SecretManagerProps = {

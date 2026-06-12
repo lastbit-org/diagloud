@@ -30,7 +30,6 @@ export type ResolvedGraph = {
   vpcForInterconnect: Map<string, string>;
   vpcForPeering: Map<string, string[]>;
   vpcForLoadBalancer: Map<string, string>;
-  vpcForPsc: Map<string, string>;
   subnetForPsc: Map<string, string>;
   subnetForGke: Map<string, string>;
   subnetForRun: Map<string, string>;
@@ -95,9 +94,6 @@ function applyEdge(
     case "loadbalancer-vpc":
       graph.vpcForLoadBalancer.set(source, target);
       break;
-    case "psc-vpc":
-      graph.vpcForPsc.set(source, target);
-      break;
     case "psc-subnet":
       graph.subnetForPsc.set(source, target);
       break;
@@ -154,7 +150,6 @@ export function resolveGraph(document: DiagramDocument): ResolvedGraph {
     vpcForInterconnect: new Map(),
     vpcForPeering: new Map(),
     vpcForLoadBalancer: new Map(),
-    vpcForPsc: new Map(),
     subnetForPsc: new Map(),
     subnetForGke: new Map(),
     subnetForRun: new Map(),
