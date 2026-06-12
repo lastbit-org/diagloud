@@ -42,6 +42,11 @@ import type { ResourceKind } from "./resources";
  * - Pub/Sub → Cloud Spanner (`pubsub-spanner`): ingestão assíncrona
  * - Vertex AI Workbench → Sub-rede (`workbench-subnet`): notebook na VPC
  * - VM / GKE / Cloud Run → Firestore: acesso de aplicações NoSQL
+ * - Firebase → Firestore / Cloud Storage / Cloud Run: serviços da plataforma
+ * - VM / GKE / Cloud Run / Usuário → Firebase: clientes e apps
+ * - VM / GKE / Cloud Run → Cloud Bigtable: acesso de aplicações
+ * - Apache Spark / Cloud Dataflow → Cloud Bigtable: pipelines analíticos
+ * - Vertex AI Notebook → Sub-rede e dados (como Workbench)
  * - Pub/Sub → Firestore (`pubsub-firestore`): eventos e sincronização
  * - Pub/Sub / Cloud Storage → Eventarc: fontes de eventos
  * - Eventarc → Cloud Run / GKE (`eventarc-run`, `eventarc-gke`): destinos do roteamento
@@ -50,7 +55,7 @@ import type { ResourceKind } from "./resources";
  * - Apache Spark → Sub-rede (`spark-subnet`, modo cluster): execução na VPC
  * - Apache Spark → Storage / BigQuery / Cloud KMS: leitura de dados e criptografia
  * - Managed Airflow → Storage / BigQuery / Cloud KMS / Dataflow / Spark / Cloud Run / Cloud SQL
- * - Apache Spark → Storage / BigQuery / Cloud SQL / VM (Bigtable e MongoDB em breve)
+ * - Apache Spark → Storage / BigQuery / Cloud SQL / VM / Bigtable
  * - Cloud NAT → Cloud Router (`nat-router`); Router → VPN / Interconnect
  * - Cloud DNS → VM / GKE / Dataflow na VPC (além de `dns-vpc`)
  * - VPC ↔ peering / VPN / Interconnect via recursos de rede existentes
@@ -116,24 +121,45 @@ export const EDGE_ENDPOINTS = {
   "pubsub-gke": { from: "pubsub", to: "gke" },
   "pubsub-sql": { from: "pubsub", to: "sql" },
   "pubsub-workbench": { from: "pubsub", to: "workbench" },
+  "pubsub-notebook": { from: "pubsub", to: "notebook" },
   "vm-spanner": { from: "vm", to: "spanner" },
+  "vm-bigtable": { from: "vm", to: "bigtable" },
+  "vm-firebase": { from: "vm", to: "firebase" },
   "gke-spanner": { from: "gke", to: "spanner" },
+  "gke-bigtable": { from: "gke", to: "bigtable" },
+  "gke-firebase": { from: "gke", to: "firebase" },
   "run-spanner": { from: "run", to: "spanner" },
+  "run-bigtable": { from: "run", to: "bigtable" },
+  "run-firebase": { from: "run", to: "firebase" },
   "pubsub-spanner": { from: "pubsub", to: "spanner" },
+  "pubsub-bigtable": { from: "pubsub", to: "bigtable" },
   "workbench-subnet": { from: "workbench", to: "subnet" },
   "workbench-storage": { from: "workbench", to: "storage" },
   "workbench-bigquery": { from: "workbench", to: "bigquery" },
   "workbench-spanner": { from: "workbench", to: "spanner" },
+  "workbench-bigtable": { from: "workbench", to: "bigtable" },
   "vm-firestore": { from: "vm", to: "firestore" },
   "gke-firestore": { from: "gke", to: "firestore" },
   "run-firestore": { from: "run", to: "firestore" },
   "pubsub-firestore": { from: "pubsub", to: "firestore" },
   "workbench-firestore": { from: "workbench", to: "firestore" },
+  "firebase-firestore": { from: "firebase", to: "firestore" },
+  "firebase-storage": { from: "firebase", to: "storage" },
+  "firebase-run": { from: "firebase", to: "run" },
+  "pcuser-firebase": { from: "pcuser", to: "firebase" },
+  "notebook-subnet": { from: "notebook", to: "subnet" },
+  "notebook-storage": { from: "notebook", to: "storage" },
+  "notebook-bigquery": { from: "notebook", to: "bigquery" },
+  "notebook-spanner": { from: "notebook", to: "spanner" },
+  "notebook-firestore": { from: "notebook", to: "firestore" },
+  "notebook-bigtable": { from: "notebook", to: "bigtable" },
+  "notebook-modelregistry": { from: "notebook", to: "modelregistry" },
   "spark-subnet": { from: "spark", to: "subnet" },
   "spark-storage": { from: "spark", to: "storage" },
   "spark-bigquery": { from: "spark", to: "bigquery" },
   "spark-sql": { from: "spark", to: "sql" },
   "spark-vm": { from: "spark", to: "vm" },
+  "spark-bigtable": { from: "spark", to: "bigtable" },
   "spark-kms": { from: "spark", to: "kms" },
   "airflow-subnet": { from: "airflow", to: "subnet" },
   "airflow-storage": { from: "airflow", to: "storage" },
@@ -149,6 +175,7 @@ export const EDGE_ENDPOINTS = {
   "dataflow-bigquery": { from: "dataflow", to: "bigquery" },
   "dataflow-sql": { from: "dataflow", to: "sql" },
   "dataflow-firestore": { from: "dataflow", to: "firestore" },
+  "dataflow-bigtable": { from: "dataflow", to: "bigtable" },
   "dataflow-pubsub": { from: "dataflow", to: "pubsub" },
   "dataflow-kms": { from: "dataflow", to: "kms" },
   "pubsub-dataflow": { from: "pubsub", to: "dataflow" },
@@ -172,6 +199,7 @@ export const EDGE_ENDPOINTS = {
   "bigquery-kms": { from: "bigquery", to: "kms" },
   "firestore-kms": { from: "firestore", to: "kms" },
   "spanner-kms": { from: "spanner", to: "kms" },
+  "bigtable-kms": { from: "bigtable", to: "kms" },
   "pcuser-entra": { from: "pcuser", to: "entra" },
   "pcuser-vm": { from: "pcuser", to: "vm" },
   "pcuser-run": { from: "pcuser", to: "run" },

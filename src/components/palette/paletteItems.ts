@@ -2,7 +2,6 @@ import {
   GCP_RESOURCE_ICONS,
   GCP_RESOURCE_LABELS,
 } from "../../assets/gcpIcons";
-import firebaseIcon from "../../assets/google-cloud-legacy-icons/identity_platform/identity_platform.svg";
 import type { ResourceKind } from "../../types";
 
 export const PALETTE_DRAG_MIME = "application/diagloud.resource";
@@ -313,12 +312,20 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.spanner,
   },
   {
+    paletteKey: "bigtable",
+    kind: "bigtable",
+    category: "databases",
+    label: GCP_RESOURCE_LABELS.bigtable,
+    description: "Banco NoSQL de baixa latência e alto throughput",
+    icon: GCP_RESOURCE_ICONS.bigtable,
+  },
+  {
     paletteKey: "firebase",
+    kind: "firebase",
     category: "appdev",
-    label: "Firebase (em breve)",
+    label: GCP_RESOURCE_LABELS.firebase,
     description: "Plataforma de apps móveis e web",
-    icon: firebaseIcon,
-    comingSoon: true,
+    icon: GCP_RESOURCE_ICONS.firebase,
   },
   {
     paletteKey: "build",
@@ -370,11 +377,11 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
   },
   {
     paletteKey: "notebook",
+    kind: "notebook",
     category: "ai",
-    label: "Notebook (em breve)",
-    description: "Instância de notebook gerenciada",
-    icon: GCP_RESOURCE_ICONS.workbench,
-    comingSoon: true,
+    label: GCP_RESOURCE_LABELS.notebook,
+    description: "Instância de notebook gerenciada na Vertex AI",
+    icon: GCP_RESOURCE_ICONS.notebook,
   },
   {
     paletteKey: "kms",

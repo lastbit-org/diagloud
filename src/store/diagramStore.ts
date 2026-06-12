@@ -21,6 +21,10 @@ import {
   reassignSubnetRunIps,
 } from "../model/runSubnet";
 import {
+  clearNotebookNetwork,
+  reassignSubnetNotebookIps,
+} from "../model/notebookSubnet";
+import {
   clearWorkbenchNetwork,
   reassignSubnetWorkbenchIps,
 } from "../model/workbenchSubnet";
@@ -80,7 +84,10 @@ import type {
   BigqueryProps,
   SpannerProps,
   FirestoreProps,
+  BigtableProps,
+  FirebaseProps,
   WorkbenchProps,
+  NotebookProps,
   SparkProps,
   AirflowProps,
   DataflowProps,
@@ -141,7 +148,10 @@ type DiagramActions = {
       | Partial<BigqueryProps>
       | Partial<SpannerProps>
       | Partial<FirestoreProps>
+      | Partial<BigtableProps>
+      | Partial<FirebaseProps>
       | Partial<WorkbenchProps>
+      | Partial<NotebookProps>
       | Partial<SparkProps>
       | Partial<AirflowProps>
       | Partial<DataflowProps>
@@ -428,11 +438,29 @@ function buildNode<K extends ResourceKind>(
         kind: "firestore",
         data: { ...defaultResourceData("firestore", resourceContext), ...data },
       };
+    case "bigtable":
+      return {
+        ...base,
+        kind: "bigtable",
+        data: { ...defaultResourceData("bigtable", resourceContext), ...data },
+      };
+    case "firebase":
+      return {
+        ...base,
+        kind: "firebase",
+        data: { ...defaultResourceData("firebase", resourceContext), ...data },
+      };
     case "workbench":
       return {
         ...base,
         kind: "workbench",
         data: { ...defaultResourceData("workbench", resourceContext), ...data },
+      };
+    case "notebook":
+      return {
+        ...base,
+        kind: "notebook",
+        data: { ...defaultResourceData("notebook", resourceContext), ...data },
       };
     case "spark":
       return {
@@ -535,7 +563,11 @@ function mergeNodeData(
     | Partial<EventarcProps>
     | Partial<BigqueryProps>
     | Partial<SpannerProps>
+    | Partial<FirestoreProps>
+    | Partial<BigtableProps>
+    | Partial<FirebaseProps>
     | Partial<WorkbenchProps>
+    | Partial<NotebookProps>
     | Partial<SparkProps>
     | Partial<AirflowProps>
     | Partial<DataflowProps>
@@ -670,10 +702,25 @@ function mergeNodeData(
         ...node,
         data: { ...node.data, ...(patch as Partial<FirestoreProps>) },
       };
+    case "bigtable":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<BigtableProps>) },
+      };
+    case "firebase":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<FirebaseProps>) },
+      };
     case "workbench":
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<WorkbenchProps>) },
+      };
+    case "notebook":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<NotebookProps>) },
       };
     case "spark":
       return {
@@ -748,6 +795,7 @@ function reassignSubnetHostIps(
   next = reassignSubnetGkeIps(subnetId, next, edges);
   next = reassignSubnetRunIps(subnetId, next, edges);
   next = reassignSubnetWorkbenchIps(subnetId, next, edges);
+  next = reassignSubnetNotebookIps(subnetId, next, edges);
   return next;
 }
 
@@ -924,7 +972,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
             edge.kind === "sql-subnet" ||
             edge.kind === "gke-subnet" ||
             edge.kind === "run-subnet" ||
-            edge.kind === "workbench-subnet") &&
+            edge.kind === "workbench-subnet" ||
+            edge.kind === "notebook-subnet") &&
           (edge.source === id || edge.target === id)
         ) {
           affectedSubnetIds.add(edge.target);
@@ -988,6 +1037,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         next.kind === "gke-subnet" ||
         next.kind === "run-subnet" ||
         next.kind === "workbench-subnet" ||
+        next.kind === "notebook-subnet" ||
         next.kind === "spark-subnet" ||
         next.kind === "airflow-subnet" ||
         next.kind === "dataflow-subnet"
@@ -1048,6 +1098,11 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
       if (removed?.kind === "workbench-subnet") {
         nodes = clearWorkbenchNetwork(removed.source, nodes);
+        nodes = reassignSubnetHostIps(removed.target, nodes, edges);
+      }
+
+      if (removed?.kind === "notebook-subnet") {
+        nodes = clearNotebookNetwork(removed.source, nodes);
         nodes = reassignSubnetHostIps(removed.target, nodes, edges);
       }
 

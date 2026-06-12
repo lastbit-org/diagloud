@@ -10,6 +10,7 @@ const KMS_EDGE_KINDS = [
   "bigquery-kms",
   "firestore-kms",
   "spanner-kms",
+  "bigtable-kms",
   "spark-kms",
   "airflow-kms",
   "dataflow-kms",
@@ -31,6 +32,7 @@ export type ResolvedGraph = {
   subnetForRun: Map<string, string>;
   subnetForSql: Map<string, string>;
   subnetForWorkbench: Map<string, string>;
+  subnetForNotebook: Map<string, string>;
   subnetForSpark: Map<string, string>;
   subnetForAirflow: Map<string, string>;
   subnetForDataflow: Map<string, string>;
@@ -98,6 +100,9 @@ function applyEdge(
     case "workbench-subnet":
       graph.subnetForWorkbench.set(source, target);
       break;
+    case "notebook-subnet":
+      graph.subnetForNotebook.set(source, target);
+      break;
     case "spark-subnet":
       graph.subnetForSpark.set(source, target);
       break;
@@ -139,6 +144,7 @@ export function resolveGraph(document: DiagramDocument): ResolvedGraph {
     subnetForRun: new Map(),
     subnetForSql: new Map(),
     subnetForWorkbench: new Map(),
+    subnetForNotebook: new Map(),
     subnetForSpark: new Map(),
     subnetForAirflow: new Map(),
     subnetForDataflow: new Map(),

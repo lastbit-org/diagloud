@@ -42,7 +42,10 @@ import {
   type BigqueryProps,
   type SpannerProps,
   type FirestoreProps,
+  type BigtableProps,
+  type FirebaseProps,
   type WorkbenchProps,
+  type NotebookProps,
   type SparkProps,
   type AirflowProps,
   type DataflowProps,
@@ -486,6 +489,34 @@ function parseFirestoreData(raw: unknown): FirestoreProps {
   };
 }
 
+function parseBigtableData(raw: unknown): BigtableProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Cloud Bigtable inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
+  };
+}
+
+function parseFirebaseData(raw: unknown): FirebaseProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.projectId !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Firebase inválidos.");
+  }
+  return {
+    name: raw.name,
+    projectId: raw.projectId,
+  };
+}
+
 function parseWorkbenchData(raw: unknown): WorkbenchProps {
   if (
     !isRecord(raw) ||
@@ -496,6 +527,26 @@ function parseWorkbenchData(raw: unknown): WorkbenchProps {
     throw new DiagramParseError("Dados de Vertex AI Workbench inválidos.");
   }
   const data: WorkbenchProps = {
+    name: raw.name,
+    region: raw.region,
+    machineType: raw.machineType,
+  };
+  if (typeof raw.internalIp === "string" && raw.internalIp) {
+    data.internalIp = raw.internalIp;
+  }
+  return data;
+}
+
+function parseNotebookData(raw: unknown): NotebookProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string" ||
+    typeof raw.machineType !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Notebook (Vertex AI) inválidos.");
+  }
+  const data: NotebookProps = {
     name: raw.name,
     region: raw.region,
     machineType: raw.machineType,
@@ -989,6 +1040,32 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseFirestoreData(data),
       };
+    case "bigtable":
+      if (!nodeIdMatchesKind(nodeId, "bigtable")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Bigtable.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "bigtable",
+        position: parsedPosition,
+        zIndex,
+        data: parseBigtableData(data),
+      };
+    case "firebase":
+      if (!nodeIdMatchesKind(nodeId, "firebase")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Firebase.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "firebase",
+        position: parsedPosition,
+        zIndex,
+        data: parseFirebaseData(data),
+      };
     case "workbench":
       if (!nodeIdMatchesKind(nodeId, "workbench")) {
         throw new DiagramParseError(
@@ -1001,6 +1078,19 @@ function parseNode(raw: unknown): DiagramNode {
         position: parsedPosition,
         zIndex,
         data: parseWorkbenchData(data),
+      };
+    case "notebook":
+      if (!nodeIdMatchesKind(nodeId, "notebook")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Notebook (Vertex AI).`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "notebook",
+        position: parsedPosition,
+        zIndex,
+        data: parseNotebookData(data),
       };
     case "spark":
       if (!nodeIdMatchesKind(nodeId, "spark")) {
@@ -1233,24 +1323,45 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "pubsub-gke" &&
     kind !== "pubsub-sql" &&
     kind !== "pubsub-workbench" &&
+    kind !== "pubsub-notebook" &&
     kind !== "vm-spanner" &&
+    kind !== "vm-bigtable" &&
+    kind !== "vm-firebase" &&
     kind !== "gke-spanner" &&
+    kind !== "gke-bigtable" &&
+    kind !== "gke-firebase" &&
     kind !== "run-spanner" &&
+    kind !== "run-bigtable" &&
+    kind !== "run-firebase" &&
     kind !== "pubsub-spanner" &&
+    kind !== "pubsub-bigtable" &&
     kind !== "workbench-subnet" &&
     kind !== "workbench-storage" &&
     kind !== "workbench-bigquery" &&
     kind !== "workbench-spanner" &&
+    kind !== "workbench-bigtable" &&
     kind !== "vm-firestore" &&
     kind !== "gke-firestore" &&
     kind !== "run-firestore" &&
     kind !== "pubsub-firestore" &&
     kind !== "workbench-firestore" &&
+    kind !== "firebase-firestore" &&
+    kind !== "firebase-storage" &&
+    kind !== "firebase-run" &&
+    kind !== "pcuser-firebase" &&
+    kind !== "notebook-subnet" &&
+    kind !== "notebook-storage" &&
+    kind !== "notebook-bigquery" &&
+    kind !== "notebook-spanner" &&
+    kind !== "notebook-firestore" &&
+    kind !== "notebook-bigtable" &&
+    kind !== "notebook-modelregistry" &&
     kind !== "spark-subnet" &&
     kind !== "spark-storage" &&
     kind !== "spark-bigquery" &&
     kind !== "spark-sql" &&
     kind !== "spark-vm" &&
+    kind !== "spark-bigtable" &&
     kind !== "spark-kms" &&
     kind !== "airflow-subnet" &&
     kind !== "airflow-storage" &&
@@ -1266,6 +1377,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "dataflow-bigquery" &&
     kind !== "dataflow-sql" &&
     kind !== "dataflow-firestore" &&
+    kind !== "dataflow-bigtable" &&
     kind !== "dataflow-pubsub" &&
     kind !== "dataflow-kms" &&
     kind !== "pubsub-dataflow" &&
@@ -1289,6 +1401,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "bigquery-kms" &&
     kind !== "firestore-kms" &&
     kind !== "spanner-kms" &&
+    kind !== "bigtable-kms" &&
     kind !== "pcuser-entra" &&
     kind !== "pcuser-vm" &&
     kind !== "pcuser-run" &&
@@ -1458,10 +1571,22 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.firestore === "string"
           ? patterns.firestore
           : DEFAULT_NAMING_PATTERNS.firestore,
+      bigtable:
+        typeof patterns.bigtable === "string"
+          ? patterns.bigtable
+          : DEFAULT_NAMING_PATTERNS.bigtable,
+      firebase:
+        typeof patterns.firebase === "string"
+          ? patterns.firebase
+          : DEFAULT_NAMING_PATTERNS.firebase,
       workbench:
         typeof patterns.workbench === "string"
           ? patterns.workbench
           : DEFAULT_NAMING_PATTERNS.workbench,
+      notebook:
+        typeof patterns.notebook === "string"
+          ? patterns.notebook
+          : DEFAULT_NAMING_PATTERNS.notebook,
       spark:
         typeof patterns.spark === "string"
           ? patterns.spark
@@ -1686,7 +1811,10 @@ function namingMetadataEqual(
     a.patterns.bigquery === b.patterns.bigquery &&
     a.patterns.spanner === b.patterns.spanner &&
     a.patterns.firestore === b.patterns.firestore &&
+    a.patterns.bigtable === b.patterns.bigtable &&
+    a.patterns.firebase === b.patterns.firebase &&
     a.patterns.workbench === b.patterns.workbench &&
+    a.patterns.notebook === b.patterns.notebook &&
     a.patterns.spark === b.patterns.spark &&
     a.patterns.airflow === b.patterns.airflow &&
     a.patterns.dataflow === b.patterns.dataflow &&

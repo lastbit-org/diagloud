@@ -29,7 +29,10 @@ import type {
   BigqueryProps,
   SpannerProps,
   FirestoreProps,
+  BigtableProps,
+  FirebaseProps,
   WorkbenchProps,
+  NotebookProps,
   SparkProps,
   AirflowProps,
   DataflowProps,
@@ -192,12 +195,28 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         location: "southamerica-east1",
       } as FirestoreProps as ResourcePropsByKind[K];
+    case "bigtable":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as BigtableProps as ResourcePropsByKind[K];
+    case "firebase":
+      return {
+        name,
+        projectId: "meu-app-firebase",
+      } as FirebaseProps as ResourcePropsByKind[K];
     case "workbench":
       return {
         name,
         region: "southamerica-east1",
         machineType: DEFAULT_WORKBENCH_MACHINE_TYPE,
       } as WorkbenchProps as ResourcePropsByKind[K];
+    case "notebook":
+      return {
+        name,
+        region: "southamerica-east1",
+        machineType: DEFAULT_WORKBENCH_MACHINE_TYPE,
+      } as NotebookProps as ResourcePropsByKind[K];
     case "spark":
       return {
         name,
@@ -306,8 +325,14 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `spanner-${count}`;
     case "firestore":
       return `fs-${count}`;
+    case "bigtable":
+      return `bt-${count}`;
+    case "firebase":
+      return `firebase-${count}`;
     case "workbench":
       return `wb-${count}`;
+    case "notebook":
+      return `nb-${count}`;
     case "spark":
       return `spark-${count}`;
     case "airflow":

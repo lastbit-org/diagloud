@@ -38,6 +38,29 @@ export function generateMlTerraform(ctx: TerraformGenContext): string {
 }`);
   }
 
+  for (const node of nodesOfKind(ctx, "notebook")) {
+    const subnetId = ctx.graph.subnetForNotebook.get(node.id);
+    const chain = subnetId ? vpcNodeForSubnet(ctx, subnetId) : undefined;
+    const resourceName = ctx.getTfResourceName(node);
+    const zone = defaultZone(node.data.region);
+
+    const networkBlock = chain
+      ? `
+  network = google_compute_network.${ctx.getTfResourceName(chain.vpc)}.id
+  subnet  = google_compute_subnetwork.${ctx.getTfResourceName(chain.subnet)}.id${
+        node.data.internalIp?.trim()
+          ? `\n  # IP interno no diagrama: ${escapeHclString(node.data.internalIp.trim())}`
+          : ""
+      }`
+      : "";
+
+    blocks.push(`resource "google_notebooks_instance" "${resourceName}" {
+  name         = "${escapeHclString(node.data.name)}"
+  location     = "${escapeHclString(zone)}"
+  machine_type = "${escapeHclString(node.data.machineType)}"${networkBlock}
+}`);
+  }
+
   for (const node of nodesOfKind(ctx, "spark")) {
     const resourceName = ctx.getTfResourceName(node);
 

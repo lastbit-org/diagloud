@@ -153,6 +153,10 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("nat", "router")).toBe("nat-router");
     expect(getEdgeKind("router", "vpn")).toBe("router-vpn");
     expect(getEdgeKind("dns", "vm")).toBe("dns-vm");
+    expect(getEdgeKind("firebase", "firestore")).toBe("firebase-firestore");
+    expect(getEdgeKind("vm", "bigtable")).toBe("vm-bigtable");
+    expect(getEdgeKind("spark", "bigtable")).toBe("spark-bigtable");
+    expect(getEdgeKind("notebook", "subnet")).toBe("notebook-subnet");
     expect(getEdgeKind("vm", "spanner")).toBe("vm-spanner");
     expect(getEdgeKind("gke", "spanner")).toBe("gke-spanner");
     expect(getEdgeKind("run", "spanner")).toBe("run-spanner");

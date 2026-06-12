@@ -3,6 +3,7 @@ import { matchesHandleRoles } from "../lib/dynamicHandles";
 import { canAttachGkeToSubnet } from "./gkeSubnet";
 import { canAttachRunToSubnet } from "./runSubnet";
 import { canAttachWorkbenchToSubnet } from "./workbenchSubnet";
+import { canAttachNotebookToSubnet } from "./notebookSubnet";
 import { canAttachSqlToSubnet } from "./sqlSubnet";
 import { canAttachHostToSubnet } from "./subnetHosts";
 import { getSubnetNode } from "./subnet";
@@ -36,6 +37,8 @@ const NON_HIERARCHICAL_EDGE_KINDS = new Set<DiagramEdge["kind"]>([
   "airflow-sql",
   "spark-sql",
   "spark-vm",
+  "spark-bigtable",
+  "dataflow-bigtable",
   "nat-router",
   "router-vpn",
   "router-interconnect",
@@ -82,6 +85,8 @@ export type ConnectionInvalidReason =
   | "subnet-run-capacity"
   | "workbench-has-subnet"
   | "subnet-workbench-capacity"
+  | "notebook-has-subnet"
+  | "subnet-notebook-capacity"
   | "spark-has-subnet"
   | "spark-not-cluster"
   | "airflow-has-subnet"
@@ -599,6 +604,28 @@ export function validateConnection(
       )
     ) {
       return { valid: false, reason: "subnet-workbench-capacity" };
+    }
+  }
+
+  if (
+    edgeKind === "notebook-subnet" &&
+    context.edges.some(
+      (edge) =>
+        edge.kind === "notebook-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "notebook-has-subnet" };
+  }
+
+  if (edgeKind === "notebook-subnet") {
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+    if (
+      !canAttachNotebookToSubnet(directed.target, context.nodes, context.edges)
+    ) {
+      return { valid: false, reason: "subnet-notebook-capacity" };
     }
   }
 

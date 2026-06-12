@@ -31,12 +31,24 @@ function getWorkbenchIdsOnSubnet(
     .map((edge) => edge.source);
 }
 
+function getNotebookIdsOnSubnet(
+  subnetId: string,
+  edges: DiagramEdge[],
+): string[] {
+  return edges
+    .filter(
+      (edge) => edge.kind === "notebook-subnet" && edge.target === subnetId,
+    )
+    .map((edge) => edge.source);
+}
+
 export type SubnetHostCounts = {
   vm: number;
   sql: number;
   gke: number;
   run: number;
   workbench: number;
+  notebook: number;
 };
 
 export function countSubnetAttachedHosts(
@@ -49,11 +61,19 @@ export function countSubnetAttachedHosts(
     gke: getGkeIdsOnSubnet(subnetId, edges).length,
     run: getRunIdsOnSubnet(subnetId, edges).length,
     workbench: getWorkbenchIdsOnSubnet(subnetId, edges).length,
+    notebook: getNotebookIdsOnSubnet(subnetId, edges).length,
   };
 }
 
 export function totalSubnetAttachedHosts(counts: SubnetHostCounts): number {
-  return counts.vm + counts.sql + counts.gke + counts.run + counts.workbench;
+  return (
+    counts.vm +
+    counts.sql +
+    counts.gke +
+    counts.run +
+    counts.workbench +
+    counts.notebook
+  );
 }
 
 /** Há IP disponível na sub-rede para mais um recurso (VM, SQL ou GKE). */
@@ -91,4 +111,12 @@ export function workbenchHostIndexOffset(
 ): number {
   const counts = countSubnetAttachedHosts(subnetId, edges);
   return counts.vm + counts.sql + counts.gke + counts.run;
+}
+
+export function notebookHostIndexOffset(
+  subnetId: string,
+  edges: DiagramEdge[],
+): number {
+  const counts = countSubnetAttachedHosts(subnetId, edges);
+  return counts.vm + counts.sql + counts.gke + counts.run + counts.workbench;
 }

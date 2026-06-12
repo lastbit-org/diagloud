@@ -142,8 +142,14 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `spanner-${count}`;
     case "firestore":
       return `fs-${count}`;
+    case "bigtable":
+      return `bt-${count}`;
+    case "firebase":
+      return `firebase-${count}`;
     case "workbench":
       return `wb-${count}`;
+    case "notebook":
+      return `nb-${count}`;
     case "spark":
       return `spark-${count}`;
     case "airflow":

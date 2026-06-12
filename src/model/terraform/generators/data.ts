@@ -4,7 +4,7 @@ import {
   vpcNodeForSubnet,
   type TerraformGenContext,
 } from "../context";
-import { escapeHclString, sectionHeader } from "../hcl";
+import { defaultZone, escapeHclString, sectionHeader } from "../hcl";
 
 const STORAGE_CLASS_MAP = {
   STANDARD: "STANDARD",
@@ -113,6 +113,27 @@ export function generateDataTerraform(ctx: TerraformGenContext): string {
   name        = "${escapeHclString(node.data.name)}"
   location_id = "${escapeHclString(node.data.location)}"
   type        = "FIRESTORE_NATIVE"${cmek}
+}`);
+  }
+
+  for (const node of nodesOfKind(ctx, "bigtable")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const kmsRef = kmsKeyReference(ctx, node.id);
+    const encryption = kmsRef
+      ? `
+  cluster {
+    cluster_id   = "${escapeHclString(node.data.name)}-cluster"
+    zone         = "${escapeHclString(defaultZone(node.data.location))}"
+    kms_key_name = ${kmsRef}
+  }`
+      : `
+  cluster {
+    cluster_id = "${escapeHclString(node.data.name)}-cluster"
+    zone       = "${escapeHclString(defaultZone(node.data.location))}"
+  }`;
+
+    blocks.push(`resource "google_bigtable_instance" "${resourceName}" {
+  name = "${escapeHclString(node.data.name)}"${encryption}
 }`);
   }
 

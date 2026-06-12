@@ -15,7 +15,10 @@ import type {
   BigqueryProps,
   SpannerProps,
   FirestoreProps,
+  BigtableProps,
+  FirebaseProps,
   WorkbenchProps,
+  NotebookProps,
   SparkProps,
   AirflowProps,
   DataflowProps,
@@ -75,7 +78,10 @@ export type DiagramNode =
   | (NodeBase & { kind: "bigquery"; data: BigqueryProps })
   | (NodeBase & { kind: "spanner"; data: SpannerProps })
   | (NodeBase & { kind: "firestore"; data: FirestoreProps })
+  | (NodeBase & { kind: "bigtable"; data: BigtableProps })
+  | (NodeBase & { kind: "firebase"; data: FirebaseProps })
   | (NodeBase & { kind: "workbench"; data: WorkbenchProps })
+  | (NodeBase & { kind: "notebook"; data: NotebookProps })
   | (NodeBase & { kind: "spark"; data: SparkProps })
   | (NodeBase & { kind: "airflow"; data: AirflowProps })
   | (NodeBase & { kind: "dataflow"; data: DataflowProps })
@@ -147,24 +153,45 @@ export type DiagramEdge = {
     | "pubsub-gke"
     | "pubsub-sql"
     | "pubsub-workbench"
+    | "pubsub-notebook"
     | "vm-spanner"
+    | "vm-bigtable"
+    | "vm-firebase"
     | "gke-spanner"
+    | "gke-bigtable"
+    | "gke-firebase"
     | "run-spanner"
+    | "run-bigtable"
+    | "run-firebase"
     | "pubsub-spanner"
+    | "pubsub-bigtable"
     | "workbench-subnet"
     | "workbench-storage"
     | "workbench-bigquery"
     | "workbench-spanner"
+    | "workbench-bigtable"
     | "vm-firestore"
     | "gke-firestore"
     | "run-firestore"
     | "pubsub-firestore"
     | "workbench-firestore"
+    | "firebase-firestore"
+    | "firebase-storage"
+    | "firebase-run"
+    | "pcuser-firebase"
+    | "notebook-subnet"
+    | "notebook-storage"
+    | "notebook-bigquery"
+    | "notebook-spanner"
+    | "notebook-firestore"
+    | "notebook-bigtable"
+    | "notebook-modelregistry"
     | "spark-subnet"
     | "spark-storage"
     | "spark-bigquery"
     | "spark-sql"
     | "spark-vm"
+    | "spark-bigtable"
     | "spark-kms"
     | "airflow-subnet"
     | "airflow-storage"
@@ -180,6 +207,7 @@ export type DiagramEdge = {
     | "dataflow-bigquery"
     | "dataflow-sql"
     | "dataflow-firestore"
+    | "dataflow-bigtable"
     | "dataflow-pubsub"
     | "dataflow-kms"
     | "pubsub-dataflow"
@@ -203,6 +231,7 @@ export type DiagramEdge = {
     | "bigquery-kms"
     | "firestore-kms"
     | "spanner-kms"
+    | "bigtable-kms"
     | "pcuser-entra"
     | "pcuser-vm"
     | "pcuser-run"

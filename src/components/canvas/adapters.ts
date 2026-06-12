@@ -21,7 +21,8 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     (node.kind === "vm" ||
       node.kind === "gke" ||
       node.kind === "run" ||
-      node.kind === "workbench") &&
+      node.kind === "workbench" ||
+      node.kind === "notebook") &&
     node.data.internalIp
   ) {
     return node.data.internalIp;
@@ -76,11 +77,15 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (
     node.kind === "bigquery" ||
     node.kind === "firestore" ||
+    node.kind === "bigtable" ||
     node.kind === "eventarc" ||
     node.kind === "build" ||
     node.kind === "kms"
   ) {
     return node.data.location;
+  }
+  if (node.kind === "firebase") {
+    return node.data.projectId;
   }
   if (node.kind === "spanner") {
     return node.data.config;
@@ -92,6 +97,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     return node.data.region;
   }
   if (node.kind === "airflow") {
+    return node.data.region;
+  }
+  if (node.kind === "notebook") {
     return node.data.region;
   }
   if (node.kind === "dataflow") {

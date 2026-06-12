@@ -25,7 +25,10 @@ export type ResourceKind =
   | "bigquery"
   | "spanner"
   | "firestore"
+  | "bigtable"
+  | "firebase"
   | "workbench"
+  | "notebook"
   | "spark"
   | "airflow"
   | "dataflow"
@@ -229,8 +232,30 @@ export type FirestoreProps = {
   location: string;
 };
 
+export type BigtableProps = {
+  /** Nome da instância. */
+  name: string;
+  location: string;
+};
+
+export type FirebaseProps = {
+  /** Nome do recurso no diagrama. */
+  name: string;
+  /** ID do projeto Firebase. */
+  projectId: string;
+};
+
 export type WorkbenchProps = {
   /** Nome da instância de notebook. */
+  name: string;
+  region: string;
+  machineType: string;
+  /** IP interno na sub-rede ao conectar (VPC). */
+  internalIp?: string;
+};
+
+export type NotebookProps = {
+  /** Nome da instância de notebook gerenciada. */
   name: string;
   region: string;
   machineType: string;
@@ -341,7 +366,10 @@ export type ResourcePropsByKind = {
   bigquery: BigqueryProps;
   spanner: SpannerProps;
   firestore: FirestoreProps;
+  bigtable: BigtableProps;
+  firebase: FirebaseProps;
   workbench: WorkbenchProps;
+  notebook: NotebookProps;
   spark: SparkProps;
   airflow: AirflowProps;
   dataflow: DataflowProps;

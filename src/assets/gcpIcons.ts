@@ -6,6 +6,8 @@ import iamIcon from "./google-cloud-legacy-icons/identity_and_access_management/
 import bigqueryIcon from "./google-cloud-legacy-icons/bigquery/bigquery.svg";
 import spannerIcon from "./google-cloud-legacy-icons/cloud_spanner/cloud_spanner.svg";
 import firestoreIcon from "./google-cloud-legacy-icons/firestore/firestore.svg";
+import bigtableIcon from "./google-cloud-legacy-icons/bigtable/bigtable.svg";
+import firebaseIcon from "./firebase/firebase.svg";
 import workbenchIcon from "./google-cloud-legacy-icons/vertexai/vertexai.svg";
 import sparkIcon from "./google-cloud-legacy-icons/dataproc/dataproc.svg";
 import airflowIcon from "./google-cloud-legacy-icons/cloud_composer/cloud_composer.svg";
@@ -63,7 +65,10 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   bigquery: bigqueryIcon,
   spanner: spannerIcon,
   firestore: firestoreIcon,
+  bigtable: bigtableIcon,
+  firebase: firebaseIcon,
   workbench: workbenchIcon,
+  notebook: workbenchIcon,
   spark: sparkIcon,
   airflow: airflowIcon,
   dataflow: dataflowIcon,
@@ -103,7 +108,10 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   bigquery: "BigQuery",
   spanner: "Spanner",
   firestore: "Firestore",
+  bigtable: "Cloud Bigtable",
+  firebase: "Firebase",
   workbench: "Workbench",
+  notebook: "Notebook (Vertex AI)",
   spark: "Managed Apache Spark",
   airflow: "Managed Airflow",
   dataflow: "Dataflow",

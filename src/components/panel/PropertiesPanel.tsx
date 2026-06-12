@@ -920,6 +920,68 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "bigtable" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="bigtable-name">Instância</label>
+            <input
+              id="bigtable-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="bigtable-location">Localização</label>
+            <input
+              id="bigtable-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <BigtableClientsInfo
+            bigtable={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "firebase" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="firebase-name">Nome</label>
+            <input
+              id="firebase-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="firebase-project">Projeto Firebase</label>
+            <input
+              id="firebase-project"
+              value={selectedNode.data.projectId}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { projectId: e.target.value })
+              }
+              placeholder="meu-app-firebase"
+            />
+          </div>
+          <FirebaseConnectionsInfo
+            firebase={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "workbench" && (
         <>
           <div className="properties-field">
@@ -967,6 +1029,59 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <WorkbenchConnectionsInfo
             workbench={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "notebook" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="notebook-name">Instância</label>
+            <input
+              id="notebook-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="notebook-region">Região</label>
+            <input
+              id="notebook-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="notebook-machine">Tipo de máquina</label>
+            <select
+              id="notebook-machine"
+              value={selectedNode.data.machineType}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  machineType: e.target.value,
+                })
+              }
+            >
+              {!isWorkbenchMachineType(selectedNode.data.machineType) ? (
+                <option value={selectedNode.data.machineType}>
+                  {selectedNode.data.machineType} (personalizado)
+                </option>
+              ) : null}
+              {WORKBENCH_MACHINE_TYPES.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <NotebookConnectionsInfo
+            notebook={selectedNode}
             edges={edges}
             nodes={nodes}
           />
@@ -2265,6 +2380,14 @@ function PubsubDestinationsInfo({
     .filter(
       (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
     );
+  const notebooks = edges
+    .filter((e) => e.kind === "pubsub-notebook" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "notebook"))
+    .filter((n): n is Extract<DiagramNode, { kind: "notebook" }> => n != null);
+  const bigtables = edges
+    .filter((e) => e.kind === "pubsub-bigtable" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "bigtable"))
+    .filter((n): n is Extract<DiagramNode, { kind: "bigtable" }> => n != null);
 
   if (
     runs.length === 0 &&
@@ -2272,6 +2395,7 @@ function PubsubDestinationsInfo({
     datasets.length === 0 &&
     spanners.length === 0 &&
     firestores.length === 0 &&
+    bigtables.length === 0 &&
     eventarcTriggers.length === 0 &&
     airflowEnvs.length === 0 &&
     dataflowJobs.length === 0 &&
@@ -2279,13 +2403,15 @@ function PubsubDestinationsInfo({
     vms.length === 0 &&
     clusters.length === 0 &&
     sqlInstances.length === 0 &&
-    workbenches.length === 0
+    workbenches.length === 0 &&
+    notebooks.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue a VMs, GKE, Cloud Run, Cloud SQL, Workbench, Cloud Storage,
-        BigQuery, Cloud Spanner, Firestore, Eventarc, Managed Airflow, Cloud
-        Dataflow ou Cloud Build para documentar subscriptions e exportações.
+        Ligue a VMs, GKE, Cloud Run, Cloud SQL, Workbench, Notebook, Cloud
+        Storage, BigQuery, Cloud Spanner, Firestore, Cloud Bigtable, Eventarc,
+        Managed Airflow, Cloud Dataflow ou Cloud Build para documentar
+        subscriptions e exportações.
       </p>
     );
   }
@@ -2320,6 +2446,12 @@ function PubsubDestinationsInfo({
         <>
           <dt>Firestore</dt>
           <dd>{firestores.map((f) => f.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {bigtables.length > 0 ? (
+        <>
+          <dt>Cloud Bigtable</dt>
+          <dd>{bigtables.map((b) => b.data.name).join(", ")}</dd>
         </>
       ) : null}
       {eventarcTriggers.length > 0 ? (
@@ -2370,6 +2502,12 @@ function PubsubDestinationsInfo({
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
         </>
       ) : null}
+      {notebooks.length > 0 ? (
+        <>
+          <dt>Notebook (Vertex AI)</dt>
+          <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }
@@ -2398,6 +2536,9 @@ function WorkbenchConnectionsInfo({
   const firestoreEdges = edges.filter(
     (e) => e.kind === "workbench-firestore" && e.source === workbench.id,
   );
+  const bigtableEdges = edges.filter(
+    (e) => e.kind === "workbench-bigtable" && e.source === workbench.id,
+  );
   const modelRegistryEdges = edges.filter(
     (e) => e.kind === "workbench-modelregistry" && e.source === workbench.id,
   );
@@ -2408,12 +2549,14 @@ function WorkbenchConnectionsInfo({
     bigqueryEdges.length === 0 &&
     spannerEdges.length === 0 &&
     firestoreEdges.length === 0 &&
+    bigtableEdges.length === 0 &&
     modelRegistryEdges.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud Spanner,
-        Firestore ou Model Registry para documentar o ambiente de notebooks.
+        Firestore, Cloud Bigtable ou Model Registry para documentar o ambiente
+        de notebooks.
       </p>
     );
   }
@@ -2504,6 +2647,23 @@ function WorkbenchConnectionsInfo({
           </dd>
         </>
       ) : null}
+      {bigtableEdges.length > 0 ? (
+        <>
+          <dt>Cloud Bigtable</dt>
+          <dd>
+            {bigtableEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "bigtable"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "bigtable" }> =>
+                  n != null,
+              )
+              .map((b) => b.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
       {modelRegistryEdges.length > 0 ? (
         <>
           <dt>Model Registry</dt>
@@ -2545,6 +2705,13 @@ function ModelRegistryConnectionsInfo({
     .filter(
       (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
     );
+  const notebooks = edges
+    .filter(
+      (e) =>
+        e.kind === "notebook-modelregistry" && e.target === modelregistry.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "notebook"))
+    .filter((n): n is Extract<DiagramNode, { kind: "notebook" }> => n != null);
   const builds = edges
     .filter(
       (e) => e.kind === "build-modelregistry" && e.target === modelregistry.id,
@@ -2579,6 +2746,7 @@ function ModelRegistryConnectionsInfo({
 
   if (
     workbenches.length === 0 &&
+    notebooks.length === 0 &&
     builds.length === 0 &&
     runs.length === 0 &&
     clusters.length === 0 &&
@@ -2587,8 +2755,8 @@ function ModelRegistryConnectionsInfo({
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue Vertex AI Workbench ou Cloud Build para registro; Cloud Run, GKE,
-        Storage ou Cloud KMS para deploy e artefatos.
+        Ligue Vertex AI Workbench, Notebook ou Cloud Build para registro; Cloud
+        Run, GKE, Storage ou Cloud KMS para deploy e artefatos.
       </p>
     );
   }
@@ -2599,6 +2767,12 @@ function ModelRegistryConnectionsInfo({
         <>
           <dt>Vertex AI Workbench</dt>
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {notebooks.length > 0 ? (
+        <>
+          <dt>Notebook (Vertex AI)</dt>
+          <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
         </>
       ) : null}
       {builds.length > 0 ? (
@@ -2669,6 +2843,9 @@ function DataflowConnectionsInfo({
   const firestoreEdges = edges.filter(
     (e) => e.kind === "dataflow-firestore" && e.source === dataflow.id,
   );
+  const bigtableEdges = edges.filter(
+    (e) => e.kind === "dataflow-bigtable" && e.source === dataflow.id,
+  );
   const bigqueryInputs = edges
     .filter((e) => e.kind === "bigquery-dataflow" && e.target === dataflow.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "bigquery"))
@@ -2687,13 +2864,14 @@ function DataflowConnectionsInfo({
     pubsubOutputs.length === 0 &&
     sqlEdges.length === 0 &&
     firestoreEdges.length === 0 &&
+    bigtableEdges.length === 0 &&
     bigqueryInputs.length === 0 &&
     storageInputs.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud SQL, Firestore,
-        Cloud KMS ou Pub/Sub. Bigtable em breve.
+        Cloud Bigtable, Cloud KMS ou Pub/Sub.
       </p>
     );
   }
@@ -2815,6 +2993,23 @@ function DataflowConnectionsInfo({
                   n != null,
               )
               .map((f) => f.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {bigtableEdges.length > 0 ? (
+        <>
+          <dt>Cloud Bigtable</dt>
+          <dd>
+            {bigtableEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "bigtable"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "bigtable" }> =>
+                  n != null,
+              )
+              .map((b) => b.data.name)
               .join(", ")}
           </dd>
         </>
@@ -3003,6 +3198,9 @@ function SparkConnectionsInfo({
   const vmEdges = edges.filter(
     (e) => e.kind === "spark-vm" && e.source === spark.id,
   );
+  const bigtableEdges = edges.filter(
+    (e) => e.kind === "spark-bigtable" && e.source === spark.id,
+  );
 
   if (
     !subnetEdge &&
@@ -3010,13 +3208,14 @@ function SparkConnectionsInfo({
     bigqueryEdges.length === 0 &&
     kmsEdges.length === 0 &&
     sqlEdges.length === 0 &&
-    vmEdges.length === 0
+    vmEdges.length === 0 &&
+    bigtableEdges.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         {spark.data.deployMode === "cluster"
-          ? "Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud SQL ou VMs. Bigtable e MongoDB em breve."
-          : "Ligue a Cloud Storage, BigQuery, Cloud SQL ou VMs. Bigtable e MongoDB em breve."}
+          ? "Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud SQL, Cloud Bigtable ou VMs."
+          : "Ligue a Cloud Storage, BigQuery, Cloud SQL, Cloud Bigtable ou VMs."}
       </p>
     );
   }
@@ -3103,6 +3302,23 @@ function SparkConnectionsInfo({
           </dd>
         </>
       ) : null}
+      {bigtableEdges.length > 0 ? (
+        <>
+          <dt>Cloud Bigtable</dt>
+          <dd>
+            {bigtableEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "bigtable"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "bigtable" }> =>
+                  n != null,
+              )
+              .map((b) => b.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
     </dl>
   );
 }
@@ -3138,18 +3354,28 @@ function FirestoreClientsInfo({
     .filter(
       (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
     );
+  const notebooks = edges
+    .filter((e) => e.kind === "notebook-firestore" && e.target === firestore.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "notebook"))
+    .filter((n): n is Extract<DiagramNode, { kind: "notebook" }> => n != null);
+  const firebaseApps = edges
+    .filter((e) => e.kind === "firebase-firestore" && e.target === firestore.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "firebase"))
+    .filter((n): n is Extract<DiagramNode, { kind: "firebase" }> => n != null);
 
   if (
     vms.length === 0 &&
     clusters.length === 0 &&
     runs.length === 0 &&
     topics.length === 0 &&
-    workbenches.length === 0
+    workbenches.length === 0 &&
+    notebooks.length === 0 &&
+    firebaseApps.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue VMs, GKE, Cloud Run, Workbench ou Pub/Sub para documentar
-        clientes deste banco.
+        Ligue VMs, GKE, Cloud Run, Workbench, Notebook, Firebase ou Pub/Sub
+        para documentar clientes deste banco.
       </p>
     );
   }
@@ -3184,6 +3410,18 @@ function FirestoreClientsInfo({
         <>
           <dt>Vertex AI Workbench</dt>
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {notebooks.length > 0 ? (
+        <>
+          <dt>Notebook (Vertex AI)</dt>
+          <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {firebaseApps.length > 0 ? (
+        <>
+          <dt>Firebase</dt>
+          <dd>{firebaseApps.map((f) => f.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
@@ -3221,18 +3459,23 @@ function SpannerClientsInfo({
     .filter(
       (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
     );
+  const notebooks = edges
+    .filter((e) => e.kind === "notebook-spanner" && e.target === spanner.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "notebook"))
+    .filter((n): n is Extract<DiagramNode, { kind: "notebook" }> => n != null);
 
   if (
     vms.length === 0 &&
     clusters.length === 0 &&
     runs.length === 0 &&
     topics.length === 0 &&
-    workbenches.length === 0
+    workbenches.length === 0 &&
+    notebooks.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue VMs, GKE, Cloud Run, Workbench ou Pub/Sub para documentar
-        clientes desta instância.
+        Ligue VMs, GKE, Cloud Run, Workbench, Notebook ou Pub/Sub para
+        documentar clientes desta instância.
       </p>
     );
   }
@@ -3267,6 +3510,347 @@ function SpannerClientsInfo({
         <>
           <dt>Vertex AI Workbench</dt>
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {notebooks.length > 0 ? (
+        <>
+          <dt>Notebook (Vertex AI)</dt>
+          <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function BigtableClientsInfo({
+  bigtable,
+  edges,
+  nodes,
+}: {
+  bigtable: Extract<DiagramNode, { kind: "bigtable" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vms = edges
+    .filter((e) => e.kind === "vm-bigtable" && e.target === bigtable.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "gke-bigtable" && e.target === bigtable.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "run-bigtable" && e.target === bigtable.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const topics = edges
+    .filter((e) => e.kind === "pubsub-bigtable" && e.target === bigtable.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const sparks = edges
+    .filter((e) => e.kind === "spark-bigtable" && e.target === bigtable.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "spark"))
+    .filter((n): n is Extract<DiagramNode, { kind: "spark" }> => n != null);
+  const dataflowJobs = edges
+    .filter((e) => e.kind === "dataflow-bigtable" && e.target === bigtable.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "dataflow"))
+    .filter((n): n is Extract<DiagramNode, { kind: "dataflow" }> => n != null);
+  const workbenches = edges
+    .filter((e) => e.kind === "workbench-bigtable" && e.target === bigtable.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "workbench"))
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
+    );
+  const notebooks = edges
+    .filter((e) => e.kind === "notebook-bigtable" && e.target === bigtable.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "notebook"))
+    .filter((n): n is Extract<DiagramNode, { kind: "notebook" }> => n != null);
+
+  if (
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    topics.length === 0 &&
+    sparks.length === 0 &&
+    dataflowJobs.length === 0 &&
+    workbenches.length === 0 &&
+    notebooks.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue VMs, GKE, Cloud Run, Spark, Dataflow, Workbench, Notebook ou
+        Pub/Sub para documentar clientes desta instância.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {sparks.length > 0 ? (
+        <>
+          <dt>Apache Spark</dt>
+          <dd>{sparks.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {dataflowJobs.length > 0 ? (
+        <>
+          <dt>Cloud Dataflow</dt>
+          <dd>{dataflowJobs.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {topics.length > 0 ? (
+        <>
+          <dt>Pub/Sub</dt>
+          <dd>{topics.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {workbenches.length > 0 ? (
+        <>
+          <dt>Vertex AI Workbench</dt>
+          <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {notebooks.length > 0 ? (
+        <>
+          <dt>Notebook (Vertex AI)</dt>
+          <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function FirebaseConnectionsInfo({
+  firebase,
+  edges,
+  nodes,
+}: {
+  firebase: Extract<DiagramNode, { kind: "firebase" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const firestores = edges
+    .filter((e) => e.kind === "firebase-firestore" && e.source === firebase.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "firestore"))
+    .filter((n): n is Extract<DiagramNode, { kind: "firestore" }> => n != null);
+  const buckets = edges
+    .filter((e) => e.kind === "firebase-storage" && e.source === firebase.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "firebase-run" && e.source === firebase.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const vms = edges
+    .filter((e) => e.kind === "vm-firebase" && e.target === firebase.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "gke-firebase" && e.target === firebase.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runClients = edges
+    .filter((e) => e.kind === "run-firebase" && e.target === firebase.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const users = edges
+    .filter((e) => e.kind === "pcuser-firebase" && e.target === firebase.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pcuser"))
+    .filter((n): n is Extract<DiagramNode, { kind: "pcuser" }> => n != null);
+
+  if (
+    firestores.length === 0 &&
+    buckets.length === 0 &&
+    runs.length === 0 &&
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runClients.length === 0 &&
+    users.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue Firestore, Cloud Storage ou Cloud Run (backend); VMs, GKE, Cloud
+        Run ou usuários (clientes do app).
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {firestores.length > 0 ? (
+        <>
+          <dt>Firestore</dt>
+          <dd>{firestores.map((f) => f.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {buckets.length > 0 ? (
+        <>
+          <dt>Cloud Storage</dt>
+          <dd>{buckets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run (backend)</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs (cliente)</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE (cliente)</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runClients.length > 0 ? (
+        <>
+          <dt>Cloud Run (cliente)</dt>
+          <dd>{runClients.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {users.length > 0 ? (
+        <>
+          <dt>Usuários</dt>
+          <dd>{users.map((u) => u.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function NotebookConnectionsInfo({
+  notebook,
+  edges,
+  nodes,
+}: {
+  notebook: Extract<DiagramNode, { kind: "notebook" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const subnetEdge = edges.find(
+    (e) => e.kind === "notebook-subnet" && e.source === notebook.id,
+  );
+  const storageEdges = edges.filter(
+    (e) => e.kind === "notebook-storage" && e.source === notebook.id,
+  );
+  const bigqueryEdges = edges.filter(
+    (e) => e.kind === "notebook-bigquery" && e.source === notebook.id,
+  );
+  const spannerEdges = edges.filter(
+    (e) => e.kind === "notebook-spanner" && e.source === notebook.id,
+  );
+  const firestoreEdges = edges.filter(
+    (e) => e.kind === "notebook-firestore" && e.source === notebook.id,
+  );
+  const bigtableEdges = edges.filter(
+    (e) => e.kind === "notebook-bigtable" && e.source === notebook.id,
+  );
+  const modelRegistryEdges = edges.filter(
+    (e) => e.kind === "notebook-modelregistry" && e.source === notebook.id,
+  );
+
+  if (
+    !subnetEdge &&
+    storageEdges.length === 0 &&
+    bigqueryEdges.length === 0 &&
+    spannerEdges.length === 0 &&
+    firestoreEdges.length === 0 &&
+    bigtableEdges.length === 0 &&
+    modelRegistryEdges.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud Spanner,
+        Firestore, Cloud Bigtable ou Model Registry.
+      </p>
+    );
+  }
+
+  const subnet = subnetEdge
+    ? nodes.find((n) => n.id === subnetEdge.target && n.kind === "subnet")
+    : undefined;
+
+  const mapTargets = <K extends DiagramNode["kind"]>(
+    edgeList: typeof storageEdges,
+    kind: K,
+  ) =>
+    edgeList
+      .map((e) => nodes.find((n) => n.id === e.target && n.kind === kind))
+      .filter((n): n is Extract<DiagramNode, { kind: K }> => n != null)
+      .map((n) => getNodeDisplayName(n))
+      .join(", ");
+
+  return (
+    <dl className="properties-stats">
+      {subnet && subnet.kind === "subnet" ? (
+        <>
+          <dt>Sub-rede</dt>
+          <dd>{subnet.data.name}</dd>
+        </>
+      ) : null}
+      {notebook.data.internalIp ? (
+        <>
+          <dt>IP interno</dt>
+          <dd>{notebook.data.internalIp}</dd>
+        </>
+      ) : null}
+      {storageEdges.length > 0 ? (
+        <>
+          <dt>Cloud Storage</dt>
+          <dd>{mapTargets(storageEdges, "storage")}</dd>
+        </>
+      ) : null}
+      {bigqueryEdges.length > 0 ? (
+        <>
+          <dt>BigQuery</dt>
+          <dd>{mapTargets(bigqueryEdges, "bigquery")}</dd>
+        </>
+      ) : null}
+      {spannerEdges.length > 0 ? (
+        <>
+          <dt>Cloud Spanner</dt>
+          <dd>{mapTargets(spannerEdges, "spanner")}</dd>
+        </>
+      ) : null}
+      {firestoreEdges.length > 0 ? (
+        <>
+          <dt>Firestore</dt>
+          <dd>{mapTargets(firestoreEdges, "firestore")}</dd>
+        </>
+      ) : null}
+      {bigtableEdges.length > 0 ? (
+        <>
+          <dt>Cloud Bigtable</dt>
+          <dd>{mapTargets(bigtableEdges, "bigtable")}</dd>
+        </>
+      ) : null}
+      {modelRegistryEdges.length > 0 ? (
+        <>
+          <dt>Model Registry</dt>
+          <dd>{mapTargets(modelRegistryEdges, "modelregistry")}</dd>
         </>
       ) : null}
     </dl>
