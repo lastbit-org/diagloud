@@ -10,6 +10,8 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
   "duplicate-edge": "Esta ligação já existe no diagrama.",
   "subnet-has-vpc": "Esta sub-rede já está ligada a uma VPC.",
   "vm-has-subnet": "Esta VM já está ligada a uma sub-rede.",
+  "vm-has-iam": "Esta VM já está ligada a uma identidade IAM.",
+  "vm-has-nat": "Esta VM já está ligada a um Cloud NAT.",
   "subnet-invalid-cidr": "A sub-rede precisa de um CIDR válido antes de receber VMs.",
   "subnet-vm-capacity":
     "Não há mais endereços de IP disponíveis para esse range de sub-rede.",

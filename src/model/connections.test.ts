@@ -70,6 +70,9 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("subnet", "vpc")).toBe("subnet-vpc");
     expect(getEdgeKind("vm", "subnet")).toBe("vm-subnet");
     expect(getEdgeKind("vm", "storage")).toBe("vm-storage");
+    expect(getEdgeKind("vm", "iam")).toBe("vm-iam");
+    expect(getEdgeKind("vm", "nat")).toBe("vm-nat");
+    expect(getEdgeKind("vm", "firewall")).toBe("vm-firewall");
     expect(getEdgeKind("sql", "subnet")).toBe("sql-subnet");
     expect(getEdgeKind("nat", "vpc")).toBe("nat-vpc");
     expect(getEdgeKind("router", "vpc")).toBe("router-vpc");
@@ -324,6 +327,116 @@ describe("validateConnection", () => {
       { nodes, edges: [] },
     );
     expect(result).toMatchObject({ valid: true, edgeKind: "vm-storage" });
+  });
+
+  it("aceita VM → IAM, Cloud NAT e Firewall", () => {
+    const iam: DiagramNode = {
+      id: "iam-1",
+      kind: "iam",
+      position: { x: 300, y: 0 },
+      data: {
+        name: "iam-app",
+        variant: "iam",
+        serviceAccountEmail: "sa@projeto.iam.gserviceaccount.com",
+        workloadPoolId: "",
+        workloadProviderId: "",
+        groupEmail: "",
+        roles: [],
+      },
+    };
+    const nat: DiagramNode = {
+      id: "nat-1",
+      kind: "nat",
+      position: { x: 400, y: 0 },
+      data: { name: "nat-egress", region: "southamerica-east1" },
+    };
+    const firewall: DiagramNode = {
+      id: "firewall-1",
+      kind: "firewall",
+      position: { x: 500, y: 0 },
+      data: { name: "allow-ssh", direction: "ingress" },
+    };
+    const diagramNodes = [...nodes, iam, nat, firewall];
+
+    expect(
+      validateConnection(
+        {
+          source: vm.id,
+          target: iam.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "vm-iam" });
+
+    expect(
+      validateConnection(
+        {
+          source: vm.id,
+          target: nat.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "vm-nat" });
+
+    expect(
+      validateConnection(
+        {
+          source: vm.id,
+          target: firewall.id,
+          sourceHandle: egress(),
+          targetHandle: ingress(),
+        },
+        { nodes: diagramNodes, edges: [] },
+      ),
+    ).toMatchObject({ valid: true, edgeKind: "vm-firewall" });
+  });
+
+  it("rejeita segunda identidade IAM na mesma VM", () => {
+    const iamA: DiagramNode = {
+      id: "iam-1",
+      kind: "iam",
+      position: { x: 300, y: 0 },
+      data: {
+        name: "iam-a",
+        variant: "iam",
+        serviceAccountEmail: "sa-a@projeto.iam.gserviceaccount.com",
+        workloadPoolId: "",
+        workloadProviderId: "",
+        groupEmail: "",
+        roles: [],
+      },
+    };
+    const iamB: DiagramNode = {
+      id: "iam-2",
+      kind: "iam",
+      position: { x: 400, y: 0 },
+      data: {
+        name: "iam-b",
+        variant: "iam",
+        serviceAccountEmail: "sa-b@projeto.iam.gserviceaccount.com",
+        workloadPoolId: "",
+        workloadProviderId: "",
+        groupEmail: "",
+        roles: [],
+      },
+    };
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: vm.id, target: iamA.id, kind: "vm-iam" },
+    ];
+    const result = validateConnection(
+      {
+        source: vm.id,
+        target: iamB.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [...nodes, iamA, iamB], edges },
+    );
+    expect(result).toEqual({ valid: false, reason: "vm-has-iam" });
   });
 
   it("rejeita ligação com handle inválido", () => {

@@ -8,6 +8,9 @@ import type { ResourceKind } from "./resources";
  * - Sub-rede → VPC (`subnet-vpc`): no máximo 1 VPC por sub-rede
  * - VM → Sub-rede (`vm-subnet`): no máximo 1 sub-rede por VM
  * - VM → Cloud Storage (`vm-storage`): acesso da VM ao bucket
+ * - VM → IAM (`vm-iam`): conta de serviço ou identidade da VM
+ * - VM → Cloud NAT (`vm-nat`): egress documentado via NAT
+ * - VM → Firewall (`vm-firewall`): regras que se aplicam à VM
  * - Cloud SQL → Sub-rede (`sql-subnet`): IP privado na sub-rede (modo privado)
  * - Cloud NAT → VPC (`nat-vpc`): gateway NAT na VPC
  * - Cloud Router → VPC (`router-vpc`): roteador BGP/NAT na VPC (opcional)
@@ -57,6 +60,9 @@ export const EDGE_ENDPOINTS = {
   "subnet-vpc": { from: "subnet", to: "vpc" },
   "vm-subnet": { from: "vm", to: "subnet" },
   "vm-storage": { from: "vm", to: "storage" },
+  "vm-iam": { from: "vm", to: "iam" },
+  "vm-nat": { from: "vm", to: "nat" },
+  "vm-firewall": { from: "vm", to: "firewall" },
   "sql-subnet": { from: "sql", to: "subnet" },
   "gke-subnet": { from: "gke", to: "subnet" },
   "nat-vpc": { from: "nat", to: "vpc" },

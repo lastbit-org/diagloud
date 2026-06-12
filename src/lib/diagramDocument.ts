@@ -1186,6 +1186,9 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "subnet-vpc" &&
     kind !== "vm-subnet" &&
     kind !== "vm-storage" &&
+    kind !== "vm-iam" &&
+    kind !== "vm-nat" &&
+    kind !== "vm-firewall" &&
     kind !== "sql-subnet" &&
     kind !== "gke-subnet" &&
     kind !== "nat-vpc" &&

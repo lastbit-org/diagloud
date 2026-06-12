@@ -27,6 +27,8 @@ export type ConnectionInvalidReason =
   | "duplicate-edge"
   | "subnet-has-vpc"
   | "vm-has-subnet"
+  | "vm-has-iam"
+  | "vm-has-nat"
   | "subnet-invalid-cidr"
   | "subnet-vm-capacity"
   | "sql-has-subnet"
@@ -333,6 +335,24 @@ export function validateConnection(
     )
   ) {
     return { valid: false, reason: "vm-has-subnet" };
+  }
+
+  if (
+    edgeKind === "vm-iam" &&
+    context.edges.some(
+      (edge) => edge.kind === "vm-iam" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "vm-has-iam" };
+  }
+
+  if (
+    edgeKind === "vm-nat" &&
+    context.edges.some(
+      (edge) => edge.kind === "vm-nat" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "vm-has-nat" };
   }
 
   if (

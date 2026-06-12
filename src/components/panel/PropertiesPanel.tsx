@@ -428,6 +428,9 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <VmSubnetInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
           <VmStorageInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
+          <VmIamInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
+          <VmNatInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
+          <VmFirewallInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
         </>
       )}
 
@@ -1579,7 +1582,8 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           <p className="properties-field__hint">
             O ícone permanece o mesmo; o nó exibe o tipo e os detalhes conforme a
             opção selecionada. Ligue ao Projeto, sub-rede, Cloud KMS ou BigQuery
-            para documentar identidade e permissões.
+            para documentar identidade e permissões; VMs podem ligar a este IAM
+            para documentar a conta de serviço.
           </p>
           <IamConnectionsInfo iam={selectedNode} edges={edges} nodes={nodes} />
         </>
@@ -3205,6 +3209,83 @@ function VmStorageInfo({
   );
 }
 
+function VmIamInfo({
+  vmId,
+  edges,
+  nodes,
+}: {
+  vmId: string;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find((e) => e.kind === "vm-iam" && e.source === vmId);
+  if (!edge) return null;
+
+  const iam = nodes.find((n) => n.id === edge.target && n.kind === "iam");
+  if (!iam || iam.kind !== "iam") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>IAM</dt>
+      <dd>{iam.data.name}</dd>
+    </dl>
+  );
+}
+
+function VmNatInfo({
+  vmId,
+  edges,
+  nodes,
+}: {
+  vmId: string;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find((e) => e.kind === "vm-nat" && e.source === vmId);
+  if (!edge) return null;
+
+  const nat = nodes.find((n) => n.id === edge.target && n.kind === "nat");
+  if (!nat || nat.kind !== "nat") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Cloud NAT</dt>
+      <dd>{nat.data.name}</dd>
+    </dl>
+  );
+}
+
+function VmFirewallInfo({
+  vmId,
+  edges,
+  nodes,
+}: {
+  vmId: string;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "vm-firewall" && e.source === vmId)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "firewall"))
+    .filter((n): n is Extract<DiagramNode, { kind: "firewall" }> => n != null);
+
+  if (linked.length === 0) return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Firewall</dt>
+      <dd>
+        {linked
+          .map(
+            (rule) =>
+              `${rule.data.name} (${rule.data.direction === "ingress" ? "entrada" : "saída"})`,
+          )
+          .join(", ")}
+      </dd>
+    </dl>
+  );
+}
+
 function PeeringVpcInfo({
   peering,
   edges,
@@ -3335,11 +3416,16 @@ function FirewallVpcInfo({
     return (
       <p className="properties-field__hint">
         Ligue à VPC (handle inferior) para documentar onde a regra se aplica.
+        VMs podem ligar a esta regra para documentar o escopo.
       </p>
     );
   }
 
   const vpc = nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc");
+  const vms = edges
+    .filter((e) => e.kind === "vm-firewall" && e.target === firewall.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
 
   return (
     <dl className="properties-stats">
@@ -3347,6 +3433,12 @@ function FirewallVpcInfo({
         <>
           <dt>VPC</dt>
           <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
@@ -3531,12 +3623,16 @@ function NatVpcInfo({
   const internetEdge = edges.find(
     (e) => e.kind === "internet-nat" && e.target === nat.id,
   );
+  const vms = edges
+    .filter((e) => e.kind === "vm-nat" && e.target === nat.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
 
-  if (!vpcEdge && subnetEdges.length === 0 && !internetEdge) {
+  if (!vpcEdge && subnetEdges.length === 0 && !internetEdge && vms.length === 0) {
     return (
       <p className="properties-field__hint">
-        Ligue à VPC (handle inferior), sub-redes privadas (esquerda) e Internet
-        (superior) para documentar egress.
+        Ligue à VPC (handle inferior), sub-redes privadas (esquerda), Internet
+        (superior) e VMs (egress) para documentar saída.
       </p>
     );
   }
@@ -3569,6 +3665,12 @@ function NatVpcInfo({
         <>
           <dt>Internet</dt>
           <dd>Ligada</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs (egress)</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
@@ -3636,12 +3738,17 @@ function IamConnectionsInfo({
     .filter((e) => e.kind === "iam-bigquery" && e.source === iam.id)
     .map((e) => nodes.find((n) => n.id === e.target && n.kind === "bigquery"))
     .filter((n): n is Extract<DiagramNode, { kind: "bigquery" }> => n != null);
+  const vms = edges
+    .filter((e) => e.kind === "vm-iam" && e.target === iam.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
 
   if (
     projects.length === 0 &&
     subnets.length === 0 &&
     kmsKeys.length === 0 &&
-    datasets.length === 0
+    datasets.length === 0 &&
+    vms.length === 0
   ) {
     return null;
   }
@@ -3670,6 +3777,12 @@ function IamConnectionsInfo({
         <>
           <dt>BigQuery</dt>
           <dd>{datasets.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
