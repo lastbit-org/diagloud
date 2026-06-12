@@ -343,6 +343,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
               }
             />
           </div>
+          <VpcNetworkingInfo vpc={selectedNode} edges={edges} nodes={nodes} />
           <VpcFirewallRulesInfo
             vpc={selectedNode}
             edges={edges}
@@ -431,6 +432,10 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           <VmIamInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
           <VmNatInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
           <VmFirewallInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
+          <VmPeersInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
+          <VmBigqueryInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
+          <VmSparkInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
+          <VmDnsInfo vmId={selectedNode.id} edges={edges} nodes={nodes} />
         </>
       )}
 
@@ -845,7 +850,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
               placeholder="southamerica-east1 ou US"
             />
           </div>
-          <BigqueryPubsubInfo
+          <BigqueryConnectionsInfo
             bigquery={selectedNode}
             edges={edges}
             nodes={nodes}
@@ -2242,6 +2247,24 @@ function PubsubDestinationsInfo({
     .filter((e) => e.kind === "pubsub-build" && e.source === pubsub.id)
     .map((e) => nodes.find((n) => n.id === e.target && n.kind === "build"))
     .filter((n): n is Extract<DiagramNode, { kind: "build" }> => n != null);
+  const vms = edges
+    .filter((e) => e.kind === "pubsub-vm" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "pubsub-gke" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const sqlInstances = edges
+    .filter((e) => e.kind === "pubsub-sql" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "sql"))
+    .filter((n): n is Extract<DiagramNode, { kind: "sql" }> => n != null);
+  const workbenches = edges
+    .filter((e) => e.kind === "pubsub-workbench" && e.source === pubsub.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "workbench"))
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
+    );
 
   if (
     runs.length === 0 &&
@@ -2252,13 +2275,17 @@ function PubsubDestinationsInfo({
     eventarcTriggers.length === 0 &&
     airflowEnvs.length === 0 &&
     dataflowJobs.length === 0 &&
-    builds.length === 0
+    builds.length === 0 &&
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    sqlInstances.length === 0 &&
+    workbenches.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue a Cloud Run, Cloud Storage, BigQuery, Cloud Spanner, Firestore,
-        Eventarc, Managed Airflow, Cloud Dataflow ou Cloud Build para documentar
-        subscriptions e exportações.
+        Ligue a VMs, GKE, Cloud Run, Cloud SQL, Workbench, Cloud Storage,
+        BigQuery, Cloud Spanner, Firestore, Eventarc, Managed Airflow, Cloud
+        Dataflow ou Cloud Build para documentar subscriptions e exportações.
       </p>
     );
   }
@@ -2317,6 +2344,30 @@ function PubsubDestinationsInfo({
         <>
           <dt>Cloud Build</dt>
           <dd>{builds.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {sqlInstances.length > 0 ? (
+        <>
+          <dt>Cloud SQL</dt>
+          <dd>{sqlInstances.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {workbenches.length > 0 ? (
+        <>
+          <dt>Workbench</dt>
+          <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
@@ -2609,17 +2660,40 @@ function DataflowConnectionsInfo({
     .filter((e) => e.kind === "pubsub-dataflow" && e.target === dataflow.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
     .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const pubsubOutputs = edges.filter(
+    (e) => e.kind === "dataflow-pubsub" && e.source === dataflow.id,
+  );
+  const sqlEdges = edges.filter(
+    (e) => e.kind === "dataflow-sql" && e.source === dataflow.id,
+  );
+  const firestoreEdges = edges.filter(
+    (e) => e.kind === "dataflow-firestore" && e.source === dataflow.id,
+  );
+  const bigqueryInputs = edges
+    .filter((e) => e.kind === "bigquery-dataflow" && e.target === dataflow.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "bigquery"))
+    .filter((n): n is Extract<DiagramNode, { kind: "bigquery" }> => n != null);
+  const storageInputs = edges
+    .filter((e) => e.kind === "storage-dataflow" && e.target === dataflow.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
 
   if (
     !subnetEdge &&
     storageEdges.length === 0 &&
     bigqueryEdges.length === 0 &&
     kmsEdges.length === 0 &&
-    pubsubTriggers.length === 0
+    pubsubTriggers.length === 0 &&
+    pubsubOutputs.length === 0 &&
+    sqlEdges.length === 0 &&
+    firestoreEdges.length === 0 &&
+    bigqueryInputs.length === 0 &&
+    storageInputs.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud KMS ou Pub/Sub.
+        Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud SQL, Firestore,
+        Cloud KMS ou Pub/Sub. Bigtable em breve.
       </p>
     );
   }
@@ -2638,7 +2712,7 @@ function DataflowConnectionsInfo({
       ) : null}
       {storageEdges.length > 0 ? (
         <>
-          <dt>Cloud Storage</dt>
+          <dt>Cloud Storage (saída)</dt>
           <dd>
             {storageEdges
               .map((e) =>
@@ -2653,9 +2727,15 @@ function DataflowConnectionsInfo({
           </dd>
         </>
       ) : null}
+      {storageInputs.length > 0 ? (
+        <>
+          <dt>Cloud Storage (entrada)</dt>
+          <dd>{storageInputs.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
       {bigqueryEdges.length > 0 ? (
         <>
-          <dt>BigQuery</dt>
+          <dt>BigQuery (saída)</dt>
           <dd>
             {bigqueryEdges
               .map((e) =>
@@ -2668,6 +2748,12 @@ function DataflowConnectionsInfo({
               .map((b) => b.data.name)
               .join(", ")}
           </dd>
+        </>
+      ) : null}
+      {bigqueryInputs.length > 0 ? (
+        <>
+          <dt>BigQuery (entrada)</dt>
+          <dd>{bigqueryInputs.map((b) => b.data.name).join(", ")}</dd>
         </>
       ) : null}
       {kmsEdges.length > 0 ? (
@@ -2686,6 +2772,51 @@ function DataflowConnectionsInfo({
         <>
           <dt>Entrada Pub/Sub</dt>
           <dd>{pubsubTriggers.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {pubsubOutputs.length > 0 ? (
+        <>
+          <dt>Saída Pub/Sub</dt>
+          <dd>
+            {pubsubOutputs
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "pubsub"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null,
+              )
+              .map((p) => p.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {sqlEdges.length > 0 ? (
+        <>
+          <dt>Cloud SQL</dt>
+          <dd>
+            {sqlEdges
+              .map((e) => nodes.find((n) => n.id === e.target && n.kind === "sql"))
+              .filter((n): n is Extract<DiagramNode, { kind: "sql" }> => n != null)
+              .map((s) => s.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {firestoreEdges.length > 0 ? (
+        <>
+          <dt>Firestore</dt>
+          <dd>
+            {firestoreEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "firestore"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "firestore" }> =>
+                  n != null,
+              )
+              .map((f) => f.data.name)
+              .join(", ")}
+          </dd>
         </>
       ) : null}
     </dl>
@@ -2717,17 +2848,38 @@ function AirflowConnectionsInfo({
     .filter((e) => e.kind === "pubsub-airflow" && e.target === airflow.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "pubsub"))
     .filter((n): n is Extract<DiagramNode, { kind: "pubsub" }> => n != null);
+  const dataflowJobs = edges
+    .filter((e) => e.kind === "airflow-dataflow" && e.source === airflow.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "dataflow"))
+    .filter((n): n is Extract<DiagramNode, { kind: "dataflow" }> => n != null);
+  const sparkJobs = edges
+    .filter((e) => e.kind === "airflow-spark" && e.source === airflow.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "spark"))
+    .filter((n): n is Extract<DiagramNode, { kind: "spark" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "airflow-run" && e.source === airflow.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const sqlInstances = edges
+    .filter((e) => e.kind === "airflow-sql" && e.source === airflow.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "sql"))
+    .filter((n): n is Extract<DiagramNode, { kind: "sql" }> => n != null);
 
   if (
     !subnetEdge &&
     storageEdges.length === 0 &&
     bigqueryEdges.length === 0 &&
     kmsEdges.length === 0 &&
-    pubsubTriggers.length === 0
+    pubsubTriggers.length === 0 &&
+    dataflowJobs.length === 0 &&
+    sparkJobs.length === 0 &&
+    runs.length === 0 &&
+    sqlInstances.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud KMS ou Pub/Sub.
+        Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud Dataflow, Apache
+        Spark, Cloud Run, Cloud SQL, Cloud KMS ou Pub/Sub (via API GCP).
       </p>
     );
   }
@@ -2796,6 +2948,30 @@ function AirflowConnectionsInfo({
           <dd>{pubsubTriggers.map((p) => p.data.name).join(", ")}</dd>
         </>
       ) : null}
+      {dataflowJobs.length > 0 ? (
+        <>
+          <dt>Cloud Dataflow</dt>
+          <dd>{dataflowJobs.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {sparkJobs.length > 0 ? (
+        <>
+          <dt>Apache Spark</dt>
+          <dd>{sparkJobs.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {sqlInstances.length > 0 ? (
+        <>
+          <dt>Cloud SQL</dt>
+          <dd>{sqlInstances.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }
@@ -2821,18 +2997,26 @@ function SparkConnectionsInfo({
   const kmsEdges = edges.filter(
     (e) => e.kind === "spark-kms" && e.source === spark.id,
   );
+  const sqlEdges = edges.filter(
+    (e) => e.kind === "spark-sql" && e.source === spark.id,
+  );
+  const vmEdges = edges.filter(
+    (e) => e.kind === "spark-vm" && e.source === spark.id,
+  );
 
   if (
     !subnetEdge &&
     storageEdges.length === 0 &&
     bigqueryEdges.length === 0 &&
-    kmsEdges.length === 0
+    kmsEdges.length === 0 &&
+    sqlEdges.length === 0 &&
+    vmEdges.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         {spark.data.deployMode === "cluster"
-          ? "Ligue à sub-rede (VPC), Cloud Storage, BigQuery ou Cloud KMS."
-          : "Ligue a Cloud Storage, BigQuery ou Cloud KMS."}
+          ? "Ligue à sub-rede (VPC), Cloud Storage, BigQuery, Cloud SQL ou VMs. Bigtable e MongoDB em breve."
+          : "Ligue a Cloud Storage, BigQuery, Cloud SQL ou VMs. Bigtable e MongoDB em breve."}
       </p>
     );
   }
@@ -2891,6 +3075,30 @@ function SparkConnectionsInfo({
               .map((e) => nodes.find((n) => n.id === e.target && n.kind === "kms"))
               .filter((n): n is Extract<DiagramNode, { kind: "kms" }> => n != null)
               .map((k) => k.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {sqlEdges.length > 0 ? (
+        <>
+          <dt>Cloud SQL</dt>
+          <dd>
+            {sqlEdges
+              .map((e) => nodes.find((n) => n.id === e.target && n.kind === "sql"))
+              .filter((n): n is Extract<DiagramNode, { kind: "sql" }> => n != null)
+              .map((s) => s.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {vmEdges.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>
+            {vmEdges
+              .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+              .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null)
+              .map((v) => v.data.name)
               .join(", ")}
           </dd>
         </>
@@ -3065,7 +3273,7 @@ function SpannerClientsInfo({
   );
 }
 
-function BigqueryPubsubInfo({
+function BigqueryConnectionsInfo({
   bigquery,
   edges,
   nodes,
@@ -3084,12 +3292,50 @@ function BigqueryPubsubInfo({
     .filter(
       (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
     );
+  const dataflowJobs = edges
+    .filter((e) => e.kind === "dataflow-bigquery" && e.target === bigquery.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "dataflow"))
+    .filter((n): n is Extract<DiagramNode, { kind: "dataflow" }> => n != null);
+  const buckets = edges
+    .filter((e) => e.kind === "storage-bigquery" && e.target === bigquery.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const vms = edges
+    .filter((e) => e.kind === "vm-bigquery" && e.target === bigquery.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "run-bigquery" && e.target === bigquery.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "gke-bigquery" && e.target === bigquery.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const exportBuckets = edges
+    .filter((e) => e.kind === "bigquery-storage" && e.source === bigquery.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const exportDataflow = edges
+    .filter((e) => e.kind === "bigquery-dataflow" && e.source === bigquery.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "dataflow"))
+    .filter((n): n is Extract<DiagramNode, { kind: "dataflow" }> => n != null);
 
-  if (topics.length === 0 && workbenches.length === 0) {
+  if (
+    topics.length === 0 &&
+    workbenches.length === 0 &&
+    dataflowJobs.length === 0 &&
+    buckets.length === 0 &&
+    vms.length === 0 &&
+    runs.length === 0 &&
+    clusters.length === 0 &&
+    exportBuckets.length === 0 &&
+    exportDataflow.length === 0
+  ) {
     return (
       <p className="properties-field__hint">
-        Ligue tópicos Pub/Sub ou Vertex AI Workbench para documentar consumo
-        deste dataset.
+        Ligue Pub/Sub, Cloud Dataflow, Cloud Storage, VMs, Cloud Run, GKE ou
+        Workbench para documentar consumo; exporte para Storage ou Dataflow.
       </p>
     );
   }
@@ -3102,10 +3348,52 @@ function BigqueryPubsubInfo({
           <dd>{topics.map((p) => p.data.name).join(", ")}</dd>
         </>
       ) : null}
+      {dataflowJobs.length > 0 ? (
+        <>
+          <dt>Cloud Dataflow (entrada)</dt>
+          <dd>{dataflowJobs.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {buckets.length > 0 ? (
+        <>
+          <dt>Cloud Storage (origem)</dt>
+          <dd>{buckets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
       {workbenches.length > 0 ? (
         <>
-          <dt>Vertex AI Workbench</dt>
+          <dt>Workbench</dt>
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {exportBuckets.length > 0 ? (
+        <>
+          <dt>Cloud Storage (exportação)</dt>
+          <dd>{exportBuckets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {exportDataflow.length > 0 ? (
+        <>
+          <dt>Cloud Dataflow (exportação)</dt>
+          <dd>{exportDataflow.map((d) => d.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>
@@ -3325,6 +3613,80 @@ function PeeringVpcInfo({
   );
 }
 
+function VpcNetworkingInfo({
+  vpc,
+  edges,
+  nodes,
+}: {
+  vpc: Extract<DiagramNode, { kind: "vpc" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const subnets = edges
+    .filter((e) => e.kind === "subnet-vpc" && e.target === vpc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "subnet"))
+    .filter((n): n is Extract<DiagramNode, { kind: "subnet" }> => n != null);
+  const peerings = edges
+    .filter((e) => e.kind === "peering-vpc" && e.target === vpc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "peering"))
+    .filter((n): n is Extract<DiagramNode, { kind: "peering" }> => n != null);
+  const vpns = edges
+    .filter((e) => e.kind === "vpn-vpc" && e.target === vpc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vpn"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vpn" }> => n != null);
+  const interconnects = edges
+    .filter((e) => e.kind === "interconnect-vpc" && e.target === vpc.id)
+    .map((e) =>
+      nodes.find((n) => n.id === e.source && n.kind === "interconnect"),
+    )
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "interconnect" }> => n != null,
+    );
+
+  if (
+    subnets.length === 0 &&
+    peerings.length === 0 &&
+    vpns.length === 0 &&
+    interconnects.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue sub-redes, VPC Peering (até 2 VPCs), Cloud VPN ou Cloud
+        Interconnect para documentar a rede.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {subnets.length > 0 ? (
+        <>
+          <dt>Sub-redes</dt>
+          <dd>{subnets.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {peerings.length > 0 ? (
+        <>
+          <dt>VPC Peering</dt>
+          <dd>{peerings.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {vpns.length > 0 ? (
+        <>
+          <dt>Cloud VPN</dt>
+          <dd>{vpns.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {interconnects.length > 0 ? (
+        <>
+          <dt>Cloud Interconnect</dt>
+          <dd>{interconnects.map((i) => i.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function VpcFirewallRulesInfo({
   vpc,
   edges,
@@ -3458,30 +3820,70 @@ function DnsVpcInfo({
     (e) => e.kind === "dns-vpc" && e.source === dns.id,
   );
 
-  if (dns.data.visibility === "public") {
-    return (
-      <p className="properties-field__hint">
-        Zona pública — ligação à VPC é opcional para documentação.
-      </p>
-    );
-  }
-
-  if (vpcEdges.length === 0) {
-    return (
-      <p className="properties-field__hint">
-        Ligue à VPC (handle inferior) para documentar visibilidade privada.
-      </p>
-    );
-  }
-
   const vpcs = vpcEdges
     .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vpc"))
     .filter((n): n is Extract<DiagramNode, { kind: "vpc" }> => n != null);
+  const vms = edges
+    .filter((e) => e.kind === "dns-vm" && e.source === dns.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "dns-gke" && e.source === dns.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const dataflowJobs = edges
+    .filter((e) => e.kind === "dns-dataflow" && e.source === dns.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "dataflow"))
+    .filter((n): n is Extract<DiagramNode, { kind: "dataflow" }> => n != null);
+
+  if (dns.data.visibility === "public" && vpcEdges.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Zona pública — ligação à VPC e recursos internos é opcional.
+      </p>
+    );
+  }
+
+  if (
+    vpcEdges.length === 0 &&
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    dataflowJobs.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à VPC e a recursos na rede (VM, GKE, Dataflow) para documentar
+        resolução privada.
+      </p>
+    );
+  }
 
   return (
     <dl className="properties-stats">
-      <dt>VPC{vpcs.length > 1 ? "s" : ""}</dt>
-      <dd>{vpcs.map((vpc) => vpc.data.name).join(", ")}</dd>
+      {vpcs.length > 0 ? (
+        <>
+          <dt>VPC{vpcs.length > 1 ? "s" : ""}</dt>
+          <dd>{vpcs.map((vpc) => vpc.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {dataflowJobs.length > 0 ? (
+        <>
+          <dt>Cloud Dataflow</dt>
+          <dd>{dataflowJobs.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
     </dl>
   );
 }
@@ -3505,12 +3907,15 @@ function InterconnectVpcInfo({
   const onpremEdge = edges.find(
     (e) => e.kind === "onprem-interconnect" && e.target === interconnect.id,
   );
+  const routerEdge = edges.find(
+    (e) => e.kind === "router-interconnect" && e.target === interconnect.id,
+  );
 
-  if (!vpcEdge && !internetEdge && !onpremEdge) {
+  if (!vpcEdge && !internetEdge && !onpremEdge && !routerEdge) {
     return (
       <p className="properties-field__hint">
-        Ligue à VPC (handle inferior), à Internet (superior) ou ao on-premises
-        para documentar o link dedicado.
+        Ligue à VPC, Cloud Router, Internet ou on-premises para documentar o
+        link dedicado.
       </p>
     );
   }
@@ -3521,6 +3926,9 @@ function InterconnectVpcInfo({
   const onprem = onpremEdge
     ? nodes.find((n) => n.id === onpremEdge.source && n.kind === "onprem")
     : undefined;
+  const router = routerEdge
+    ? nodes.find((n) => n.id === routerEdge.source && n.kind === "router")
+    : undefined;
 
   return (
     <dl className="properties-stats">
@@ -3528,6 +3936,12 @@ function InterconnectVpcInfo({
         <>
           <dt>VPC</dt>
           <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {router && router.kind === "router" ? (
+        <>
+          <dt>Cloud Router</dt>
+          <dd>{router.data.name}</dd>
         </>
       ) : null}
       {internetEdge ? (
@@ -3564,12 +3978,15 @@ function VpnVpcInfo({
   const onpremEdge = edges.find(
     (e) => e.kind === "onprem-vpn" && e.target === vpn.id,
   );
+  const routerEdge = edges.find(
+    (e) => e.kind === "router-vpn" && e.target === vpn.id,
+  );
 
-  if (!vpcEdge && !internetEdge && !onpremEdge) {
+  if (!vpcEdge && !internetEdge && !onpremEdge && !routerEdge) {
     return (
       <p className="properties-field__hint">
-        Ligue à VPC (handle inferior), à Internet (superior) ou ao on-premises
-        para documentar conectividade híbrida.
+        Ligue à VPC, Cloud Router, Internet ou on-premises para documentar
+        conectividade híbrida.
       </p>
     );
   }
@@ -3580,6 +3997,9 @@ function VpnVpcInfo({
   const onprem = onpremEdge
     ? nodes.find((n) => n.id === onpremEdge.source && n.kind === "onprem")
     : undefined;
+  const router = routerEdge
+    ? nodes.find((n) => n.id === routerEdge.source && n.kind === "router")
+    : undefined;
 
   return (
     <dl className="properties-stats">
@@ -3587,6 +4007,12 @@ function VpnVpcInfo({
         <>
           <dt>VPC</dt>
           <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {router && router.kind === "router" ? (
+        <>
+          <dt>Cloud Router</dt>
+          <dd>{router.data.name}</dd>
         </>
       ) : null}
       {internetEdge ? (
@@ -3627,18 +4053,30 @@ function NatVpcInfo({
     .filter((e) => e.kind === "vm-nat" && e.target === nat.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
     .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const routerEdge = edges.find(
+    (e) => e.kind === "nat-router" && e.source === nat.id,
+  );
 
-  if (!vpcEdge && subnetEdges.length === 0 && !internetEdge && vms.length === 0) {
+  if (
+    !vpcEdge &&
+    subnetEdges.length === 0 &&
+    !internetEdge &&
+    vms.length === 0 &&
+    !routerEdge
+  ) {
     return (
       <p className="properties-field__hint">
-        Ligue à VPC (handle inferior), sub-redes privadas (esquerda), Internet
-        (superior) e VMs (egress) para documentar saída.
+        Ligue à VPC, sub-redes, Internet, VMs (egress) e Cloud Router para
+        documentar saída.
       </p>
     );
   }
 
   const vpc = vpcEdge
     ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+  const router = routerEdge
+    ? nodes.find((n) => n.id === routerEdge.target && n.kind === "router")
     : undefined;
 
   return (
@@ -3647,6 +4085,12 @@ function NatVpcInfo({
         <>
           <dt>VPC</dt>
           <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {router && router.kind === "router" ? (
+        <>
+          <dt>Cloud Router</dt>
+          <dd>{router.data.name}</dd>
         </>
       ) : null}
       {subnetEdges.length > 0 ? (
@@ -3689,17 +4133,36 @@ function RouterVpcInfo({
   const vpcEdge = edges.find(
     (e) => e.kind === "router-vpc" && e.source === router.id,
   );
+  const natEdge = edges.find(
+    (e) => e.kind === "nat-router" && e.target === router.id,
+  );
+  const vpnEdges = edges.filter(
+    (e) => e.kind === "router-vpn" && e.source === router.id,
+  );
+  const interconnectEdges = edges.filter(
+    (e) => e.kind === "router-interconnect" && e.source === router.id,
+  );
 
-  if (!vpcEdge) {
+  if (
+    !vpcEdge &&
+    !natEdge &&
+    vpnEdges.length === 0 &&
+    interconnectEdges.length === 0
+  ) {
     return (
       <p className="properties-field__hint">
-        Opcional: ligue à VPC (handle inferior) para documentar roteamento BGP,
-        NAT ou VPN. Pode permanecer isolado no diagrama.
+        Ligue à VPC, Cloud NAT, Cloud VPN ou Cloud Interconnect para documentar
+        roteamento BGP e híbrido.
       </p>
     );
   }
 
-  const vpc = nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc");
+  const vpc = vpcEdge
+    ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+  const nat = natEdge
+    ? nodes.find((n) => n.id === natEdge.source && n.kind === "nat")
+    : undefined;
 
   return (
     <dl className="properties-stats">
@@ -3707,6 +4170,41 @@ function RouterVpcInfo({
         <>
           <dt>VPC</dt>
           <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {nat && nat.kind === "nat" ? (
+        <>
+          <dt>Cloud NAT</dt>
+          <dd>{nat.data.name}</dd>
+        </>
+      ) : null}
+      {vpnEdges.length > 0 ? (
+        <>
+          <dt>Cloud VPN</dt>
+          <dd>
+            {vpnEdges
+              .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vpn"))
+              .filter((n): n is Extract<DiagramNode, { kind: "vpn" }> => n != null)
+              .map((v) => v.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {interconnectEdges.length > 0 ? (
+        <>
+          <dt>Cloud Interconnect</dt>
+          <dd>
+            {interconnectEdges
+              .map((e) =>
+                nodes.find((n) => n.id === e.target && n.kind === "interconnect"),
+              )
+              .filter(
+                (n): n is Extract<DiagramNode, { kind: "interconnect" }> =>
+                  n != null,
+              )
+              .map((i) => i.data.name)
+              .join(", ")}
+          </dd>
         </>
       ) : null}
     </dl>
@@ -4264,13 +4762,38 @@ function StorageVmInfo({
     .filter(
       (n): n is Extract<DiagramNode, { kind: "workbench" }> => n != null,
     );
+  const dataflowJobs = edges
+    .filter((e) => e.kind === "storage-dataflow" && e.source === storage.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "dataflow"))
+    .filter((n): n is Extract<DiagramNode, { kind: "dataflow" }> => n != null);
+  const datasets = edges
+    .filter((e) => e.kind === "storage-bigquery" && e.source === storage.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "bigquery"))
+    .filter((n): n is Extract<DiagramNode, { kind: "bigquery" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "storage-gke" && e.source === storage.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "storage-run" && e.source === storage.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const bigqueryExports = edges
+    .filter((e) => e.kind === "bigquery-storage" && e.target === storage.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "bigquery"))
+    .filter((n): n is Extract<DiagramNode, { kind: "bigquery" }> => n != null);
 
   if (
     storage.data.accessMode === "public" &&
     vms.length === 0 &&
     pubsubTopics.length === 0 &&
     eventarcTriggers.length === 0 &&
-    workbenches.length === 0
+    workbenches.length === 0 &&
+    dataflowJobs.length === 0 &&
+    datasets.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    bigqueryExports.length === 0
   ) {
     return (
       <p className="properties-field__hint">
@@ -4283,11 +4806,17 @@ function StorageVmInfo({
     vms.length === 0 &&
     pubsubTopics.length === 0 &&
     eventarcTriggers.length === 0 &&
-    workbenches.length === 0
+    workbenches.length === 0 &&
+    dataflowJobs.length === 0 &&
+    datasets.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    bigqueryExports.length === 0
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue VMs, Workbench, Pub/Sub ou Eventarc a este bucket.
+        Ligue VMs, Workbench, Pub/Sub, Eventarc, Dataflow, BigQuery, GKE ou
+        Cloud Run a este bucket.
       </p>
     );
   }
@@ -4318,6 +4847,142 @@ function StorageVmInfo({
           <dd>{eventarcTriggers.map((e) => e.data.name).join(", ")}</dd>
         </>
       ) : null}
+      {dataflowJobs.length > 0 ? (
+        <>
+          <dt>Cloud Dataflow</dt>
+          <dd>{dataflowJobs.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {datasets.length > 0 ? (
+        <>
+          <dt>BigQuery (carga)</dt>
+          <dd>{datasets.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {bigqueryExports.length > 0 ? (
+        <>
+          <dt>BigQuery (exportação)</dt>
+          <dd>{bigqueryExports.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function VmPeersInfo({
+  vmId,
+  edges,
+  nodes,
+}: {
+  vmId: string;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const peers = edges
+    .filter(
+      (e) =>
+        e.kind === "vm-vm" && (e.source === vmId || e.target === vmId),
+    )
+    .map((e) => {
+      const peerId = e.source === vmId ? e.target : e.source;
+      return nodes.find((n) => n.id === peerId && n.kind === "vm");
+    })
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+
+  if (peers.length === 0) return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>VMs (comunicação)</dt>
+      <dd>{peers.map((v) => v.data.name).join(", ")}</dd>
+    </dl>
+  );
+}
+
+function VmBigqueryInfo({
+  vmId,
+  edges,
+  nodes,
+}: {
+  vmId: string;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find(
+    (e) => e.kind === "vm-bigquery" && e.source === vmId,
+  );
+  if (!edge) return null;
+
+  const bigquery = nodes.find(
+    (n) => n.id === edge.target && n.kind === "bigquery",
+  );
+  if (!bigquery || bigquery.kind !== "bigquery") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>BigQuery</dt>
+      <dd>{bigquery.data.name}</dd>
+    </dl>
+  );
+}
+
+function VmSparkInfo({
+  vmId,
+  edges,
+  nodes,
+}: {
+  vmId: string;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "spark-vm" && e.target === vmId)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "spark"))
+    .filter((n): n is Extract<DiagramNode, { kind: "spark" }> => n != null);
+
+  if (linked.length === 0) return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Apache Spark</dt>
+      <dd>{linked.map((s) => s.data.name).join(", ")}</dd>
+    </dl>
+  );
+}
+
+function VmDnsInfo({
+  vmId,
+  edges,
+  nodes,
+}: {
+  vmId: string;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find((e) => e.kind === "dns-vm" && e.target === vmId);
+  if (!edge) return null;
+
+  const dns = nodes.find((n) => n.id === edge.source && n.kind === "dns");
+  if (!dns || dns.kind !== "dns") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Cloud DNS</dt>
+      <dd>
+        {dns.data.name} ({dns.data.dnsName.trim() || "example.com."})
+      </dd>
     </dl>
   );
 }

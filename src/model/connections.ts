@@ -11,6 +11,39 @@ import { INFOCARD_LINK_EDGE_KIND } from "../lib/infocardLinks";
 import { EDGE_ENDPOINTS } from "../types";
 import type { DiagramEdge, DiagramNode, ResourceKind } from "../types";
 
+/** Arestas documentais — não disparam detecção de ciclo hierárquico. */
+const NON_HIERARCHICAL_EDGE_KINDS = new Set<DiagramEdge["kind"]>([
+  "vm-vm",
+  "vm-bigquery",
+  "run-bigquery",
+  "gke-bigquery",
+  "pubsub-vm",
+  "pubsub-gke",
+  "pubsub-sql",
+  "pubsub-workbench",
+  "storage-dataflow",
+  "storage-bigquery",
+  "storage-gke",
+  "storage-run",
+  "dataflow-sql",
+  "dataflow-firestore",
+  "dataflow-pubsub",
+  "bigquery-storage",
+  "bigquery-dataflow",
+  "airflow-dataflow",
+  "airflow-spark",
+  "airflow-run",
+  "airflow-sql",
+  "spark-sql",
+  "spark-vm",
+  "nat-router",
+  "router-vpn",
+  "router-interconnect",
+  "dns-vm",
+  "dns-gke",
+  "dns-dataflow",
+]);
+
 export type ConnectionInput = {
   source: string;
   target: string;
@@ -37,6 +70,7 @@ export type ConnectionInvalidReason =
   | "gke-has-subnet"
   | "subnet-gke-capacity"
   | "nat-has-vpc"
+  | "nat-has-router"
   | "router-has-vpc"
   | "vpn-has-vpc"
   | "interconnect-has-vpc"
@@ -305,7 +339,24 @@ export function validateConnection(
     return { valid: false, reason: "duplicate-edge" };
   }
 
+  if (edgeKind === "vm-vm") {
+    const reverseExists = context.edges.some(
+      (edge) =>
+        edge.kind === "vm-vm" &&
+        edge.source === directed.target &&
+        edge.target === directed.source,
+    );
+    if (reverseExists) {
+      return { valid: false, reason: "duplicate-edge" };
+    }
+  }
+
   if (
+    edgeKind === "vm-vm" ||
+    NON_HIERARCHICAL_EDGE_KINDS.has(edgeKind)
+  ) {
+    // Ligações documentais — não participam de detecção de ciclo hierárquico.
+  } else if (
     wouldCreateDirectedCycle(
       directed.source,
       directed.target,
@@ -417,6 +468,15 @@ export function validateConnection(
     )
   ) {
     return { valid: false, reason: "nat-has-vpc" };
+  }
+
+  if (
+    edgeKind === "nat-router" &&
+    context.edges.some(
+      (edge) => edge.kind === "nat-router" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "nat-has-router" };
   }
 
   if (

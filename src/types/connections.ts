@@ -11,6 +11,12 @@ import type { ResourceKind } from "./resources";
  * - VM → IAM (`vm-iam`): conta de serviço ou identidade da VM
  * - VM → Cloud NAT (`vm-nat`): egress documentado via NAT
  * - VM → Firewall (`vm-firewall`): regras que se aplicam à VM
+ * - VM → VM (`vm-vm`): comunicação entre instâncias
+ * - VM / Cloud Run / GKE → BigQuery (`vm-bigquery`, `run-bigquery`, `gke-bigquery`)
+ * - Cloud Storage → Dataflow / BigQuery / GKE / Cloud Run
+ * - Pub/Sub → VM / GKE / Cloud SQL / Workbench (além dos destinos existentes)
+ * - Cloud Dataflow → Pub/Sub / Cloud SQL / Firestore (além de Storage / BigQuery)
+ * - BigQuery → Cloud Storage / Cloud Dataflow (exportação e pipelines)
  * - Cloud SQL → Sub-rede (`sql-subnet`): IP privado na sub-rede (modo privado)
  * - Cloud NAT → VPC (`nat-vpc`): gateway NAT na VPC
  * - Cloud Router → VPC (`router-vpc`): roteador BGP/NAT na VPC (opcional)
@@ -43,8 +49,11 @@ import type { ResourceKind } from "./resources";
  * - Vertex AI Workbench → Storage / BigQuery / Spanner / Firestore: acesso a dados
  * - Apache Spark → Sub-rede (`spark-subnet`, modo cluster): execução na VPC
  * - Apache Spark → Storage / BigQuery / Cloud KMS: leitura de dados e criptografia
- * - Managed Airflow → Sub-rede (`airflow-subnet`): ambiente Composer na VPC
- * - Managed Airflow → Storage / BigQuery / Cloud KMS: DAGs, dados e criptografia
+ * - Managed Airflow → Storage / BigQuery / Cloud KMS / Dataflow / Spark / Cloud Run / Cloud SQL
+ * - Apache Spark → Storage / BigQuery / Cloud SQL / VM (Bigtable e MongoDB em breve)
+ * - Cloud NAT → Cloud Router (`nat-router`); Router → VPN / Interconnect
+ * - Cloud DNS → VM / GKE / Dataflow na VPC (além de `dns-vpc`)
+ * - VPC ↔ peering / VPN / Interconnect via recursos de rede existentes
  * - Pub/Sub → Managed Airflow (`pubsub-airflow`): triggers e sensores
  * - Cloud Dataflow → Sub-rede (`dataflow-subnet`): workers na VPC
  * - Cloud Dataflow → Storage / BigQuery / Cloud KMS: leitura, escrita e criptografia
@@ -63,6 +72,8 @@ export const EDGE_ENDPOINTS = {
   "vm-iam": { from: "vm", to: "iam" },
   "vm-nat": { from: "vm", to: "nat" },
   "vm-firewall": { from: "vm", to: "firewall" },
+  "vm-vm": { from: "vm", to: "vm" },
+  "vm-bigquery": { from: "vm", to: "bigquery" },
   "sql-subnet": { from: "sql", to: "subnet" },
   "gke-subnet": { from: "gke", to: "subnet" },
   "nat-vpc": { from: "nat", to: "vpc" },
@@ -72,23 +83,39 @@ export const EDGE_ENDPOINTS = {
   "interconnect-vpc": { from: "interconnect", to: "vpc" },
   "firewall-vpc": { from: "firewall", to: "vpc" },
   "dns-vpc": { from: "dns", to: "vpc" },
+  "dns-vm": { from: "dns", to: "vm" },
+  "dns-gke": { from: "dns", to: "gke" },
+  "dns-dataflow": { from: "dns", to: "dataflow" },
+  "nat-router": { from: "nat", to: "router" },
+  "router-vpn": { from: "router", to: "vpn" },
+  "router-interconnect": { from: "router", to: "interconnect" },
   "internet-nat": { from: "internet", to: "nat" },
   "internet-vpn": { from: "internet", to: "vpn" },
   "internet-interconnect": { from: "internet", to: "interconnect" },
   "subnet-nat": { from: "subnet", to: "nat" },
   "gke-artifact": { from: "gke", to: "artifact" },
+  "gke-bigquery": { from: "gke", to: "bigquery" },
   "vm-artifact": { from: "vm", to: "artifact" },
   "run-subnet": { from: "run", to: "subnet" },
   "run-artifact": { from: "run", to: "artifact" },
+  "run-bigquery": { from: "run", to: "bigquery" },
   "build-artifact": { from: "build", to: "artifact" },
   "pubsub-build": { from: "pubsub", to: "build" },
   "storage-build": { from: "storage", to: "build" },
+  "storage-dataflow": { from: "storage", to: "dataflow" },
+  "storage-bigquery": { from: "storage", to: "bigquery" },
+  "storage-gke": { from: "storage", to: "gke" },
+  "storage-run": { from: "storage", to: "run" },
   "github-build": { from: "github", to: "build" },
   "github-run": { from: "github", to: "run" },
   "github-gke": { from: "github", to: "gke" },
   "pubsub-run": { from: "pubsub", to: "run" },
   "pubsub-storage": { from: "pubsub", to: "storage" },
   "pubsub-bigquery": { from: "pubsub", to: "bigquery" },
+  "pubsub-vm": { from: "pubsub", to: "vm" },
+  "pubsub-gke": { from: "pubsub", to: "gke" },
+  "pubsub-sql": { from: "pubsub", to: "sql" },
+  "pubsub-workbench": { from: "pubsub", to: "workbench" },
   "vm-spanner": { from: "vm", to: "spanner" },
   "gke-spanner": { from: "gke", to: "spanner" },
   "run-spanner": { from: "run", to: "spanner" },
@@ -105,17 +132,28 @@ export const EDGE_ENDPOINTS = {
   "spark-subnet": { from: "spark", to: "subnet" },
   "spark-storage": { from: "spark", to: "storage" },
   "spark-bigquery": { from: "spark", to: "bigquery" },
+  "spark-sql": { from: "spark", to: "sql" },
+  "spark-vm": { from: "spark", to: "vm" },
   "spark-kms": { from: "spark", to: "kms" },
   "airflow-subnet": { from: "airflow", to: "subnet" },
   "airflow-storage": { from: "airflow", to: "storage" },
   "airflow-bigquery": { from: "airflow", to: "bigquery" },
+  "airflow-dataflow": { from: "airflow", to: "dataflow" },
+  "airflow-spark": { from: "airflow", to: "spark" },
+  "airflow-run": { from: "airflow", to: "run" },
+  "airflow-sql": { from: "airflow", to: "sql" },
   "airflow-kms": { from: "airflow", to: "kms" },
   "pubsub-airflow": { from: "pubsub", to: "airflow" },
   "dataflow-subnet": { from: "dataflow", to: "subnet" },
   "dataflow-storage": { from: "dataflow", to: "storage" },
   "dataflow-bigquery": { from: "dataflow", to: "bigquery" },
+  "dataflow-sql": { from: "dataflow", to: "sql" },
+  "dataflow-firestore": { from: "dataflow", to: "firestore" },
+  "dataflow-pubsub": { from: "dataflow", to: "pubsub" },
   "dataflow-kms": { from: "dataflow", to: "kms" },
   "pubsub-dataflow": { from: "pubsub", to: "dataflow" },
+  "bigquery-storage": { from: "bigquery", to: "storage" },
+  "bigquery-dataflow": { from: "bigquery", to: "dataflow" },
   "workbench-modelregistry": { from: "workbench", to: "modelregistry" },
   "build-modelregistry": { from: "build", to: "modelregistry" },
   "modelregistry-run": { from: "modelregistry", to: "run" },

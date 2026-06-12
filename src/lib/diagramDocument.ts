@@ -1189,6 +1189,8 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "vm-iam" &&
     kind !== "vm-nat" &&
     kind !== "vm-firewall" &&
+    kind !== "vm-vm" &&
+    kind !== "vm-bigquery" &&
     kind !== "sql-subnet" &&
     kind !== "gke-subnet" &&
     kind !== "nat-vpc" &&
@@ -1198,23 +1200,39 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "interconnect-vpc" &&
     kind !== "firewall-vpc" &&
     kind !== "dns-vpc" &&
+    kind !== "dns-vm" &&
+    kind !== "dns-gke" &&
+    kind !== "dns-dataflow" &&
+    kind !== "nat-router" &&
+    kind !== "router-vpn" &&
+    kind !== "router-interconnect" &&
     kind !== "internet-nat" &&
     kind !== "internet-vpn" &&
     kind !== "internet-interconnect" &&
     kind !== "subnet-nat" &&
     kind !== "gke-artifact" &&
+    kind !== "gke-bigquery" &&
     kind !== "vm-artifact" &&
     kind !== "run-subnet" &&
     kind !== "run-artifact" &&
+    kind !== "run-bigquery" &&
     kind !== "build-artifact" &&
     kind !== "pubsub-build" &&
     kind !== "storage-build" &&
+    kind !== "storage-dataflow" &&
+    kind !== "storage-bigquery" &&
+    kind !== "storage-gke" &&
+    kind !== "storage-run" &&
     kind !== "github-build" &&
     kind !== "github-run" &&
     kind !== "github-gke" &&
     kind !== "pubsub-run" &&
     kind !== "pubsub-storage" &&
     kind !== "pubsub-bigquery" &&
+    kind !== "pubsub-vm" &&
+    kind !== "pubsub-gke" &&
+    kind !== "pubsub-sql" &&
+    kind !== "pubsub-workbench" &&
     kind !== "vm-spanner" &&
     kind !== "gke-spanner" &&
     kind !== "run-spanner" &&
@@ -1231,17 +1249,28 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "spark-subnet" &&
     kind !== "spark-storage" &&
     kind !== "spark-bigquery" &&
+    kind !== "spark-sql" &&
+    kind !== "spark-vm" &&
     kind !== "spark-kms" &&
     kind !== "airflow-subnet" &&
     kind !== "airflow-storage" &&
     kind !== "airflow-bigquery" &&
+    kind !== "airflow-dataflow" &&
+    kind !== "airflow-spark" &&
+    kind !== "airflow-run" &&
+    kind !== "airflow-sql" &&
     kind !== "airflow-kms" &&
     kind !== "pubsub-airflow" &&
     kind !== "dataflow-subnet" &&
     kind !== "dataflow-storage" &&
     kind !== "dataflow-bigquery" &&
+    kind !== "dataflow-sql" &&
+    kind !== "dataflow-firestore" &&
+    kind !== "dataflow-pubsub" &&
     kind !== "dataflow-kms" &&
     kind !== "pubsub-dataflow" &&
+    kind !== "bigquery-storage" &&
+    kind !== "bigquery-dataflow" &&
     kind !== "workbench-modelregistry" &&
     kind !== "build-modelregistry" &&
     kind !== "modelregistry-run" &&

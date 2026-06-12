@@ -73,6 +73,8 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vm", "iam")).toBe("vm-iam");
     expect(getEdgeKind("vm", "nat")).toBe("vm-nat");
     expect(getEdgeKind("vm", "firewall")).toBe("vm-firewall");
+    expect(getEdgeKind("vm", "vm")).toBe("vm-vm");
+    expect(getEdgeKind("vm", "bigquery")).toBe("vm-bigquery");
     expect(getEdgeKind("sql", "subnet")).toBe("sql-subnet");
     expect(getEdgeKind("nat", "vpc")).toBe("nat-vpc");
     expect(getEdgeKind("router", "vpc")).toBe("router-vpc");
@@ -134,6 +136,23 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("pubsub", "run")).toBe("pubsub-run");
     expect(getEdgeKind("pubsub", "storage")).toBe("pubsub-storage");
     expect(getEdgeKind("pubsub", "bigquery")).toBe("pubsub-bigquery");
+    expect(getEdgeKind("pubsub", "vm")).toBe("pubsub-vm");
+    expect(getEdgeKind("pubsub", "gke")).toBe("pubsub-gke");
+    expect(getEdgeKind("storage", "dataflow")).toBe("storage-dataflow");
+    expect(getEdgeKind("storage", "bigquery")).toBe("storage-bigquery");
+    expect(getEdgeKind("dataflow", "sql")).toBe("dataflow-sql");
+    expect(getEdgeKind("dataflow", "firestore")).toBe("dataflow-firestore");
+    expect(getEdgeKind("dataflow", "pubsub")).toBe("dataflow-pubsub");
+    expect(getEdgeKind("bigquery", "storage")).toBe("bigquery-storage");
+    expect(getEdgeKind("run", "bigquery")).toBe("run-bigquery");
+    expect(getEdgeKind("gke", "bigquery")).toBe("gke-bigquery");
+    expect(getEdgeKind("airflow", "dataflow")).toBe("airflow-dataflow");
+    expect(getEdgeKind("airflow", "spark")).toBe("airflow-spark");
+    expect(getEdgeKind("spark", "sql")).toBe("spark-sql");
+    expect(getEdgeKind("spark", "vm")).toBe("spark-vm");
+    expect(getEdgeKind("nat", "router")).toBe("nat-router");
+    expect(getEdgeKind("router", "vpn")).toBe("router-vpn");
+    expect(getEdgeKind("dns", "vm")).toBe("dns-vm");
     expect(getEdgeKind("vm", "spanner")).toBe("vm-spanner");
     expect(getEdgeKind("gke", "spanner")).toBe("gke-spanner");
     expect(getEdgeKind("run", "spanner")).toBe("run-spanner");
@@ -175,7 +194,6 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vpc", "vm")).toBeNull();
     expect(getEdgeKind("vpc", "subnet")).toBeNull();
     expect(getEdgeKind("subnet", "vm")).toBeNull();
-    expect(getEdgeKind("vm", "vm")).toBeNull();
     expect(getEdgeKind("storage", "vm")).toBeNull();
     expect(getEdgeKind("vpc", "storage")).toBeNull();
   });
@@ -437,6 +455,39 @@ describe("validateConnection", () => {
       { nodes: [...nodes, iamA, iamB], edges },
     );
     expect(result).toEqual({ valid: false, reason: "vm-has-iam" });
+  });
+
+  it("aceita VM → VM e rejeita par duplicado invertido", () => {
+    const vmB: DiagramNode = {
+      id: "vm-2",
+      kind: "vm",
+      position: { x: 300, y: 0 },
+      data: { name: "vm-b", machineType: "e2-micro" },
+    };
+    const first = validateConnection(
+      {
+        source: vm.id,
+        target: vmB.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [...nodes, vmB], edges: [] },
+    );
+    expect(first).toMatchObject({ valid: true, edgeKind: "vm-vm" });
+
+    const edges: DiagramEdge[] = [
+      { id: "e1", source: vm.id, target: vmB.id, kind: "vm-vm" },
+    ];
+    const reverse = validateConnection(
+      {
+        source: vmB.id,
+        target: vm.id,
+        sourceHandle: egress(),
+        targetHandle: ingress(),
+      },
+      { nodes: [...nodes, vmB], edges },
+    );
+    expect(reverse).toEqual({ valid: false, reason: "duplicate-edge" });
   });
 
   it("rejeita ligação com handle inválido", () => {
