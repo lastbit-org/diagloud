@@ -45,6 +45,7 @@ import type {
   OrgPolicyProps,
   PscProps,
   SecretManagerProps,
+  CloudShellProps,
 } from "./resources";
 
 export const DIAGRAM_DOCUMENT_VERSION = 1 as const;
@@ -103,7 +104,8 @@ export type DiagramNode =
   | (NodeBase & { kind: "loadbalancer"; data: LoadBalancerProps })
   | (NodeBase & { kind: "orgpolicy"; data: OrgPolicyProps })
   | (NodeBase & { kind: "psc"; data: PscProps })
-  | (NodeBase & { kind: "secretmanager"; data: SecretManagerProps });
+  | (NodeBase & { kind: "secretmanager"; data: SecretManagerProps })
+  | (NodeBase & { kind: "cloudshell"; data: CloudShellProps });
 
 export type DiagramEdge = {
   id: string;
@@ -157,6 +159,14 @@ export type DiagramEdge = {
     | "github-build"
     | "github-run"
     | "github-gke"
+    | "cloudshell-project"
+    | "cloudshell-vm"
+    | "cloudshell-gke"
+    | "cloudshell-run"
+    | "cloudshell-storage"
+    | "cloudshell-bigquery"
+    | "cloudshell-sql"
+    | "cloudshell-build"
     | "pubsub-run"
     | "pubsub-storage"
     | "pubsub-bigquery"

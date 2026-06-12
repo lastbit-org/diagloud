@@ -109,6 +109,7 @@ import type {
   OrgPolicyProps,
   PscProps,
   SecretManagerProps,
+  CloudShellProps,
   IamProps,
 } from "../types";
 
@@ -177,6 +178,7 @@ type DiagramActions = {
       | Partial<OrgPolicyProps>
       | Partial<PscProps>
       | Partial<SecretManagerProps>
+      | Partial<CloudShellProps>
       | Partial<IamProps>,
   ) => void;
   updateNodeDimensions: (id: string, width: number, height: number) => void;
@@ -581,6 +583,15 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "cloudshell":
+      return {
+        ...base,
+        kind: "cloudshell",
+        data: {
+          ...defaultResourceData("cloudshell", resourceContext),
+          ...data,
+        },
+      };
   }
 }
 
@@ -627,6 +638,7 @@ function mergeNodeData(
     | Partial<OrgPolicyProps>
     | Partial<PscProps>
     | Partial<SecretManagerProps>
+    | Partial<CloudShellProps>
     | Partial<IamProps>,
 ): DiagramNode {
   switch (node.kind) {
@@ -849,6 +861,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<SecretManagerProps>) },
+      };
+    case "cloudshell":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<CloudShellProps>) },
       };
   }
 }

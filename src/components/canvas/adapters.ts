@@ -127,6 +127,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "pcuser") {
     return "Usuário";
   }
+  if (node.kind === "cloudshell") {
+    return "Console GCP";
+  }
   return undefined;
 }
 

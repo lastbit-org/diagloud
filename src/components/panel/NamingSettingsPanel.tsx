@@ -43,6 +43,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "orgpolicy",
   "psc",
   "secretmanager",
+  "cloudshell",
   "entra",
   "pcuser",
   "onprem",

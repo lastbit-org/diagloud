@@ -47,5 +47,6 @@ export { LoadBalancerNode } from "./LoadBalancerNode";
 export { OrgPolicyNode } from "./OrgPolicyNode";
 export { PscNode } from "./PscNode";
 export { SecretManagerNode } from "./SecretManagerNode";
+export { CloudShellNode } from "./CloudShellNode";
 export type { IamNodeData } from "./IamNode";
 export { IamNode } from "./IamNode";

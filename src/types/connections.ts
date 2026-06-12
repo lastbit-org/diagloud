@@ -34,6 +34,7 @@ import type { ResourceKind } from "./resources";
  * - Pub/Sub → Cloud Build (`pubsub-build`): trigger de pipeline
  * - Cloud Storage → Cloud Build (`storage-build`): código-fonte no bucket
  * - GitHub → Cloud Build / Cloud Run / GKE (`github-build`, `github-run`, `github-gke`): CI/CD e deploy contínuo
+ * - Cloud Shell → Projeto / compute / dados / CI (`cloudshell-*`): administração via console (gcloud, kubectl, bq)
  * - Cloud Run → Sub-rede (`run-subnet`): VPC connector (modo VPC)
  * - Pub/Sub → Cloud Run (`pubsub-run`): push subscription / evento
  * - Pub/Sub → Cloud Storage (`pubsub-storage`): exportação para bucket
@@ -121,6 +122,14 @@ export const EDGE_ENDPOINTS = {
   "github-build": { from: "github", to: "build" },
   "github-run": { from: "github", to: "run" },
   "github-gke": { from: "github", to: "gke" },
+  "cloudshell-project": { from: "cloudshell", to: "project" },
+  "cloudshell-vm": { from: "cloudshell", to: "vm" },
+  "cloudshell-gke": { from: "cloudshell", to: "gke" },
+  "cloudshell-run": { from: "cloudshell", to: "run" },
+  "cloudshell-storage": { from: "cloudshell", to: "storage" },
+  "cloudshell-bigquery": { from: "cloudshell", to: "bigquery" },
+  "cloudshell-sql": { from: "cloudshell", to: "sql" },
+  "cloudshell-build": { from: "cloudshell", to: "build" },
   "pubsub-run": { from: "pubsub", to: "run" },
   "pubsub-storage": { from: "pubsub", to: "storage" },
   "pubsub-bigquery": { from: "pubsub", to: "bigquery" },

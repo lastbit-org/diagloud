@@ -157,6 +157,14 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("vm", "bigtable")).toBe("vm-bigtable");
     expect(getEdgeKind("spark", "bigtable")).toBe("spark-bigtable");
     expect(getEdgeKind("notebook", "subnet")).toBe("notebook-subnet");
+    expect(getEdgeKind("cloudshell", "project")).toBe("cloudshell-project");
+    expect(getEdgeKind("cloudshell", "vm")).toBe("cloudshell-vm");
+    expect(getEdgeKind("cloudshell", "gke")).toBe("cloudshell-gke");
+    expect(getEdgeKind("cloudshell", "run")).toBe("cloudshell-run");
+    expect(getEdgeKind("cloudshell", "storage")).toBe("cloudshell-storage");
+    expect(getEdgeKind("cloudshell", "bigquery")).toBe("cloudshell-bigquery");
+    expect(getEdgeKind("cloudshell", "sql")).toBe("cloudshell-sql");
+    expect(getEdgeKind("cloudshell", "build")).toBe("cloudshell-build");
     expect(getEdgeKind("internet", "loadbalancer")).toBe("internet-loadbalancer");
     expect(getEdgeKind("psc", "subnet")).toBe("psc-subnet");
     expect(getEdgeKind("psc", "vpc")).toBeNull();

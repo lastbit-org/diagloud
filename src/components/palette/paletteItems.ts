@@ -97,7 +97,8 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "loadbalancer" ||
     value === "orgpolicy" ||
     value === "psc" ||
-    value === "secretmanager"
+    value === "secretmanager" ||
+    value === "cloudshell"
   );
 }
 
@@ -381,6 +382,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.modelregistry,
     description: "Registro e versionamento de modelos ML",
     icon: GCP_RESOURCE_ICONS.modelregistry,
+  },
+  {
+    paletteKey: "cloudshell",
+    kind: "cloudshell",
+    category: "management",
+    label: GCP_RESOURCE_LABELS.cloudshell,
+    description: "Terminal efêmero no console GCP (gcloud, kubectl, bq)",
+    icon: GCP_RESOURCE_ICONS.cloudshell,
   },
   {
     paletteKey: "github",

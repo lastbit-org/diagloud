@@ -45,7 +45,8 @@ export type ResourceKind =
   | "loadbalancer"
   | "orgpolicy"
   | "psc"
-  | "secretmanager";
+  | "secretmanager"
+  | "cloudshell";
 
 export type RunAccessMode = "public" | "vpc";
 
@@ -346,6 +347,11 @@ export type GithubProps = {
   repository: string;
 };
 
+export type CloudShellProps = {
+  /** Nome no diagrama. */
+  name: string;
+};
+
 export type LoadBalancerType = "external" | "internal";
 
 export type LoadBalancerProps = {
@@ -421,4 +427,5 @@ export type ResourcePropsByKind = {
   orgpolicy: OrgPolicyProps;
   psc: PscProps;
   secretmanager: SecretManagerProps;
+  cloudshell: CloudShellProps;
 };

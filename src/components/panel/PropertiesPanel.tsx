@@ -2222,6 +2222,30 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           />
         </>
       )}
+
+      {selectedNode?.kind === "cloudshell" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="cloudshell-name">Sessão</label>
+            <input
+              id="cloudshell-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <p className="properties-field__hint">
+            Terminal efêmero no console GCP. Ligue a recursos administrados via
+            gcloud, kubectl, gsutil ou bq.
+          </p>
+          <CloudShellConnectionsInfo
+            cloudshell={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
     </>
   );
 
@@ -5105,6 +5129,120 @@ function IamConnectionsInfo({
         <>
           <dt>VMs</dt>
           <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function CloudShellConnectionsInfo({
+  cloudshell,
+  edges,
+  nodes,
+}: {
+  cloudshell: Extract<DiagramNode, { kind: "cloudshell" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const projects = edges
+    .filter((e) => e.kind === "cloudshell-project" && e.source === cloudshell.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "project"))
+    .filter((n): n is Extract<DiagramNode, { kind: "project" }> => n != null);
+  const vms = edges
+    .filter((e) => e.kind === "cloudshell-vm" && e.source === cloudshell.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "cloudshell-gke" && e.source === cloudshell.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "cloudshell-run" && e.source === cloudshell.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const buckets = edges
+    .filter((e) => e.kind === "cloudshell-storage" && e.source === cloudshell.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "storage"))
+    .filter((n): n is Extract<DiagramNode, { kind: "storage" }> => n != null);
+  const datasets = edges
+    .filter((e) => e.kind === "cloudshell-bigquery" && e.source === cloudshell.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "bigquery"))
+    .filter((n): n is Extract<DiagramNode, { kind: "bigquery" }> => n != null);
+  const sqlInstances = edges
+    .filter((e) => e.kind === "cloudshell-sql" && e.source === cloudshell.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "sql"))
+    .filter((n): n is Extract<DiagramNode, { kind: "sql" }> => n != null);
+  const builds = edges
+    .filter((e) => e.kind === "cloudshell-build" && e.source === cloudshell.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "build"))
+    .filter((n): n is Extract<DiagramNode, { kind: "build" }> => n != null);
+
+  if (
+    projects.length === 0 &&
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    buckets.length === 0 &&
+    datasets.length === 0 &&
+    sqlInstances.length === 0 &&
+    builds.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue ao projeto GCP ou a recursos administrados (VM, GKE, Cloud Run,
+        Storage, BigQuery, Cloud SQL, Cloud Build).
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {projects.length > 0 ? (
+        <>
+          <dt>Projeto</dt>
+          <dd>{projects.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {buckets.length > 0 ? (
+        <>
+          <dt>Cloud Storage</dt>
+          <dd>{buckets.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {datasets.length > 0 ? (
+        <>
+          <dt>BigQuery</dt>
+          <dd>{datasets.map((d) => d.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {sqlInstances.length > 0 ? (
+        <>
+          <dt>Cloud SQL</dt>
+          <dd>{sqlInstances.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {builds.length > 0 ? (
+        <>
+          <dt>Cloud Build</dt>
+          <dd>{builds.map((b) => b.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

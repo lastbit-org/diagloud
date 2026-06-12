@@ -71,6 +71,7 @@ const SKIPPED_KINDS = new Set<ResourceKind>([
   "onprem",
   "github",
   "internet",
+  "cloudshell",
 ]);
 
 const TERRAFORM_FILE_ORDER = [

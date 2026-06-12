@@ -63,6 +63,7 @@ import {
   type OrgPolicyProps,
   type PscProps,
   type SecretManagerProps,
+  type CloudShellProps,
 } from "../types";
 
 export const DIAGRAM_STORAGE_KEY = "diagloud-diagram";
@@ -695,6 +696,13 @@ function parseGithubData(raw: unknown): GithubProps {
     name: raw.name,
     repository: raw.repository,
   };
+}
+
+function parseCloudShellData(raw: unknown): CloudShellProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Cloud Shell inválidos.");
+  }
+  return { name: raw.name };
 }
 
 const LOAD_BALANCER_TYPES = new Set<LoadBalancerType>(["external", "internal"]);
@@ -1369,6 +1377,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseSecretManagerData(data),
       };
+    case "cloudshell":
+      if (!nodeIdMatchesKind(nodeId, "cloudshell")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Shell.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "cloudshell",
+        position: parsedPosition,
+        zIndex,
+        data: parseCloudShellData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -1439,6 +1460,14 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "github-build" &&
     kind !== "github-run" &&
     kind !== "github-gke" &&
+    kind !== "cloudshell-project" &&
+    kind !== "cloudshell-vm" &&
+    kind !== "cloudshell-gke" &&
+    kind !== "cloudshell-run" &&
+    kind !== "cloudshell-storage" &&
+    kind !== "cloudshell-bigquery" &&
+    kind !== "cloudshell-sql" &&
+    kind !== "cloudshell-build" &&
     kind !== "pubsub-run" &&
     kind !== "pubsub-storage" &&
     kind !== "pubsub-bigquery" &&
@@ -1798,6 +1827,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.secretmanager === "string"
           ? patterns.secretmanager
           : DEFAULT_NAMING_PATTERNS.secretmanager,
+      cloudshell:
+        typeof patterns.cloudshell === "string"
+          ? patterns.cloudshell
+          : DEFAULT_NAMING_PATTERNS.cloudshell,
     },
   };
 }
@@ -1993,7 +2026,8 @@ function namingMetadataEqual(
     a.patterns.loadbalancer === b.patterns.loadbalancer &&
     a.patterns.orgpolicy === b.patterns.orgpolicy &&
     a.patterns.psc === b.patterns.psc &&
-    a.patterns.secretmanager === b.patterns.secretmanager
+    a.patterns.secretmanager === b.patterns.secretmanager &&
+    a.patterns.cloudshell === b.patterns.cloudshell
   );
 }
 
