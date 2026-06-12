@@ -4,6 +4,7 @@ import { sectionHeader } from "../hcl";
 
 const SKIPPED_CONNECTION_KINDS = new Set([
   "infocard-link",
+  "zone-link",
   "internet-nat",
   "internet-vpn",
   "internet-interconnect",

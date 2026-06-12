@@ -1,6 +1,7 @@
 import { NodeResizer, type NodeProps } from "@xyflow/react";
 import type { ZoneColorId } from "../../lib/zoneColors";
 import type { ZoneBorderStyle, ZoneBorderWidth } from "../../lib/zoneBorder";
+import { NodeHandles } from "./NodeHandles";
 import "./zones.css";
 
 export type ZoneNodeData = {
@@ -15,7 +16,7 @@ export type ZoneNodeData = {
 
 const DEFAULT_ZONE_LABEL = "Zona";
 
-export function ZoneNode({ data, selected }: NodeProps) {
+export function ZoneNode({ id, data, selected }: NodeProps) {
   const { label, colorId, borderWidth, borderStyle } = (data ?? {}) as ZoneNodeData;
   const displayName = label.trim() || DEFAULT_ZONE_LABEL;
 
@@ -34,6 +35,7 @@ export function ZoneNode({ data, selected }: NodeProps) {
       >
         <span className="gcp-zone__label">{displayName}</span>
       </div>
+      <NodeHandles nodeId={id} />
     </>
   );
 }

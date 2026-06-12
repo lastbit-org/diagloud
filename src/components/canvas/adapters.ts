@@ -1,6 +1,7 @@
 import type { Edge, Node } from "@xyflow/react";
 import { issueCountForNode, type DiagramIssue } from "../../model/validation";
 import { resolveEdgeHandles } from "../../lib/dynamicHandles";
+import { resolveEdgeLineStyle } from "../../lib/edgeLineStyle";
 import type { DiagramEdge, DiagramNode } from "../../types";
 import { resolveNodeZIndex } from "../../lib/nodeLayers";
 import type {
@@ -143,7 +144,7 @@ export function toFlowNode(
       position: node.position,
       selected,
       zIndex: resolveNodeZIndex(node),
-      connectable: false,
+      connectable: true,
       data: {
         kind: "zone",
         label: node.data.name,
@@ -265,6 +266,7 @@ export function toFlowNode(
 
 export function toFlowEdge(edge: DiagramEdge, selected = false): Edge {
   const { sourceHandle, targetHandle } = resolveEdgeHandles(edge);
+  const lineStyle = resolveEdgeLineStyle(edge.lineStyle);
   return {
     id: edge.id,
     type: "smoothstep",
@@ -273,6 +275,7 @@ export function toFlowEdge(edge: DiagramEdge, selected = false): Edge {
     sourceHandle,
     targetHandle,
     selected,
-    className: "gcp-edge",
+    className:
+      lineStyle === "dashed" ? "gcp-edge gcp-edge--dashed" : "gcp-edge",
   };
 }

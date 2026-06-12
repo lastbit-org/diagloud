@@ -1,4 +1,5 @@
 import type { NamingPatternByKind } from "./naming";
+import type { EdgeLineStyle } from "../lib/edgeLineStyle";
 import type {
   ArtifactProps,
   BuildProps,
@@ -110,6 +111,8 @@ export type DiagramEdge = {
   target: string;
   sourceHandle?: string;
   targetHandle?: string;
+  /** Estilo visual da linha (padrão: sólida). */
+  lineStyle?: EdgeLineStyle;
   kind:
     | "subnet-vpc"
     | "vm-subnet"
@@ -275,7 +278,8 @@ export type DiagramEdge = {
     | "build-secretmanager"
     | "airflow-secretmanager"
     | "secretmanager-kms"
-    | "infocard-link";
+    | "infocard-link"
+    | "zone-link";
 };
 
 export type DiagramNamingMetadata = {

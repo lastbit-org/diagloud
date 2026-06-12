@@ -47,6 +47,7 @@ import {
   sendNodeToBack,
 } from "../lib/nodeLayers";
 import { validateSubnetCidr } from "../model/subnet";
+import type { EdgeLineStyle } from "../lib/edgeLineStyle";
 import {
   cloneDiagramSnapshot,
   clearPropertyEditHistoryTimers,
@@ -185,6 +186,7 @@ type DiagramActions = {
   removeNode: (id: string) => void;
   addEdge: (edge: Omit<DiagramEdge, "id"> & { id?: string }) => void;
   removeEdge: (id: string) => void;
+  updateEdgeLineStyle: (id: string, lineStyle: EdgeLineStyle) => void;
   selectNode: (id: string | null) => void;
   selectEdge: (id: string | null) => void;
   clearSelection: () => void;
@@ -1187,6 +1189,20 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
           state.selectedEdgeId === id ? null : state.selectedEdgeId,
       };
     });
+  },
+
+  updateEdgeLineStyle: (id, lineStyle) => {
+    pushPropertyEditHistory(get, set);
+    set((state) => ({
+      edges: state.edges.map((edge) => {
+        if (edge.id !== id) return edge;
+        if (lineStyle === "solid") {
+          const { lineStyle: _removed, ...rest } = edge;
+          return rest;
+        }
+        return { ...edge, lineStyle: "dashed" };
+      }),
+    }));
   },
 
   selectNode: (id) =>

@@ -14,6 +14,13 @@ import {
   type ZoneBorderStyle,
   type ZoneBorderWidth,
 } from "../../lib/zoneBorder";
+import {
+  EDGE_LINE_STYLE_LABELS,
+  EDGE_LINE_STYLES,
+  resolveEdgeLineStyle,
+  type EdgeLineStyle,
+} from "../../lib/edgeLineStyle";
+import { GCP_RESOURCE_LABELS } from "../../assets/gcpIcons";
 import { useSelectedNode } from "../../hooks/useSelectedNode";
 import {
   countVmsOnSubnet,
@@ -25,6 +32,7 @@ import { getNodeDisplayName } from "../../lib/naming";
 import { useDiagramStore } from "../../store/diagramStore";
 import type {
   ArtifactFormat,
+  DiagramEdge,
   DiagramNode,
   RunAccessMode,
   SqlAccessMode,
@@ -38,6 +46,7 @@ import type {
   LoadBalancerType,
   IamVariant,
 } from "../../types";
+import { EDGE_ENDPOINTS } from "../../types/connections";
 import "./properties.css";
 
 function parseIamRolesText(text: string): string[] {
@@ -276,12 +285,18 @@ type PropertiesPanelProps = {
 
 export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
   const selectedNode = useSelectedNode();
+  const selectedEdgeId = useDiagramStore((s) => s.selectedEdgeId);
   const nodes = useDiagramStore((s) => s.nodes);
   const edges = useDiagramStore((s) => s.edges);
   const updateNodeData = useDiagramStore((s) => s.updateNodeData);
+  const updateEdgeLineStyle = useDiagramStore((s) => s.updateEdgeLineStyle);
   const bringNodeToFront = useDiagramStore((s) => s.bringNodeToFront);
   const sendNodeToBack = useDiagramStore((s) => s.sendNodeToBack);
   const selectNode = useDiagramStore((s) => s.selectNode);
+
+  const selectedEdge = selectedEdgeId
+    ? edges.find((edge) => edge.id === selectedEdgeId) ?? null
+    : null;
 
   const allSubnets = nodes.filter(
     (n): n is Extract<DiagramNode, { kind: "subnet" }> => n.kind === "subnet",
@@ -319,7 +334,17 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </div>
       )}
 
-      {!selectedNode && (
+      {selectedEdge && !selectedNode ? (
+        <EdgePropertiesPanel
+          edge={selectedEdge}
+          nodes={nodes}
+          onLineStyleChange={(lineStyle) =>
+            updateEdgeLineStyle(selectedEdge.id, lineStyle)
+          }
+        />
+      ) : null}
+
+      {!selectedNode && !selectedEdge && (
         <>
           <p className="properties-panel__empty">
             Selecione um recurso ou edite os CIDRs das sub-redes abaixo.
@@ -1980,9 +2005,10 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             </div>
           </div>
           <p className="properties-field__hint">
-            Arraste os cantos para redimensionar. A zona fica atrás dos recursos e
-            não aceita conexões.
+            Arraste os cantos para redimensionar. A zona fica atrás dos recursos.
+            Ligue recursos à zona para agrupá-los visualmente no diagrama.
           </p>
+          <ZoneLinksInfo zone={selectedNode} edges={edges} nodes={nodes} />
           <dl className="properties-stats">
             <dt>Tamanho</dt>
             <dd>
@@ -2093,7 +2119,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <p className="properties-field__hint">
             Cartão de identificação visual. Ligue a qualquer recurso para
-            anotar contexto (exceto zonas).
+            anotar contexto (incluindo zonas de agrupamento).
           </p>
           <InfocardLinksInfo
             infocard={selectedNode}
@@ -2207,6 +2233,70 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
     <aside className="properties-panel" aria-label="Propriedades">
       {content}
     </aside>
+  );
+}
+
+function edgeKindLabel(kind: DiagramEdge["kind"]): string {
+  const spec = EDGE_ENDPOINTS[kind];
+  if (!spec) return kind;
+  return `${GCP_RESOURCE_LABELS[spec.from]} → ${GCP_RESOURCE_LABELS[spec.to]}`;
+}
+
+function EdgePropertiesPanel({
+  edge,
+  nodes,
+  onLineStyleChange,
+}: {
+  edge: DiagramEdge;
+  nodes: DiagramNode[];
+  onLineStyleChange: (lineStyle: EdgeLineStyle) => void;
+}) {
+  const sourceNode = nodes.find((node) => node.id === edge.source);
+  const targetNode = nodes.find((node) => node.id === edge.target);
+  const lineStyle = resolveEdgeLineStyle(edge.lineStyle);
+
+  return (
+    <>
+      <dl className="properties-stats">
+        <dt>Tipo</dt>
+        <dd>{edgeKindLabel(edge.kind)}</dd>
+        {sourceNode ? (
+          <>
+            <dt>Origem</dt>
+            <dd>{getNodeDisplayName(sourceNode)}</dd>
+          </>
+        ) : null}
+        {targetNode ? (
+          <>
+            <dt>Destino</dt>
+            <dd>{getNodeDisplayName(targetNode)}</dd>
+          </>
+        ) : null}
+      </dl>
+      <div className="properties-field">
+        <span className="properties-field__label">Estilo da linha</span>
+        <div
+          className="zone-option-toggle"
+          role="radiogroup"
+          aria-label="Estilo da linha"
+        >
+          {EDGE_LINE_STYLES.map((style) => (
+            <button
+              key={style}
+              type="button"
+              className={`zone-option-toggle__btn${
+                lineStyle === style ? " zone-option-toggle__btn--selected" : ""
+              }`}
+              role="radio"
+              aria-checked={lineStyle === style}
+              onClick={() => onLineStyleChange(style)}
+            >
+              {EDGE_LINE_STYLE_LABELS[style]}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -6191,6 +6281,36 @@ function ProjectConnectionsInfo({
     <dl className="properties-stats">
       <dt>Pasta</dt>
       <dd>{parentFolders.map((f) => f.data.name).join(", ")}</dd>
+    </dl>
+  );
+}
+
+function ZoneLinksInfo({
+  zone,
+  edges,
+  nodes,
+}: {
+  zone: Extract<DiagramNode, { kind: "zone" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const linked = edges
+    .filter((e) => e.kind === "zone-link" && e.target === zone.id)
+    .map((e) => nodes.find((n) => n.id === e.source))
+    .filter((n): n is DiagramNode => n != null);
+
+  if (linked.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Ligue recursos a esta zona para documentar agrupamento no diagrama.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      <dt>Recursos ligados</dt>
+      <dd>{linked.map((n) => getNodeDisplayName(n)).join(", ")}</dd>
     </dl>
   );
 }

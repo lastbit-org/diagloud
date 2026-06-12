@@ -10,6 +10,8 @@ import { canAttachHostToSubnet } from "./subnetHosts";
 import { getSubnetNode } from "./subnet";
 import { resolveInfocardLinkKinds } from "../lib/infocardLinks";
 import { INFOCARD_LINK_EDGE_KIND } from "../lib/infocardLinks";
+import { resolveZoneLinkKinds } from "../lib/zoneLinks";
+import { ZONE_LINK_EDGE_KIND } from "../lib/zoneLinks";
 import { EDGE_ENDPOINTS } from "../types";
 import type { DiagramEdge, DiagramNode, ResourceKind } from "../types";
 
@@ -54,6 +56,8 @@ const NON_HIERARCHICAL_EDGE_KINDS = new Set<DiagramEdge["kind"]>([
   "run-secretmanager",
   "build-secretmanager",
   "airflow-secretmanager",
+  INFOCARD_LINK_EDGE_KIND,
+  ZONE_LINK_EDGE_KIND,
 ]);
 
 export type ConnectionInput = {
@@ -118,6 +122,16 @@ export function canonicalizeEdgeEndpoints(
       return { source: edge.source, target: edge.target };
     }
     if (targetNode.kind === "infocard") {
+      return { source: edge.target, target: edge.source };
+    }
+    return { source: edge.source, target: edge.target };
+  }
+
+  if (edge.kind === ZONE_LINK_EDGE_KIND) {
+    if (targetNode.kind === "zone") {
+      return { source: edge.source, target: edge.target };
+    }
+    if (sourceNode.kind === "zone") {
       return { source: edge.target, target: edge.source };
     }
     return { source: edge.source, target: edge.target };
@@ -196,6 +210,10 @@ export function getEdgeKind(
 ): DiagramEdge["kind"] | null {
   if (resolveInfocardLinkKinds(from, to)) {
     return INFOCARD_LINK_EDGE_KIND;
+  }
+
+  if (resolveZoneLinkKinds(from, to)) {
+    return ZONE_LINK_EDGE_KIND;
   }
 
   for (const [kind, endpoints] of Object.entries(EDGE_ENDPOINTS) as [
@@ -280,6 +298,17 @@ function normalizeConnectionDirection(
   let edgeKind = getEdgeKind(sourceNode.kind, targetNode.kind);
   if (edgeKind) {
     if (edgeKind === INFOCARD_LINK_EDGE_KIND && targetNode.kind === "infocard") {
+      return {
+        edgeKind,
+        connection: {
+          source: connection.target,
+          target: connection.source,
+          sourceHandle: connection.targetHandle,
+          targetHandle: connection.sourceHandle,
+        },
+      };
+    }
+    if (edgeKind === ZONE_LINK_EDGE_KIND && sourceNode.kind === "zone") {
       return {
         edgeKind,
         connection: {

@@ -38,6 +38,14 @@
   stroke-width: 2.25;
 }
 
+.diagram-canvas .react-flow__edge.gcp-edge--dashed .react-flow__edge-path {
+  stroke-dasharray: 8 5;
+}
+
+.diagram-canvas .react-flow__edge.selected.gcp-edge--dashed .react-flow__edge-path {
+  stroke-dasharray: 8 5;
+}
+
 /* Linha enquanto arrasta (fallback se o componente custom não aplicar) */
 .diagram-canvas .react-flow__connection.invalid path {
   stroke: #e53935;
@@ -146,6 +154,10 @@
 .diagram-canvas--exporting .react-flow__edge.selected .react-flow__edge-path {
   stroke: var(--edge-stroke);
   stroke-width: 1.75;
+}
+
+.diagram-canvas--exporting .react-flow__edge.gcp-edge--dashed .react-flow__edge-path {
+  stroke-dasharray: 8 5;
 }
 
 .diagram-canvas--exporting .react-flow__controls {

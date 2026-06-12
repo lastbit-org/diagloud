@@ -1561,6 +1561,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "airflow-secretmanager" &&
     kind !== "secretmanager-kms" &&
     kind !== "infocard-link" &&
+    kind !== "zone-link" &&
     kind !== "sql-vpc"
   ) {
     throw new DiagramParseError(`Tipo de aresta desconhecido: ${String(kind)}`);
@@ -1578,6 +1579,11 @@ function parseEdge(raw: unknown): DiagramEdge {
   }
   if (typeof targetHandle === "string") {
     parsed.targetHandle = targetHandle;
+  }
+
+  const lineStyle = raw.lineStyle;
+  if (lineStyle === "dashed") {
+    parsed.lineStyle = "dashed";
   }
 
   return parsed;

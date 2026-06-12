@@ -72,6 +72,7 @@ import type { ResourceKind } from "./resources";
  * - PSC → serviço gerenciado (ex.: Cloud SQL via service attachment)
  * - VM / GKE / Cloud Run → PSC (consumidores do endpoint)
  * - Compute e CI/CD → Secret Manager; Secret Manager → Cloud KMS (CMEK)
+ * - Recursos → Zona (`zone-link`): agrupamento visual no diagrama
  * - Pasta → Projeto (`folder-project`): projeto contido na pasta
  * - IAM → Projeto / Sub-rede / KMS / BigQuery: identidade e permissões
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
@@ -242,6 +243,7 @@ export const EDGE_ENDPOINTS = {
   "airflow-secretmanager": { from: "airflow", to: "secretmanager" },
   "secretmanager-kms": { from: "secretmanager", to: "kms" },
   "infocard-link": { from: "infocard", to: "vpc" },
+  "zone-link": { from: "vpc", to: "zone" },
 } as const satisfies Record<
   DiagramEdge["kind"],
   { from: ResourceKind; to: ResourceKind }

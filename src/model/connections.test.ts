@@ -193,7 +193,10 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("project", "folder")).toBeNull();
     expect(getEdgeKind("infocard", "vpc")).toBe("infocard-link");
     expect(getEdgeKind("vm", "infocard")).toBe("infocard-link");
-    expect(getEdgeKind("infocard", "zone")).toBeNull();
+    expect(getEdgeKind("infocard", "zone")).toBe("zone-link");
+    expect(getEdgeKind("vm", "zone")).toBe("zone-link");
+    expect(getEdgeKind("zone", "vpc")).toBe("zone-link");
+    expect(getEdgeKind("zone", "zone")).toBeNull();
     expect(getEdgeKind("infocard", "infocard")).toBe("infocard-link");
   });
 
