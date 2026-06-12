@@ -15,6 +15,7 @@ const KMS_EDGE_KINDS = [
   "airflow-kms",
   "dataflow-kms",
   "modelregistry-kms",
+  "secretmanager-kms",
   "iam-kms",
 ] as const;
 
@@ -28,6 +29,9 @@ export type ResolvedGraph = {
   vpcForVpn: Map<string, string>;
   vpcForInterconnect: Map<string, string>;
   vpcForPeering: Map<string, string[]>;
+  vpcForLoadBalancer: Map<string, string>;
+  vpcForPsc: Map<string, string>;
+  subnetForPsc: Map<string, string>;
   subnetForGke: Map<string, string>;
   subnetForRun: Map<string, string>;
   subnetForSql: Map<string, string>;
@@ -88,6 +92,15 @@ function applyEdge(
       graph.vpcForPeering.set(source, list);
       break;
     }
+    case "loadbalancer-vpc":
+      graph.vpcForLoadBalancer.set(source, target);
+      break;
+    case "psc-vpc":
+      graph.vpcForPsc.set(source, target);
+      break;
+    case "psc-subnet":
+      graph.subnetForPsc.set(source, target);
+      break;
     case "gke-subnet":
       graph.subnetForGke.set(source, target);
       break;
@@ -140,6 +153,9 @@ export function resolveGraph(document: DiagramDocument): ResolvedGraph {
     vpcForVpn: new Map(),
     vpcForInterconnect: new Map(),
     vpcForPeering: new Map(),
+    vpcForLoadBalancer: new Map(),
+    vpcForPsc: new Map(),
+    subnetForPsc: new Map(),
     subnetForGke: new Map(),
     subnetForRun: new Map(),
     subnetForSql: new Map(),

@@ -100,6 +100,10 @@ import type {
   PcUserProps,
   OnpremProps,
   GithubProps,
+  LoadBalancerProps,
+  OrgPolicyProps,
+  PscProps,
+  SecretManagerProps,
   IamProps,
 } from "../types";
 
@@ -164,6 +168,10 @@ type DiagramActions = {
       | Partial<PcUserProps>
       | Partial<OnpremProps>
       | Partial<GithubProps>
+      | Partial<LoadBalancerProps>
+      | Partial<OrgPolicyProps>
+      | Partial<PscProps>
+      | Partial<SecretManagerProps>
       | Partial<IamProps>,
   ) => void;
   updateNodeDimensions: (id: string, width: number, height: number) => void;
@@ -537,6 +545,36 @@ function buildNode<K extends ResourceKind>(
         kind: "github",
         data: { ...defaultResourceData("github", resourceContext), ...data },
       };
+    case "loadbalancer":
+      return {
+        ...base,
+        kind: "loadbalancer",
+        data: {
+          ...defaultResourceData("loadbalancer", resourceContext),
+          ...data,
+        },
+      };
+    case "orgpolicy":
+      return {
+        ...base,
+        kind: "orgpolicy",
+        data: { ...defaultResourceData("orgpolicy", resourceContext), ...data },
+      };
+    case "psc":
+      return {
+        ...base,
+        kind: "psc",
+        data: { ...defaultResourceData("psc", resourceContext), ...data },
+      };
+    case "secretmanager":
+      return {
+        ...base,
+        kind: "secretmanager",
+        data: {
+          ...defaultResourceData("secretmanager", resourceContext),
+          ...data,
+        },
+      };
   }
 }
 
@@ -579,6 +617,10 @@ function mergeNodeData(
     | Partial<PcUserProps>
     | Partial<OnpremProps>
     | Partial<GithubProps>
+    | Partial<LoadBalancerProps>
+    | Partial<OrgPolicyProps>
+    | Partial<PscProps>
+    | Partial<SecretManagerProps>
     | Partial<IamProps>,
 ): DiagramNode {
   switch (node.kind) {
@@ -781,6 +823,26 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<GithubProps>) },
+      };
+    case "loadbalancer":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<LoadBalancerProps>) },
+      };
+    case "orgpolicy":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<OrgPolicyProps>) },
+      };
+    case "psc":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<PscProps>) },
+      };
+    case "secretmanager":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<SecretManagerProps>) },
       };
   }
 }

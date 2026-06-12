@@ -1,4 +1,5 @@
 import {
+  findNode,
   nodesOfKind,
   vpcNodeForSubnet,
   type TerraformGenContext,
@@ -204,6 +205,48 @@ resource "google_compute_network_peering" "${resourceName}_b_to_a" {
   name         = "${escapeHclString(node.data.name)}-b-a"
   network      = google_compute_network.${vpcBName}.id
   peer_network = google_compute_network.${vpcAName}.id
+}`);
+  }
+
+  for (const node of nodesOfKind(ctx, "loadbalancer")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const vpcId = ctx.graph.vpcForLoadBalancer.get(node.id);
+    const vpcNode = vpcId ? findNode(ctx.document.nodes, vpcId) : undefined;
+    const networkBlock =
+      node.data.type === "internal" && vpcNode?.kind === "vpc"
+        ? `\n  network = google_compute_network.${ctx.getTfResourceName(vpcNode)}.id`
+        : "";
+
+    blocks.push(`resource "google_compute_forwarding_rule" "${resourceName}" {
+  name   = "${escapeHclString(node.data.name)}"
+  region = "${escapeHclString(node.data.region)}"${networkBlock}
+
+  # Tipo no diagrama: ${node.data.type}
+  load_balancing_scheme = "${node.data.type === "internal" ? "INTERNAL" : "EXTERNAL"}"
+}`);
+  }
+
+  for (const node of nodesOfKind(ctx, "psc")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const vpcId = ctx.graph.vpcForPsc.get(node.id);
+    const subnetId = ctx.graph.subnetForPsc.get(node.id);
+    const vpcNode = vpcId ? findNode(ctx.document.nodes, vpcId) : undefined;
+    const subnetNode = subnetId ? findNode(ctx.document.nodes, subnetId) : undefined;
+    const networkBlock =
+      vpcNode?.kind === "vpc" && subnetNode?.kind === "subnet"
+        ? `
+  network    = google_compute_network.${ctx.getTfResourceName(vpcNode)}.id
+  subnetwork = google_compute_subnetwork.${ctx.getTfResourceName(subnetNode)}.id`
+        : vpcNode?.kind === "vpc"
+          ? `\n  network = google_compute_network.${ctx.getTfResourceName(vpcNode)}.id`
+          : "";
+
+    blocks.push(`resource "google_compute_forwarding_rule" "${resourceName}" {
+  name   = "${escapeHclString(node.data.name)}"
+  region = "${escapeHclString(node.data.region)}"${networkBlock}
+
+  # Private Service Connect endpoint
+  load_balancing_scheme = "INTERNAL"
 }`);
   }
 

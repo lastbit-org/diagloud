@@ -45,6 +45,14 @@ const NON_HIERARCHICAL_EDGE_KINDS = new Set<DiagramEdge["kind"]>([
   "dns-vm",
   "dns-gke",
   "dns-dataflow",
+  "vm-psc",
+  "gke-psc",
+  "run-psc",
+  "vm-secretmanager",
+  "gke-secretmanager",
+  "run-secretmanager",
+  "build-secretmanager",
+  "airflow-secretmanager",
 ]);
 
 export type ConnectionInput = {

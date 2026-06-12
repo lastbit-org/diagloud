@@ -38,6 +38,10 @@ import infocardIcon from "./icons/infocard.svg";
 import pcUserIcon from "./icons/pc-user.svg";
 import onpremIcon from "./icons/onprem.svg";
 import githubIcon from "./github/github.svg";
+import loadBalancerIcon from "./google-cloud-legacy-icons/cloud_load_balancing/cloud_load_balancing.svg";
+import orgPolicyIcon from "./google-cloud-legacy-icons/policy_analyzer/policy_analyzer.svg";
+import pscIcon from "./google-cloud-legacy-icons/private_service_connect/private_service_connect.svg";
+import secretManagerIcon from "./google-cloud-legacy-icons/secret_manager/secret_manager.svg";
 
 /** Ícones oficiais GCP (legacy 24px). Sub-rede usa Cloud Network (sem ícone subnet no pacote). */
 export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
@@ -81,6 +85,10 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   pcuser: pcUserIcon,
   onprem: onpremIcon,
   github: githubIcon,
+  loadbalancer: loadBalancerIcon,
+  orgpolicy: orgPolicyIcon,
+  psc: pscIcon,
+  secretmanager: secretManagerIcon,
 };
 
 export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
@@ -124,4 +132,8 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   pcuser: "Usuário",
   onprem: "On-premises",
   github: "GitHub",
+  loadbalancer: "Cloud Load Balancing",
+  orgpolicy: "Organization Policy",
+  psc: "Private Service Connect",
+  secretmanager: "Secret Manager",
 };

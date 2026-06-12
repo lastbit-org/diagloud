@@ -40,6 +40,10 @@ import type {
   OnpremProps,
   GithubProps,
   IamProps,
+  LoadBalancerProps,
+  OrgPolicyProps,
+  PscProps,
+  SecretManagerProps,
 } from "./resources";
 
 export const DIAGRAM_DOCUMENT_VERSION = 1 as const;
@@ -94,7 +98,11 @@ export type DiagramNode =
   | (NodeBase & { kind: "pcuser"; data: PcUserProps })
   | (NodeBase & { kind: "onprem"; data: OnpremProps })
   | (NodeBase & { kind: "github"; data: GithubProps })
-  | (NodeBase & { kind: "iam"; data: IamProps });
+  | (NodeBase & { kind: "iam"; data: IamProps })
+  | (NodeBase & { kind: "loadbalancer"; data: LoadBalancerProps })
+  | (NodeBase & { kind: "orgpolicy"; data: OrgPolicyProps })
+  | (NodeBase & { kind: "psc"; data: PscProps })
+  | (NodeBase & { kind: "secretmanager"; data: SecretManagerProps });
 
 export type DiagramEdge = {
   id: string;
@@ -249,6 +257,25 @@ export type DiagramEdge = {
     | "iam-subnet"
     | "iam-kms"
     | "iam-bigquery"
+    | "internet-loadbalancer"
+    | "loadbalancer-vm"
+    | "loadbalancer-gke"
+    | "loadbalancer-run"
+    | "loadbalancer-vpc"
+    | "orgpolicy-folder"
+    | "orgpolicy-project"
+    | "psc-vpc"
+    | "psc-subnet"
+    | "psc-sql"
+    | "vm-psc"
+    | "gke-psc"
+    | "run-psc"
+    | "vm-secretmanager"
+    | "gke-secretmanager"
+    | "run-secretmanager"
+    | "build-secretmanager"
+    | "airflow-secretmanager"
+    | "secretmanager-kms"
     | "infocard-link";
 };
 

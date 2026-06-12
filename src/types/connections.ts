@@ -65,7 +65,11 @@ import type { ResourceKind } from "./resources";
  * - Pub/Sub → Cloud Dataflow (`pubsub-dataflow`): entrada streaming
  * - Vertex AI Workbench / Cloud Build → Model Registry: registro de modelos
  * - Model Registry → Cloud Run / GKE / Storage / Cloud KMS: deploy e artefatos
- * - Pasta → Pasta (`folder-folder`): hierarquia organizacional
+ * - Organization Policy → Pasta / Projeto (opcional; pode ficar isolada no diagrama)
+ * - Cloud Load Balancing → VM / GKE / Cloud Run / VPC (backends e LB interno)
+ * - Internet → Cloud Load Balancing (entrada pública)
+ * - Private Service Connect → VPC / Sub-rede / Cloud SQL; consumido por VM / GKE / Cloud Run
+ * - Compute e CI/CD → Secret Manager; Secret Manager → Cloud KMS (CMEK)
  * - Pasta → Projeto (`folder-project`): projeto contido na pasta
  * - IAM → Projeto / Sub-rede / KMS / BigQuery: identidade e permissões
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
@@ -217,6 +221,25 @@ export const EDGE_ENDPOINTS = {
   "iam-subnet": { from: "iam", to: "subnet" },
   "iam-kms": { from: "iam", to: "kms" },
   "iam-bigquery": { from: "iam", to: "bigquery" },
+  "internet-loadbalancer": { from: "internet", to: "loadbalancer" },
+  "loadbalancer-vm": { from: "loadbalancer", to: "vm" },
+  "loadbalancer-gke": { from: "loadbalancer", to: "gke" },
+  "loadbalancer-run": { from: "loadbalancer", to: "run" },
+  "loadbalancer-vpc": { from: "loadbalancer", to: "vpc" },
+  "orgpolicy-folder": { from: "orgpolicy", to: "folder" },
+  "orgpolicy-project": { from: "orgpolicy", to: "project" },
+  "psc-vpc": { from: "psc", to: "vpc" },
+  "psc-subnet": { from: "psc", to: "subnet" },
+  "psc-sql": { from: "psc", to: "sql" },
+  "vm-psc": { from: "vm", to: "psc" },
+  "gke-psc": { from: "gke", to: "psc" },
+  "run-psc": { from: "run", to: "psc" },
+  "vm-secretmanager": { from: "vm", to: "secretmanager" },
+  "gke-secretmanager": { from: "gke", to: "secretmanager" },
+  "run-secretmanager": { from: "run", to: "secretmanager" },
+  "build-secretmanager": { from: "build", to: "secretmanager" },
+  "airflow-secretmanager": { from: "airflow", to: "secretmanager" },
+  "secretmanager-kms": { from: "secretmanager", to: "kms" },
   "infocard-link": { from: "infocard", to: "vpc" },
 } as const satisfies Record<
   DiagramEdge["kind"],

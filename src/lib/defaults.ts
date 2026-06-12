@@ -46,6 +46,10 @@ import type {
   OnpremProps,
   IamProps,
   GithubProps,
+  LoadBalancerProps,
+  OrgPolicyProps,
+  PscProps,
+  SecretManagerProps,
 } from "../types";
 
 export function defaultResourceData<K extends ResourceKind>(
@@ -271,6 +275,27 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         repository: "org/repository",
       } as GithubProps as ResourcePropsByKind[K];
+    case "loadbalancer":
+      return {
+        name,
+        type: "external",
+        region: "southamerica-east1",
+      } as LoadBalancerProps as ResourcePropsByKind[K];
+    case "orgpolicy":
+      return {
+        name,
+        constraintId: "constraints/compute.disableSerialPortAccess",
+      } as OrgPolicyProps as ResourcePropsByKind[K];
+    case "psc":
+      return {
+        name,
+        region: "southamerica-east1",
+      } as PscProps as ResourcePropsByKind[K];
+    case "secretmanager":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as SecretManagerProps as ResourcePropsByKind[K];
   }
 }
 
@@ -357,5 +382,13 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `onprem-${count}`;
     case "github":
       return `github-${count}`;
+    case "loadbalancer":
+      return `lb-${count}`;
+    case "orgpolicy":
+      return `orgpol-${count}`;
+    case "psc":
+      return `psc-${count}`;
+    case "secretmanager":
+      return `secret-${count}`;
   }
 }

@@ -58,6 +58,11 @@ import {
   type PcUserProps,
   type OnpremProps,
   type GithubProps,
+  type LoadBalancerProps,
+  type LoadBalancerType,
+  type OrgPolicyProps,
+  type PscProps,
+  type SecretManagerProps,
 } from "../types";
 
 export const DIAGRAM_STORAGE_KEY = "diagloud-diagram";
@@ -692,6 +697,71 @@ function parseGithubData(raw: unknown): GithubProps {
   };
 }
 
+const LOAD_BALANCER_TYPES = new Set<LoadBalancerType>(["external", "internal"]);
+
+function parseLoadBalancerData(raw: unknown): LoadBalancerProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Cloud Load Balancing inválidos.");
+  }
+  const type =
+    raw.type === "internal" || raw.type === "external"
+      ? raw.type
+      : "external";
+  if (!LOAD_BALANCER_TYPES.has(type)) {
+    throw new DiagramParseError("Dados de Cloud Load Balancing inválidos.");
+  }
+  return {
+    name: raw.name,
+    type,
+    region:
+      typeof raw.region === "string" && raw.region.trim()
+        ? raw.region
+        : "southamerica-east1",
+  };
+}
+
+function parseOrgPolicyData(raw: unknown): OrgPolicyProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.constraintId !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Organization Policy inválidos.");
+  }
+  return {
+    name: raw.name,
+    constraintId: raw.constraintId,
+  };
+}
+
+function parsePscData(raw: unknown): PscProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.region !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Private Service Connect inválidos.");
+  }
+  return {
+    name: raw.name,
+    region: raw.region,
+  };
+}
+
+function parseSecretManagerData(raw: unknown): SecretManagerProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Secret Manager inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
+  };
+}
+
 function parseZoneData(raw: unknown): ZoneProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de zona inválidos.");
@@ -1246,6 +1316,58 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseGithubData(data),
       };
+    case "loadbalancer":
+      if (!nodeIdMatchesKind(nodeId, "loadbalancer")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Load Balancing.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "loadbalancer",
+        position: parsedPosition,
+        zIndex,
+        data: parseLoadBalancerData(data),
+      };
+    case "orgpolicy":
+      if (!nodeIdMatchesKind(nodeId, "orgpolicy")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Organization Policy.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "orgpolicy",
+        position: parsedPosition,
+        zIndex,
+        data: parseOrgPolicyData(data),
+      };
+    case "psc":
+      if (!nodeIdMatchesKind(nodeId, "psc")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Private Service Connect.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "psc",
+        position: parsedPosition,
+        zIndex,
+        data: parsePscData(data),
+      };
+    case "secretmanager":
+      if (!nodeIdMatchesKind(nodeId, "secretmanager")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Secret Manager.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "secretmanager",
+        position: parsedPosition,
+        zIndex,
+        data: parseSecretManagerData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -1419,6 +1541,25 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "iam-subnet" &&
     kind !== "iam-kms" &&
     kind !== "iam-bigquery" &&
+    kind !== "internet-loadbalancer" &&
+    kind !== "loadbalancer-vm" &&
+    kind !== "loadbalancer-gke" &&
+    kind !== "loadbalancer-run" &&
+    kind !== "loadbalancer-vpc" &&
+    kind !== "orgpolicy-folder" &&
+    kind !== "orgpolicy-project" &&
+    kind !== "psc-vpc" &&
+    kind !== "psc-subnet" &&
+    kind !== "psc-sql" &&
+    kind !== "vm-psc" &&
+    kind !== "gke-psc" &&
+    kind !== "run-psc" &&
+    kind !== "vm-secretmanager" &&
+    kind !== "gke-secretmanager" &&
+    kind !== "run-secretmanager" &&
+    kind !== "build-secretmanager" &&
+    kind !== "airflow-secretmanager" &&
+    kind !== "secretmanager-kms" &&
     kind !== "infocard-link" &&
     kind !== "sql-vpc"
   ) {
@@ -1635,6 +1776,22 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.github === "string"
           ? patterns.github
           : DEFAULT_NAMING_PATTERNS.github,
+      loadbalancer:
+        typeof patterns.loadbalancer === "string"
+          ? patterns.loadbalancer
+          : DEFAULT_NAMING_PATTERNS.loadbalancer,
+      orgpolicy:
+        typeof patterns.orgpolicy === "string"
+          ? patterns.orgpolicy
+          : DEFAULT_NAMING_PATTERNS.orgpolicy,
+      psc:
+        typeof patterns.psc === "string"
+          ? patterns.psc
+          : DEFAULT_NAMING_PATTERNS.psc,
+      secretmanager:
+        typeof patterns.secretmanager === "string"
+          ? patterns.secretmanager
+          : DEFAULT_NAMING_PATTERNS.secretmanager,
     },
   };
 }
@@ -1826,7 +1983,11 @@ function namingMetadataEqual(
     a.patterns.infocard === b.patterns.infocard &&
     a.patterns.pcuser === b.patterns.pcuser &&
     a.patterns.onprem === b.patterns.onprem &&
-    a.patterns.github === b.patterns.github
+    a.patterns.github === b.patterns.github &&
+    a.patterns.loadbalancer === b.patterns.loadbalancer &&
+    a.patterns.orgpolicy === b.patterns.orgpolicy &&
+    a.patterns.psc === b.patterns.psc &&
+    a.patterns.secretmanager === b.patterns.secretmanager
   );
 }
 

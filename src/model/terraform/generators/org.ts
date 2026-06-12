@@ -38,5 +38,20 @@ export function generateOrgTerraform(ctx: TerraformGenContext): string {
 }`);
   }
 
+  for (const node of nodesOfKind(ctx, "orgpolicy")) {
+    const resourceName = ctx.getTfResourceName(node);
+
+    blocks.push(`resource "google_org_policy_policy" "${resourceName}" {
+  name   = "${escapeHclString(node.data.constraintId.startsWith("organizations/") ? node.data.constraintId : `organizations/\${var.organization_id}/policies/${node.data.constraintId.replace(/^constraints\//, "")}`)}"
+  parent = "organizations/\${var.organization_id}"
+
+  spec {
+    rules {
+      enforce = true
+    }
+  }
+}`);
+  }
+
   return blocks.length > 1 ? blocks.join("\n\n") : "";
 }

@@ -55,6 +55,10 @@ const EXPORTABLE_KINDS = new Set<ResourceKind>([
   "airflow",
   "dataflow",
   "modelregistry",
+  "loadbalancer",
+  "psc",
+  "secretmanager",
+  "orgpolicy",
   "folder",
   "project",
 ]);

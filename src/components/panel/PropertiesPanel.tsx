@@ -35,6 +35,7 @@ import type {
   StorageClass,
   SparkDeployMode,
   DataflowPipelineType,
+  LoadBalancerType,
   IamVariant,
 } from "../../types";
 import "./properties.css";
@@ -1604,6 +1605,141 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             />
           </div>
           <KmsConsumersInfo kms={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
+      {selectedNode?.kind === "secretmanager" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="secretmanager-name">Secret</label>
+            <input
+              id="secretmanager-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="secretmanager-location">Localização</label>
+            <input
+              id="secretmanager-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1 ou global"
+            />
+          </div>
+          <SecretManagerConsumersInfo
+            secretmanager={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "loadbalancer" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="loadbalancer-name">Balanceador</label>
+            <input
+              id="loadbalancer-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="loadbalancer-type">Tipo</label>
+            <select
+              id="loadbalancer-type"
+              value={selectedNode.data.type}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  type: e.target.value as LoadBalancerType,
+                })
+              }
+            >
+              <option value="external">Externo (público)</option>
+              <option value="internal">Interno (VPC)</option>
+            </select>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="loadbalancer-region">Região</label>
+            <input
+              id="loadbalancer-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <LoadBalancerConnectionsInfo
+            loadbalancer={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "orgpolicy" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="orgpolicy-name">Nome</label>
+            <input
+              id="orgpolicy-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="orgpolicy-constraint">Constraint</label>
+            <input
+              id="orgpolicy-constraint"
+              value={selectedNode.data.constraintId}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  constraintId: e.target.value,
+                })
+              }
+              placeholder="constraints/compute.disableSerialPortAccess"
+            />
+          </div>
+          <OrgPolicyScopeInfo
+            orgpolicy={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "psc" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="psc-name">Endpoint</label>
+            <input
+              id="psc-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="psc-region">Região</label>
+            <input
+              id="psc-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <PscConnectionsInfo psc={selectedNode} edges={edges} nodes={nodes} />
         </>
       )}
 
@@ -4990,6 +5126,14 @@ function KmsConsumersInfo({
     .filter((e) => e.kind === "iam-kms" && e.target === kms.id)
     .map((e) => nodes.find((n) => n.id === e.source && n.kind === "iam"))
     .filter((n): n is Extract<DiagramNode, { kind: "iam" }> => n != null);
+  const secrets = edges
+    .filter((e) => e.kind === "secretmanager-kms" && e.target === kms.id)
+    .map((e) =>
+      nodes.find((n) => n.id === e.source && n.kind === "secretmanager"),
+    )
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "secretmanager" }> => n != null,
+    );
 
   if (
     vms.length === 0 &&
@@ -5004,13 +5148,14 @@ function KmsConsumersInfo({
     airflowEnvs.length === 0 &&
     dataflowJobs.length === 0 &&
     modelRegistries.length === 0 &&
-    iams.length === 0
+    iams.length === 0 &&
+    secrets.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         Ligue VMs, GKE, Cloud Run, Storage, Cloud SQL, BigQuery, Firestore,
-        Spanner, Apache Spark, Managed Airflow, Cloud Dataflow, Model Registry
-        ou IAM para documentar uso de chaves (CMEK).
+        Spanner, Apache Spark, Managed Airflow, Cloud Dataflow, Model Registry,
+        Secret Manager ou IAM para documentar uso de chaves (CMEK).
       </p>
     );
   }
@@ -5093,6 +5238,343 @@ function KmsConsumersInfo({
         <>
           <dt>IAM</dt>
           <dd>{iams.map((i) => i.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {secrets.length > 0 ? (
+        <>
+          <dt>Secret Manager</dt>
+          <dd>{secrets.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function SecretManagerConsumersInfo({
+  secretmanager,
+  edges,
+  nodes,
+}: {
+  secretmanager: Extract<DiagramNode, { kind: "secretmanager" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vms = edges
+    .filter(
+      (e) => e.kind === "vm-secretmanager" && e.target === secretmanager.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter(
+      (e) => e.kind === "gke-secretmanager" && e.target === secretmanager.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter(
+      (e) => e.kind === "run-secretmanager" && e.target === secretmanager.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const builds = edges
+    .filter(
+      (e) => e.kind === "build-secretmanager" && e.target === secretmanager.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "build"))
+    .filter((n): n is Extract<DiagramNode, { kind: "build" }> => n != null);
+  const airflowEnvs = edges
+    .filter(
+      (e) =>
+        e.kind === "airflow-secretmanager" && e.target === secretmanager.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "airflow"))
+    .filter((n): n is Extract<DiagramNode, { kind: "airflow" }> => n != null);
+  const kmsKeys = edges
+    .filter(
+      (e) => e.kind === "secretmanager-kms" && e.source === secretmanager.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "kms"))
+    .filter((n): n is Extract<DiagramNode, { kind: "kms" }> => n != null);
+
+  if (
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    builds.length === 0 &&
+    airflowEnvs.length === 0 &&
+    kmsKeys.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue VMs, GKE, Cloud Run, Cloud Build ou Managed Airflow para
+        documentar consumo de segredos; Cloud KMS para CMEK.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {builds.length > 0 ? (
+        <>
+          <dt>Cloud Build</dt>
+          <dd>{builds.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {airflowEnvs.length > 0 ? (
+        <>
+          <dt>Managed Airflow</dt>
+          <dd>{airflowEnvs.map((a) => a.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {kmsKeys.length > 0 ? (
+        <>
+          <dt>Cloud KMS</dt>
+          <dd>{kmsKeys.map((k) => k.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function LoadBalancerConnectionsInfo({
+  loadbalancer,
+  edges,
+  nodes,
+}: {
+  loadbalancer: Extract<DiagramNode, { kind: "loadbalancer" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const internet = edges.find(
+    (e) => e.kind === "internet-loadbalancer" && e.target === loadbalancer.id,
+  );
+  const vms = edges
+    .filter((e) => e.kind === "loadbalancer-vm" && e.source === loadbalancer.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "loadbalancer-gke" && e.source === loadbalancer.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "loadbalancer-run" && e.source === loadbalancer.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const vpcEdge = edges.find(
+    (e) => e.kind === "loadbalancer-vpc" && e.source === loadbalancer.id,
+  );
+  const vpc = vpcEdge
+    ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+
+  if (
+    !internet &&
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    !vpc
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à Internet (LB externo), VPC (LB interno) e backends VM, GKE ou
+        Cloud Run.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {internet ? (
+        <>
+          <dt>Internet</dt>
+          <dd>Entrada pública</dd>
+        </>
+      ) : null}
+      {vpc && vpc.kind === "vpc" ? (
+        <>
+          <dt>VPC</dt>
+          <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs (backend)</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE (backend)</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run (backend)</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function OrgPolicyScopeInfo({
+  orgpolicy,
+  edges,
+  nodes,
+}: {
+  orgpolicy: Extract<DiagramNode, { kind: "orgpolicy" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const folders = edges
+    .filter((e) => e.kind === "orgpolicy-folder" && e.source === orgpolicy.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "folder"))
+    .filter((n): n is Extract<DiagramNode, { kind: "folder" }> => n != null);
+  const projects = edges
+    .filter((e) => e.kind === "orgpolicy-project" && e.source === orgpolicy.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "project"))
+    .filter((n): n is Extract<DiagramNode, { kind: "project" }> => n != null);
+
+  if (folders.length === 0 && projects.length === 0) {
+    return (
+      <p className="properties-field__hint">
+        Recurso independente — ligue opcionalmente a pastas ou projetos para
+        documentar escopo da política.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {folders.length > 0 ? (
+        <>
+          <dt>Pastas</dt>
+          <dd>{folders.map((f) => f.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {projects.length > 0 ? (
+        <>
+          <dt>Projetos</dt>
+          <dd>{projects.map((p) => p.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function PscConnectionsInfo({
+  psc,
+  edges,
+  nodes,
+}: {
+  psc: Extract<DiagramNode, { kind: "psc" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vpcEdge = edges.find((e) => e.kind === "psc-vpc" && e.source === psc.id);
+  const subnetEdge = edges.find(
+    (e) => e.kind === "psc-subnet" && e.source === psc.id,
+  );
+  const sqlEdges = edges.filter(
+    (e) => e.kind === "psc-sql" && e.source === psc.id,
+  );
+  const vms = edges
+    .filter((e) => e.kind === "vm-psc" && e.target === psc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "gke-psc" && e.target === psc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "run-psc" && e.target === psc.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+
+  const vpc = vpcEdge
+    ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+  const subnet = subnetEdge
+    ? nodes.find((n) => n.id === subnetEdge.target && n.kind === "subnet")
+    : undefined;
+
+  if (
+    !vpc &&
+    !subnet &&
+    sqlEdges.length === 0 &&
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à VPC, sub-rede, Cloud SQL ou consumidores (VM, GKE, Cloud Run).
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {vpc && vpc.kind === "vpc" ? (
+        <>
+          <dt>VPC</dt>
+          <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {subnet && subnet.kind === "subnet" ? (
+        <>
+          <dt>Sub-rede</dt>
+          <dd>{subnet.data.name}</dd>
+        </>
+      ) : null}
+      {sqlEdges.length > 0 ? (
+        <>
+          <dt>Cloud SQL</dt>
+          <dd>
+            {sqlEdges
+              .map((e) => nodes.find((n) => n.id === e.target && n.kind === "sql"))
+              .filter((n): n is Extract<DiagramNode, { kind: "sql" }> => n != null)
+              .map((s) => s.data.name)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

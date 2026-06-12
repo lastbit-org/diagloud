@@ -108,6 +108,18 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "modelregistry") {
     return node.data.location;
   }
+  if (node.kind === "loadbalancer") {
+    return node.data.type === "internal" ? "Interno" : node.data.region;
+  }
+  if (node.kind === "orgpolicy") {
+    return node.data.constraintId;
+  }
+  if (node.kind === "psc") {
+    return node.data.region;
+  }
+  if (node.kind === "secretmanager") {
+    return node.data.location;
+  }
   if (node.kind === "onprem") {
     return node.data.location;
   }

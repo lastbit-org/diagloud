@@ -1,4 +1,4 @@
-import { nodesOfKind, type TerraformGenContext } from "../context";
+import { kmsKeyReference, nodesOfKind, type TerraformGenContext } from "../context";
 import { escapeHclString, sectionHeader } from "../hcl";
 
 const ARTIFACT_FORMAT_MAP = {
@@ -35,6 +35,31 @@ resource "google_kms_crypto_key" "${resourceName}_key" {
   key_ring = google_kms_key_ring.${resourceName}.id
 
   rotation_period = "7776000s"
+}`);
+  }
+
+  for (const node of nodesOfKind(ctx, "secretmanager")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const kmsRef = kmsKeyReference(ctx, node.id);
+    const replication = kmsRef
+      ? `
+  replication {
+    user_managed {
+      replicas {
+        location = "${escapeHclString(node.data.location)}"
+        customer_managed_encryption {
+          kms_key_name = ${kmsRef}
+        }
+      }
+    }
+  }`
+      : `
+  replication {
+    auto {}
+  }`;
+
+    blocks.push(`resource "google_secret_manager_secret" "${resourceName}" {
+  secret_id = "${escapeHclString(node.data.name)}"${replication}
 }`);
   }
 

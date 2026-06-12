@@ -41,7 +41,11 @@ export type ResourceKind =
   | "pcuser"
   | "onprem"
   | "github"
-  | "iam";
+  | "iam"
+  | "loadbalancer"
+  | "orgpolicy"
+  | "psc"
+  | "secretmanager";
 
 export type RunAccessMode = "public" | "vpc";
 
@@ -342,6 +346,33 @@ export type GithubProps = {
   repository: string;
 };
 
+export type LoadBalancerType = "external" | "internal";
+
+export type LoadBalancerProps = {
+  name: string;
+  type: LoadBalancerType;
+  region: string;
+};
+
+export type OrgPolicyProps = {
+  /** Nome no diagrama. */
+  name: string;
+  /** ID da constraint (ex.: constraints/compute.disableSerialPortAccess). */
+  constraintId: string;
+};
+
+export type PscProps = {
+  /** Nome do endpoint ou service attachment. */
+  name: string;
+  region: string;
+};
+
+export type SecretManagerProps = {
+  /** Nome do secret. */
+  name: string;
+  location: string;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
@@ -383,4 +414,8 @@ export type ResourcePropsByKind = {
   onprem: OnpremProps;
   github: GithubProps;
   iam: IamProps;
+  loadbalancer: LoadBalancerProps;
+  orgpolicy: OrgPolicyProps;
+  psc: PscProps;
+  secretmanager: SecretManagerProps;
 };

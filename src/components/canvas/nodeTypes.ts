@@ -39,6 +39,10 @@ import {
   OnpremNode,
   GithubNode,
   IamNode,
+  LoadBalancerNode,
+  OrgPolicyNode,
+  PscNode,
+  SecretManagerNode,
 } from "../nodes";
 
 export const nodeTypes = {
@@ -82,4 +86,8 @@ export const nodeTypes = {
   onprem: OnpremNode,
   github: GithubNode,
   iam: IamNode,
+  loadbalancer: LoadBalancerNode,
+  orgpolicy: OrgPolicyNode,
+  psc: PscNode,
+  secretmanager: SecretManagerNode,
 };

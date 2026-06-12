@@ -90,7 +90,14 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "pcuser" ||
     value === "onprem" ||
     value === "github" ||
-    value === "iam"
+    value === "iam" ||
+    value === "bigtable" ||
+    value === "firebase" ||
+    value === "notebook" ||
+    value === "loadbalancer" ||
+    value === "orgpolicy" ||
+    value === "psc" ||
+    value === "secretmanager"
   );
 }
 
@@ -118,6 +125,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.project,
     description: "Projeto GCP (container de recursos)",
     icon: GCP_RESOURCE_ICONS.project,
+  },
+  {
+    paletteKey: "orgpolicy",
+    kind: "orgpolicy",
+    category: "management",
+    label: GCP_RESOURCE_LABELS.orgpolicy,
+    description: "Constraint de política organizacional (opcional no diagrama)",
+    icon: GCP_RESOURCE_ICONS.orgpolicy,
   },
   {
     paletteKey: "infocard",
@@ -280,6 +295,22 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.dns,
   },
   {
+    paletteKey: "loadbalancer",
+    kind: "loadbalancer",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.loadbalancer,
+    description: "Balanceamento de carga HTTP(S), TCP ou interno",
+    icon: GCP_RESOURCE_ICONS.loadbalancer,
+  },
+  {
+    paletteKey: "psc",
+    kind: "psc",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.psc,
+    description: "Conectividade privada a serviços Google ou de terceiros",
+    icon: GCP_RESOURCE_ICONS.psc,
+  },
+  {
     paletteKey: "run",
     kind: "run",
     category: "serverless",
@@ -390,6 +421,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.kms,
     description: "Chaves de criptografia gerenciadas (CMEK)",
     icon: GCP_RESOURCE_ICONS.kms,
+  },
+  {
+    paletteKey: "secretmanager",
+    kind: "secretmanager",
+    category: "security",
+    label: GCP_RESOURCE_LABELS.secretmanager,
+    description: "Armazenamento de segredos e credenciais",
+    icon: GCP_RESOURCE_ICONS.secretmanager,
   },
   {
     paletteKey: "pcuser",

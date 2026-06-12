@@ -48,6 +48,10 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   onprem: "onprem-AREA-AMBIENTE",
   github: "github-AREA-AMBIENTE",
   iam: "iam-AREA-AMBIENTE",
+  loadbalancer: "lb-AREA-AMBIENTE",
+  orgpolicy: "orgpol-AREA-AMBIENTE",
+  psc: "psc-AREA-AMBIENTE",
+  secretmanager: "secret-AREA-AMBIENTE",
 };
 
 export const NAMING_TOKEN_HINTS = [

@@ -174,6 +174,14 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `onprem-${count}`;
     case "github":
       return `github-${count}`;
+    case "loadbalancer":
+      return `lb-${count}`;
+    case "orgpolicy":
+      return `orgpol-${count}`;
+    case "psc":
+      return `psc-${count}`;
+    case "secretmanager":
+      return `secret-${count}`;
   }
 }
 
