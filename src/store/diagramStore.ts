@@ -39,6 +39,10 @@ import {
   clearPscNetwork,
   reassignSubnetPscIps,
 } from "../model/pscSubnet";
+import {
+  clearMemorystoreNetwork,
+  reassignSubnetMemorystoreIps,
+} from "../model/memorystoreSubnet";
 import { resolveEdgeHandles } from "../lib/dynamicHandles";
 import { validateConnection } from "../model/connections";
 import {
@@ -112,6 +116,7 @@ import type {
   SecretManagerProps,
   CertificateManagerProps,
   ApigeeProps,
+  MemorystoreProps,
   CloudShellProps,
   IamProps,
 } from "../types";
@@ -184,6 +189,7 @@ type DiagramActions = {
       | Partial<SecretManagerProps>
       | Partial<CertificateManagerProps>
       | Partial<ApigeeProps>
+      | Partial<MemorystoreProps>
       | Partial<CloudShellProps>
       | Partial<IamProps>,
   ) => void;
@@ -616,6 +622,15 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "memorystore":
+      return {
+        ...base,
+        kind: "memorystore",
+        data: {
+          ...defaultResourceData("memorystore", resourceContext),
+          ...data,
+        },
+      };
     case "cloudshell":
       return {
         ...base,
@@ -673,6 +688,7 @@ function mergeNodeData(
     | Partial<SecretManagerProps>
     | Partial<CertificateManagerProps>
     | Partial<ApigeeProps>
+    | Partial<MemorystoreProps>
     | Partial<CloudShellProps>
     | Partial<IamProps>,
 ): DiagramNode {
@@ -915,6 +931,11 @@ function mergeNodeData(
         ...node,
         data: { ...node.data, ...(patch as Partial<ApigeeProps>) },
       };
+    case "memorystore":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<MemorystoreProps>) },
+      };
     case "cloudshell":
       return {
         ...node,
@@ -935,6 +956,7 @@ function reassignSubnetHostIps(
   next = reassignSubnetWorkbenchIps(subnetId, next, edges);
   next = reassignSubnetNotebookIps(subnetId, next, edges);
   next = reassignSubnetPscIps(subnetId, next, edges);
+  next = reassignSubnetMemorystoreIps(subnetId, next, edges);
   return next;
 }
 
@@ -1113,7 +1135,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
             edge.kind === "run-subnet" ||
             edge.kind === "workbench-subnet" ||
             edge.kind === "notebook-subnet" ||
-            edge.kind === "psc-subnet") &&
+            edge.kind === "psc-subnet" ||
+            edge.kind === "memorystore-subnet") &&
           (edge.source === id || edge.target === id)
         ) {
           affectedSubnetIds.add(edge.target);
@@ -1179,6 +1202,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         next.kind === "workbench-subnet" ||
         next.kind === "notebook-subnet" ||
         next.kind === "psc-subnet" ||
+        next.kind === "memorystore-subnet" ||
         next.kind === "spark-subnet" ||
         next.kind === "airflow-subnet" ||
         next.kind === "dataflow-subnet"
@@ -1249,6 +1273,11 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
       if (removed?.kind === "psc-subnet") {
         nodes = clearPscNetwork(removed.source, nodes);
+        nodes = reassignSubnetHostIps(removed.target, nodes, edges);
+      }
+
+      if (removed?.kind === "memorystore-subnet") {
+        nodes = clearMemorystoreNetwork(removed.source, nodes);
         nodes = reassignSubnetHostIps(removed.target, nodes, edges);
       }
 

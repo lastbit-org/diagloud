@@ -182,6 +182,9 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("internet", "apigee")).toBe("internet-apigee");
     expect(getEdgeKind("apigee", "run")).toBe("apigee-run");
     expect(getEdgeKind("apigee", "vpc")).toBe("apigee-vpc");
+    expect(getEdgeKind("memorystore", "subnet")).toBe("memorystore-subnet");
+    expect(getEdgeKind("vm", "memorystore")).toBe("vm-memorystore");
+    expect(getEdgeKind("memorystore", "kms")).toBe("memorystore-kms");
     expect(getEdgeKind("psc", "subnet")).toBe("psc-subnet");
     expect(getEdgeKind("psc", "vpc")).toBeNull();
     expect(getEdgeKind("vm", "secretmanager")).toBe("vm-secretmanager");

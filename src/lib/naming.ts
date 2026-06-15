@@ -188,6 +188,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `cert-${count}`;
     case "apigee":
       return `apigee-${count}`;
+    case "memorystore":
+      return `ms-${count}`;
     case "cloudshell":
       return `cloudshell-${count}`;
   }

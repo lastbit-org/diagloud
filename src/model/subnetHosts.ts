@@ -48,6 +48,17 @@ function getPscIdsOnSubnet(subnetId: string, edges: DiagramEdge[]): string[] {
     .map((edge) => edge.source);
 }
 
+function getMemorystoreIdsOnSubnet(
+  subnetId: string,
+  edges: DiagramEdge[],
+): string[] {
+  return edges
+    .filter(
+      (edge) => edge.kind === "memorystore-subnet" && edge.target === subnetId,
+    )
+    .map((edge) => edge.source);
+}
+
 export type SubnetHostCounts = {
   vm: number;
   sql: number;
@@ -56,6 +67,7 @@ export type SubnetHostCounts = {
   workbench: number;
   notebook: number;
   psc: number;
+  memorystore: number;
 };
 
 export function countSubnetAttachedHosts(
@@ -70,6 +82,7 @@ export function countSubnetAttachedHosts(
     workbench: getWorkbenchIdsOnSubnet(subnetId, edges).length,
     notebook: getNotebookIdsOnSubnet(subnetId, edges).length,
     psc: getPscIdsOnSubnet(subnetId, edges).length,
+    memorystore: getMemorystoreIdsOnSubnet(subnetId, edges).length,
   };
 }
 
@@ -81,7 +94,8 @@ export function totalSubnetAttachedHosts(counts: SubnetHostCounts): number {
     counts.run +
     counts.workbench +
     counts.notebook +
-    counts.psc
+    counts.psc +
+    counts.memorystore
   );
 }
 
@@ -142,5 +156,21 @@ export function pscHostIndexOffset(
     counts.run +
     counts.workbench +
     counts.notebook
+  );
+}
+
+export function memorystoreHostIndexOffset(
+  subnetId: string,
+  edges: DiagramEdge[],
+): number {
+  const counts = countSubnetAttachedHosts(subnetId, edges);
+  return (
+    counts.vm +
+    counts.sql +
+    counts.gke +
+    counts.run +
+    counts.workbench +
+    counts.notebook +
+    counts.psc
   );
 }

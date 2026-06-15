@@ -49,6 +49,7 @@ const EXPORTABLE_KINDS = new Set<ResourceKind>([
   "spanner",
   "firestore",
   "bigtable",
+  "memorystore",
   "notebook",
   "workbench",
   "spark",

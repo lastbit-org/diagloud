@@ -137,5 +137,43 @@ export function generateDataTerraform(ctx: TerraformGenContext): string {
 }`);
   }
 
+  for (const node of nodesOfKind(ctx, "memorystore")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const subnetId = ctx.graph.subnetForMemorystore.get(node.id);
+    const chain = subnetId ? vpcNodeForSubnet(ctx, subnetId) : undefined;
+    const vpcResourceName = chain
+      ? ctx.getTfResourceName(chain.vpc)
+      : undefined;
+    const networkBlock = vpcResourceName
+      ? `
+  authorized_network = google_compute_network.${vpcResourceName}.id`
+      : "";
+    const kmsRef = kmsKeyReference(ctx, node.id);
+    const redisCustomerManagedKey = kmsRef
+      ? `
+  customer_managed_key = ${kmsRef}`
+      : "";
+
+    if (node.data.engine === "redis") {
+      blocks.push(`resource "google_redis_instance" "${resourceName}" {
+  name           = "${escapeHclString(node.data.name)}"
+  tier           = "${node.data.tier === "standard" ? "STANDARD_HA" : "BASIC"}"
+  memory_size_gb = 1
+  region         = "${escapeHclString(node.data.region)}"${networkBlock}${redisCustomerManagedKey}
+}`);
+    } else {
+      blocks.push(`resource "google_memcache_instance" "${resourceName}" {
+  name       = "${escapeHclString(node.data.name)}"
+  node_count = 1
+  region     = "${escapeHclString(node.data.region)}"${networkBlock}
+
+  node_config {
+    cpu    = 1
+    memory = 1024
+  }
+}`);
+    }
+  }
+
   return blocks.length > 1 ? blocks.join("\n\n") : "";
 }

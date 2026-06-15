@@ -69,6 +69,9 @@ import {
   type CertificateType,
   type ApigeeProps,
   type ApigeeEnvType,
+  type MemorystoreProps,
+  type MemorystoreEngine,
+  type MemorystoreTier,
   type CloudShellProps,
 } from "../types";
 
@@ -851,6 +854,34 @@ function parseApigeeData(raw: unknown): ApigeeProps {
   };
 }
 
+const MEMORYSTORE_ENGINES = new Set<MemorystoreEngine>(["redis", "memcached"]);
+const MEMORYSTORE_TIERS = new Set<MemorystoreTier>(["basic", "standard"]);
+
+function parseMemorystoreData(raw: unknown): MemorystoreProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Memorystore inválidos.");
+  }
+  const engine =
+    raw.engine === "redis" || raw.engine === "memcached"
+      ? raw.engine
+      : "redis";
+  const tier =
+    raw.tier === "basic" || raw.tier === "standard" ? raw.tier : "standard";
+  if (!MEMORYSTORE_ENGINES.has(engine) || !MEMORYSTORE_TIERS.has(tier)) {
+    throw new DiagramParseError("Dados de Memorystore inválidos.");
+  }
+  return {
+    name: raw.name,
+    region:
+      typeof raw.region === "string" && raw.region.trim()
+        ? raw.region
+        : "southamerica-east1",
+    engine,
+    tier,
+    ...(typeof raw.internalIp === "string" ? { internalIp: raw.internalIp } : {}),
+  };
+}
+
 function parseZoneData(raw: unknown): ZoneProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de zona inválidos.");
@@ -1496,6 +1527,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseApigeeData(data),
       };
+    case "memorystore":
+      if (!nodeIdMatchesKind(nodeId, "memorystore")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Memorystore.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "memorystore",
+        position: parsedPosition,
+        zIndex,
+        data: parseMemorystoreData(data),
+      };
     case "cloudshell":
       if (!nodeIdMatchesKind(nodeId, "cloudshell")) {
         throw new DiagramParseError(
@@ -1723,6 +1767,11 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "apigee-run" &&
     kind !== "apigee-vpc" &&
     kind !== "apigee-dns" &&
+    kind !== "memorystore-subnet" &&
+    kind !== "vm-memorystore" &&
+    kind !== "gke-memorystore" &&
+    kind !== "run-memorystore" &&
+    kind !== "memorystore-kms" &&
     kind !== "infocard-link" &&
     kind !== "zone-link" &&
     kind !== "sql-vpc"
@@ -1973,6 +2022,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.apigee === "string"
           ? patterns.apigee
           : DEFAULT_NAMING_PATTERNS.apigee,
+      memorystore:
+        typeof patterns.memorystore === "string"
+          ? patterns.memorystore
+          : DEFAULT_NAMING_PATTERNS.memorystore,
       cloudshell:
         typeof patterns.cloudshell === "string"
           ? patterns.cloudshell
@@ -2176,6 +2229,7 @@ function namingMetadataEqual(
     a.patterns.secretmanager === b.patterns.secretmanager &&
     a.patterns.certificatemanager === b.patterns.certificatemanager &&
     a.patterns.apigee === b.patterns.apigee &&
+    a.patterns.memorystore === b.patterns.memorystore &&
     a.patterns.cloudshell === b.patterns.cloudshell
   );
 }

@@ -50,6 +50,7 @@ export { PscNode } from "./PscNode";
 export { SecretManagerNode } from "./SecretManagerNode";
 export { CertificateManagerNode } from "./CertificateManagerNode";
 export { ApigeeNode } from "./ApigeeNode";
+export { MemorystoreNode } from "./MemorystoreNode";
 export { CloudShellNode } from "./CloudShellNode";
 export type { IamNodeData } from "./IamNode";
 export { IamNode } from "./IamNode";

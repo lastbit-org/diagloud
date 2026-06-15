@@ -48,6 +48,7 @@ import type {
   SecretManagerProps,
   CertificateManagerProps,
   ApigeeProps,
+  MemorystoreProps,
   CloudShellProps,
 } from "./resources";
 
@@ -111,6 +112,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "secretmanager"; data: SecretManagerProps })
   | (NodeBase & { kind: "certificatemanager"; data: CertificateManagerProps })
   | (NodeBase & { kind: "apigee"; data: ApigeeProps })
+  | (NodeBase & { kind: "memorystore"; data: MemorystoreProps })
   | (NodeBase & { kind: "cloudshell"; data: CloudShellProps });
 
 export type DiagramEdge = {
@@ -309,6 +311,11 @@ export type DiagramEdge = {
     | "apigee-run"
     | "apigee-vpc"
     | "apigee-dns"
+    | "memorystore-subnet"
+    | "vm-memorystore"
+    | "gke-memorystore"
+    | "run-memorystore"
+    | "memorystore-kms"
     | "infocard-link"
     | "zone-link";
 };

@@ -55,6 +55,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   secretmanager: "secret-AREA-AMBIENTE",
   certificatemanager: "cert-AREA-AMBIENTE",
   apigee: "apigee-AREA-AMBIENTE",
+  memorystore: "ms-AREA-AMBIENTE",
   cloudshell: "shell-AREA-AMBIENTE",
 };
 

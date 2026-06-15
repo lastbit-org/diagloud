@@ -5,6 +5,7 @@ import { canAttachRunToSubnet } from "./runSubnet";
 import { canAttachWorkbenchToSubnet } from "./workbenchSubnet";
 import { canAttachNotebookToSubnet } from "./notebookSubnet";
 import { canAttachPscToSubnet } from "./pscSubnet";
+import { canAttachMemorystoreToSubnet } from "./memorystoreSubnet";
 import { canAttachSqlToSubnet } from "./sqlSubnet";
 import { canAttachHostToSubnet } from "./subnetHosts";
 import { getSubnetNode } from "./subnet";
@@ -91,6 +92,8 @@ export type ConnectionInvalidReason =
   | "sql-has-subnet"
   | "sql-not-private"
   | "subnet-sql-capacity"
+  | "memorystore-has-subnet"
+  | "subnet-memorystore-capacity"
   | "gke-has-subnet"
   | "subnet-gke-capacity"
   | "nat-has-vpc"
@@ -482,6 +485,32 @@ export function validateConnection(
     }
     if (!canAttachSqlToSubnet(directed.target, context.nodes, context.edges)) {
       return { valid: false, reason: "subnet-sql-capacity" };
+    }
+  }
+
+  if (
+    edgeKind === "memorystore-subnet" &&
+    context.edges.some(
+      (edge) =>
+        edge.kind === "memorystore-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "memorystore-has-subnet" };
+  }
+
+  if (edgeKind === "memorystore-subnet") {
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+    if (
+      !canAttachMemorystoreToSubnet(
+        directed.target,
+        context.nodes,
+        context.edges,
+      )
+    ) {
+      return { valid: false, reason: "subnet-memorystore-capacity" };
     }
   }
 

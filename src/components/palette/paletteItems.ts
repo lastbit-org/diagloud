@@ -92,6 +92,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "github" ||
     value === "iam" ||
     value === "bigtable" ||
+    value === "memorystore" ||
     value === "firebase" ||
     value === "notebook" ||
     value === "loadbalancer" ||
@@ -101,6 +102,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "secretmanager" ||
     value === "certificatemanager" ||
     value === "apigee" ||
+    value === "memorystore" ||
     value === "cloudshell"
   );
 }
@@ -361,6 +363,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.bigtable,
     description: "Banco NoSQL de baixa latência e alto throughput",
     icon: GCP_RESOURCE_ICONS.bigtable,
+  },
+  {
+    paletteKey: "memorystore",
+    kind: "memorystore",
+    category: "databases",
+    label: GCP_RESOURCE_LABELS.memorystore,
+    description: "Cache em memória gerenciado (Redis / Memcached)",
+    icon: GCP_RESOURCE_ICONS.memorystore,
   },
   {
     paletteKey: "firebase",

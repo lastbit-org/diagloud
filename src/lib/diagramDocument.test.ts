@@ -73,6 +73,7 @@ const sampleDocument: DiagramDocument = {
         secretmanager: "secret-AREA-AMBIENTE",
         certificatemanager: "cert-AREA-AMBIENTE",
         apigee: "apigee-AREA-AMBIENTE",
+        memorystore: "ms-AREA-AMBIENTE",
         cloudshell: "shell-AREA-AMBIENTE",
       },
     },

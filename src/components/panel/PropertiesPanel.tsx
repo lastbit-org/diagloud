@@ -47,6 +47,8 @@ import type {
   CdnOriginType,
   CertificateType,
   ApigeeEnvType,
+  MemorystoreEngine,
+  MemorystoreTier,
   IamVariant,
 } from "../../types";
 import { EDGE_ENDPOINTS } from "../../types/connections";
@@ -974,6 +976,85 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <BigtableClientsInfo
             bigtable={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "memorystore" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="memorystore-name">Instância</label>
+            <input
+              id="memorystore-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="memorystore-region">Região</label>
+            <input
+              id="memorystore-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="memorystore-engine">Motor</label>
+            <select
+              id="memorystore-engine"
+              value={selectedNode.data.engine}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  engine: e.target.value as MemorystoreEngine,
+                })
+              }
+            >
+              <option value="redis">Redis</option>
+              <option value="memcached">Memcached</option>
+            </select>
+          </div>
+          <div className="properties-field">
+            <label htmlFor="memorystore-tier">Tier</label>
+            <select
+              id="memorystore-tier"
+              value={selectedNode.data.tier}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  tier: e.target.value as MemorystoreTier,
+                })
+              }
+            >
+              <option value="basic">Basic</option>
+              <option value="standard">Standard (HA)</option>
+            </select>
+          </div>
+          {selectedNode.data.internalIp ? (
+            <div className="properties-field">
+              <label htmlFor="memorystore-ip">IP interno</label>
+              <input
+                id="memorystore-ip"
+                value={selectedNode.data.internalIp}
+                readOnly
+                aria-readonly
+              />
+              <span className="properties-field__hint">
+                Atribuído ao ligar à sub-rede na VPC.
+              </span>
+            </div>
+          ) : null}
+          <MemorystoreSubnetInfo
+            memorystore={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+          <MemorystoreConsumersInfo
+            memorystore={selectedNode}
             edges={edges}
             nodes={nodes}
           />
@@ -4459,6 +4540,117 @@ function SqlSubnetInfo({
   );
 }
 
+function MemorystoreSubnetInfo({
+  memorystore,
+  edges,
+  nodes,
+}: {
+  memorystore: Extract<DiagramNode, { kind: "memorystore" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find(
+    (e) => e.kind === "memorystore-subnet" && e.source === memorystore.id,
+  );
+  if (!edge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue esta instância à sub-rede (handle superior) para obter IP interno
+        privado na VPC.
+      </p>
+    );
+  }
+  const subnet = nodes.find((n) => n.id === edge.target && n.kind === "subnet");
+  if (!subnet || subnet.kind !== "subnet") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Sub-rede</dt>
+      <dd>
+        {subnet.data.name} ({subnet.data.cidr})
+      </dd>
+    </dl>
+  );
+}
+
+function MemorystoreConsumersInfo({
+  memorystore,
+  edges,
+  nodes,
+}: {
+  memorystore: Extract<DiagramNode, { kind: "memorystore" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vms = edges
+    .filter(
+      (e) => e.kind === "vm-memorystore" && e.target === memorystore.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter(
+      (e) => e.kind === "gke-memorystore" && e.target === memorystore.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter(
+      (e) => e.kind === "run-memorystore" && e.target === memorystore.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const kmsKeys = edges
+    .filter(
+      (e) => e.kind === "memorystore-kms" && e.source === memorystore.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "kms"))
+    .filter((n): n is Extract<DiagramNode, { kind: "kms" }> => n != null);
+
+  if (
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    kmsKeys.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue VMs, GKE ou Cloud Run para documentar consumo do cache; Cloud KMS
+        para CMEK.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {kmsKeys.length > 0 ? (
+        <>
+          <dt>Cloud KMS</dt>
+          <dd>{kmsKeys.map((k) => k.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function VmStorageInfo({
   vmId,
   edges,
@@ -5516,6 +5708,14 @@ function KmsConsumersInfo({
     .filter(
       (n): n is Extract<DiagramNode, { kind: "secretmanager" }> => n != null,
     );
+  const memorystores = edges
+    .filter((e) => e.kind === "memorystore-kms" && e.target === kms.id)
+    .map((e) =>
+      nodes.find((n) => n.id === e.source && n.kind === "memorystore"),
+    )
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "memorystore" }> => n != null,
+    );
 
   if (
     vms.length === 0 &&
@@ -5531,13 +5731,15 @@ function KmsConsumersInfo({
     dataflowJobs.length === 0 &&
     modelRegistries.length === 0 &&
     iams.length === 0 &&
-    secrets.length === 0
+    secrets.length === 0 &&
+    memorystores.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         Ligue VMs, GKE, Cloud Run, Storage, Cloud SQL, BigQuery, Firestore,
-        Spanner, Apache Spark, Managed Airflow, Cloud Dataflow, Model Registry,
-        Secret Manager ou IAM para documentar uso de chaves (CMEK).
+        Spanner, Memorystore, Apache Spark, Managed Airflow, Cloud Dataflow,
+        Model Registry, Secret Manager ou IAM para documentar uso de chaves
+        (CMEK).
       </p>
     );
   }
@@ -5626,6 +5828,12 @@ function KmsConsumersInfo({
         <>
           <dt>Secret Manager</dt>
           <dd>{secrets.map((s) => s.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {memorystores.length > 0 ? (
+        <>
+          <dt>Memorystore</dt>
+          <dd>{memorystores.map((m) => m.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

@@ -49,6 +49,7 @@ export type ResourceKind =
   | "secretmanager"
   | "certificatemanager"
   | "apigee"
+  | "memorystore"
   | "cloudshell";
 
 export type RunAccessMode = "public" | "vpc";
@@ -411,6 +412,19 @@ export type ApigeeProps = {
   envType: ApigeeEnvType;
 };
 
+export type MemorystoreEngine = "redis" | "memcached";
+
+export type MemorystoreTier = "basic" | "standard";
+
+export type MemorystoreProps = {
+  name: string;
+  region: string;
+  engine: MemorystoreEngine;
+  tier: MemorystoreTier;
+  /** IP interno na VPC — herdado da sub-rede ao conectar. */
+  internalIp?: string;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
@@ -459,5 +473,6 @@ export type ResourcePropsByKind = {
   secretmanager: SecretManagerProps;
   certificatemanager: CertificateManagerProps;
   apigee: ApigeeProps;
+  memorystore: MemorystoreProps;
   cloudshell: CloudShellProps;
 };

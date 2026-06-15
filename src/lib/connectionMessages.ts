@@ -20,6 +20,10 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Cloud SQL em modo público não se liga à sub-rede. Altere o acesso para privado.",
   "subnet-sql-capacity":
     "Não há mais endereços de IP na sub-rede para Cloud SQL privado (após as VMs).",
+  "memorystore-has-subnet":
+    "Esta instância Memorystore já está ligada a uma sub-rede.",
+  "subnet-memorystore-capacity":
+    "Não há mais endereços de IP na sub-rede para Memorystore (após os demais recursos).",
   "gke-has-subnet": "Este cluster GKE já está ligado a uma sub-rede.",
   "subnet-gke-capacity":
     "Não há mais endereços de IP na sub-rede para o cluster GKE.",

@@ -269,6 +269,11 @@ export const EDGE_ENDPOINTS = {
   "apigee-run": { from: "apigee", to: "run" },
   "apigee-vpc": { from: "apigee", to: "vpc" },
   "apigee-dns": { from: "apigee", to: "dns" },
+  "memorystore-subnet": { from: "memorystore", to: "subnet" },
+  "vm-memorystore": { from: "vm", to: "memorystore" },
+  "gke-memorystore": { from: "gke", to: "memorystore" },
+  "run-memorystore": { from: "run", to: "memorystore" },
+  "memorystore-kms": { from: "memorystore", to: "kms" },
   "infocard-link": { from: "infocard", to: "vpc" },
   "zone-link": { from: "vpc", to: "zone" },
 } as const satisfies Record<
