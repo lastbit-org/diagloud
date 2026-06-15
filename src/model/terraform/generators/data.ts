@@ -175,5 +175,42 @@ export function generateDataTerraform(ctx: TerraformGenContext): string {
     }
   }
 
+  for (const node of nodesOfKind(ctx, "alloydb")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const subnetId = ctx.graph.subnetForAlloydb.get(node.id);
+    const chain = subnetId ? vpcNodeForSubnet(ctx, subnetId) : undefined;
+    const vpcResourceName = chain
+      ? ctx.getTfResourceName(chain.vpc)
+      : undefined;
+    const networkBlock = vpcResourceName
+      ? `
+  network_config {
+    network = google_compute_network.${vpcResourceName}.id
+  }`
+      : "";
+    const kmsRef = kmsKeyReference(ctx, node.id);
+    const kmsBlock = kmsRef
+      ? `
+  encryption_config {
+    kms_key_name = ${kmsRef}
+  }`
+      : "";
+
+    blocks.push(`resource "google_alloydb_cluster" "${resourceName}" {
+  cluster_id = "${escapeHclString(node.data.name)}"
+  location   = "${escapeHclString(node.data.region)}"${networkBlock}${kmsBlock}
+}
+
+resource "google_alloydb_instance" "${resourceName}_primary" {
+  cluster       = google_alloydb_cluster.${resourceName}.name
+  instance_id   = "${escapeHclString(node.data.name)}-primary"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+}`);
+  }
+
   return blocks.length > 1 ? blocks.join("\n\n") : "";
 }

@@ -59,6 +59,12 @@ function getMemorystoreIdsOnSubnet(
     .map((edge) => edge.source);
 }
 
+function getAlloydbIdsOnSubnet(subnetId: string, edges: DiagramEdge[]): string[] {
+  return edges
+    .filter((edge) => edge.kind === "alloydb-subnet" && edge.target === subnetId)
+    .map((edge) => edge.source);
+}
+
 export type SubnetHostCounts = {
   vm: number;
   sql: number;
@@ -68,6 +74,7 @@ export type SubnetHostCounts = {
   notebook: number;
   psc: number;
   memorystore: number;
+  alloydb: number;
 };
 
 export function countSubnetAttachedHosts(
@@ -83,6 +90,7 @@ export function countSubnetAttachedHosts(
     notebook: getNotebookIdsOnSubnet(subnetId, edges).length,
     psc: getPscIdsOnSubnet(subnetId, edges).length,
     memorystore: getMemorystoreIdsOnSubnet(subnetId, edges).length,
+    alloydb: getAlloydbIdsOnSubnet(subnetId, edges).length,
   };
 }
 
@@ -95,7 +103,8 @@ export function totalSubnetAttachedHosts(counts: SubnetHostCounts): number {
     counts.workbench +
     counts.notebook +
     counts.psc +
-    counts.memorystore
+    counts.memorystore +
+    counts.alloydb
   );
 }
 
@@ -172,5 +181,22 @@ export function memorystoreHostIndexOffset(
     counts.workbench +
     counts.notebook +
     counts.psc
+  );
+}
+
+export function alloydbHostIndexOffset(
+  subnetId: string,
+  edges: DiagramEdge[],
+): number {
+  const counts = countSubnetAttachedHosts(subnetId, edges);
+  return (
+    counts.vm +
+    counts.sql +
+    counts.gke +
+    counts.run +
+    counts.workbench +
+    counts.notebook +
+    counts.psc +
+    counts.memorystore
   );
 }

@@ -74,6 +74,7 @@ const sampleDocument: DiagramDocument = {
         certificatemanager: "cert-AREA-AMBIENTE",
         apigee: "apigee-AREA-AMBIENTE",
         memorystore: "ms-AREA-AMBIENTE",
+        alloydb: "alloydb-AREA-AMBIENTE",
         cloudshell: "shell-AREA-AMBIENTE",
       },
     },

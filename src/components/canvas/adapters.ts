@@ -133,6 +133,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "memorystore") {
     return node.data.engine === "redis" ? "Redis" : "Memcached";
   }
+  if (node.kind === "alloydb") {
+    return node.data.region;
+  }
   if (node.kind === "onprem") {
     return node.data.location;
   }

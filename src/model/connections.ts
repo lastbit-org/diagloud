@@ -6,6 +6,7 @@ import { canAttachWorkbenchToSubnet } from "./workbenchSubnet";
 import { canAttachNotebookToSubnet } from "./notebookSubnet";
 import { canAttachPscToSubnet } from "./pscSubnet";
 import { canAttachMemorystoreToSubnet } from "./memorystoreSubnet";
+import { canAttachAlloydbToSubnet } from "./alloydbSubnet";
 import { canAttachSqlToSubnet } from "./sqlSubnet";
 import { canAttachHostToSubnet } from "./subnetHosts";
 import { getSubnetNode } from "./subnet";
@@ -94,6 +95,8 @@ export type ConnectionInvalidReason =
   | "subnet-sql-capacity"
   | "memorystore-has-subnet"
   | "subnet-memorystore-capacity"
+  | "alloydb-has-subnet"
+  | "subnet-alloydb-capacity"
   | "gke-has-subnet"
   | "subnet-gke-capacity"
   | "nat-has-vpc"
@@ -511,6 +514,28 @@ export function validateConnection(
       )
     ) {
       return { valid: false, reason: "subnet-memorystore-capacity" };
+    }
+  }
+
+  if (
+    edgeKind === "alloydb-subnet" &&
+    context.edges.some(
+      (edge) =>
+        edge.kind === "alloydb-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "alloydb-has-subnet" };
+  }
+
+  if (edgeKind === "alloydb-subnet") {
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
+    }
+    if (
+      !canAttachAlloydbToSubnet(directed.target, context.nodes, context.edges)
+    ) {
+      return { valid: false, reason: "subnet-alloydb-capacity" };
     }
   }
 

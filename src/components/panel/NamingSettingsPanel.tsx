@@ -47,6 +47,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "certificatemanager",
   "apigee",
   "memorystore",
+  "alloydb",
   "cloudshell",
   "entra",
   "pcuser",

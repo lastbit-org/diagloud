@@ -1061,6 +1061,55 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "alloydb" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="alloydb-name">Cluster</label>
+            <input
+              id="alloydb-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="alloydb-region">Região</label>
+            <input
+              id="alloydb-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          {selectedNode.data.internalIp ? (
+            <div className="properties-field">
+              <label htmlFor="alloydb-ip">IP interno</label>
+              <input
+                id="alloydb-ip"
+                value={selectedNode.data.internalIp}
+                readOnly
+                aria-readonly
+              />
+              <span className="properties-field__hint">
+                Atribuído ao ligar à sub-rede na VPC.
+              </span>
+            </div>
+          ) : null}
+          <AlloydbSubnetInfo
+            alloydb={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+          <AlloydbConsumersInfo
+            alloydb={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "firebase" && (
         <>
           <div className="properties-field">
@@ -4651,6 +4700,109 @@ function MemorystoreConsumersInfo({
   );
 }
 
+function AlloydbSubnetInfo({
+  alloydb,
+  edges,
+  nodes,
+}: {
+  alloydb: Extract<DiagramNode, { kind: "alloydb" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find(
+    (e) => e.kind === "alloydb-subnet" && e.source === alloydb.id,
+  );
+  if (!edge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue este cluster à sub-rede (handle superior) para obter IP interno
+        privado na VPC.
+      </p>
+    );
+  }
+  const subnet = nodes.find((n) => n.id === edge.target && n.kind === "subnet");
+  if (!subnet || subnet.kind !== "subnet") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Sub-rede</dt>
+      <dd>
+        {subnet.data.name} ({subnet.data.cidr})
+      </dd>
+    </dl>
+  );
+}
+
+function AlloydbConsumersInfo({
+  alloydb,
+  edges,
+  nodes,
+}: {
+  alloydb: Extract<DiagramNode, { kind: "alloydb" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const vms = edges
+    .filter((e) => e.kind === "vm-alloydb" && e.target === alloydb.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "gke-alloydb" && e.target === alloydb.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "run-alloydb" && e.target === alloydb.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const kmsKeys = edges
+    .filter((e) => e.kind === "alloydb-kms" && e.source === alloydb.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "kms"))
+    .filter((n): n is Extract<DiagramNode, { kind: "kms" }> => n != null);
+
+  if (
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    kmsKeys.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue VMs, GKE ou Cloud Run para documentar consumo do banco; Cloud KMS
+        para CMEK.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {kmsKeys.length > 0 ? (
+        <>
+          <dt>Cloud KMS</dt>
+          <dd>{kmsKeys.map((k) => k.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 function VmStorageInfo({
   vmId,
   edges,
@@ -5716,6 +5868,10 @@ function KmsConsumersInfo({
     .filter(
       (n): n is Extract<DiagramNode, { kind: "memorystore" }> => n != null,
     );
+  const alloydbs = edges
+    .filter((e) => e.kind === "alloydb-kms" && e.target === kms.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "alloydb"))
+    .filter((n): n is Extract<DiagramNode, { kind: "alloydb" }> => n != null);
 
   if (
     vms.length === 0 &&
@@ -5732,14 +5888,15 @@ function KmsConsumersInfo({
     modelRegistries.length === 0 &&
     iams.length === 0 &&
     secrets.length === 0 &&
-    memorystores.length === 0
+    memorystores.length === 0 &&
+    alloydbs.length === 0
   ) {
     return (
       <p className="properties-field__hint">
         Ligue VMs, GKE, Cloud Run, Storage, Cloud SQL, BigQuery, Firestore,
-        Spanner, Memorystore, Apache Spark, Managed Airflow, Cloud Dataflow,
-        Model Registry, Secret Manager ou IAM para documentar uso de chaves
-        (CMEK).
+        Spanner, Memorystore, AlloyDB, Apache Spark, Managed Airflow, Cloud
+        Dataflow, Model Registry, Secret Manager ou IAM para documentar uso de
+        chaves (CMEK).
       </p>
     );
   }
@@ -5834,6 +5991,12 @@ function KmsConsumersInfo({
         <>
           <dt>Memorystore</dt>
           <dd>{memorystores.map((m) => m.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {alloydbs.length > 0 ? (
+        <>
+          <dt>AlloyDB</dt>
+          <dd>{alloydbs.map((a) => a.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

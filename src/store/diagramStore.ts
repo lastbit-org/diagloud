@@ -43,6 +43,10 @@ import {
   clearMemorystoreNetwork,
   reassignSubnetMemorystoreIps,
 } from "../model/memorystoreSubnet";
+import {
+  clearAlloydbNetwork,
+  reassignSubnetAlloydbIps,
+} from "../model/alloydbSubnet";
 import { resolveEdgeHandles } from "../lib/dynamicHandles";
 import { validateConnection } from "../model/connections";
 import {
@@ -117,6 +121,7 @@ import type {
   CertificateManagerProps,
   ApigeeProps,
   MemorystoreProps,
+  AlloydbProps,
   CloudShellProps,
   IamProps,
 } from "../types";
@@ -190,6 +195,7 @@ type DiagramActions = {
       | Partial<CertificateManagerProps>
       | Partial<ApigeeProps>
       | Partial<MemorystoreProps>
+      | Partial<AlloydbProps>
       | Partial<CloudShellProps>
       | Partial<IamProps>,
   ) => void;
@@ -631,6 +637,15 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "alloydb":
+      return {
+        ...base,
+        kind: "alloydb",
+        data: {
+          ...defaultResourceData("alloydb", resourceContext),
+          ...data,
+        },
+      };
     case "cloudshell":
       return {
         ...base,
@@ -689,6 +704,7 @@ function mergeNodeData(
     | Partial<CertificateManagerProps>
     | Partial<ApigeeProps>
     | Partial<MemorystoreProps>
+    | Partial<AlloydbProps>
     | Partial<CloudShellProps>
     | Partial<IamProps>,
 ): DiagramNode {
@@ -936,6 +952,11 @@ function mergeNodeData(
         ...node,
         data: { ...node.data, ...(patch as Partial<MemorystoreProps>) },
       };
+    case "alloydb":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<AlloydbProps>) },
+      };
     case "cloudshell":
       return {
         ...node,
@@ -957,6 +978,7 @@ function reassignSubnetHostIps(
   next = reassignSubnetNotebookIps(subnetId, next, edges);
   next = reassignSubnetPscIps(subnetId, next, edges);
   next = reassignSubnetMemorystoreIps(subnetId, next, edges);
+  next = reassignSubnetAlloydbIps(subnetId, next, edges);
   return next;
 }
 
@@ -1136,7 +1158,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
             edge.kind === "workbench-subnet" ||
             edge.kind === "notebook-subnet" ||
             edge.kind === "psc-subnet" ||
-            edge.kind === "memorystore-subnet") &&
+            edge.kind === "memorystore-subnet" ||
+            edge.kind === "alloydb-subnet") &&
           (edge.source === id || edge.target === id)
         ) {
           affectedSubnetIds.add(edge.target);
@@ -1203,6 +1226,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         next.kind === "notebook-subnet" ||
         next.kind === "psc-subnet" ||
         next.kind === "memorystore-subnet" ||
+        next.kind === "alloydb-subnet" ||
         next.kind === "spark-subnet" ||
         next.kind === "airflow-subnet" ||
         next.kind === "dataflow-subnet"
@@ -1278,6 +1302,11 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
       if (removed?.kind === "memorystore-subnet") {
         nodes = clearMemorystoreNetwork(removed.source, nodes);
+        nodes = reassignSubnetHostIps(removed.target, nodes, edges);
+      }
+
+      if (removed?.kind === "alloydb-subnet") {
+        nodes = clearAlloydbNetwork(removed.source, nodes);
         nodes = reassignSubnetHostIps(removed.target, nodes, edges);
       }
 

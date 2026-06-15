@@ -50,6 +50,7 @@ export type ResourceKind =
   | "certificatemanager"
   | "apigee"
   | "memorystore"
+  | "alloydb"
   | "cloudshell";
 
 export type RunAccessMode = "public" | "vpc";
@@ -425,6 +426,14 @@ export type MemorystoreProps = {
   internalIp?: string;
 };
 
+export type AlloydbProps = {
+  /** Nome do cluster AlloyDB. */
+  name: string;
+  region: string;
+  /** IP privado na VPC — herdado da sub-rede ao conectar. */
+  internalIp?: string;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
@@ -474,5 +483,6 @@ export type ResourcePropsByKind = {
   certificatemanager: CertificateManagerProps;
   apigee: ApigeeProps;
   memorystore: MemorystoreProps;
+  alloydb: AlloydbProps;
   cloudshell: CloudShellProps;
 };

@@ -49,6 +49,7 @@ import type {
   CertificateManagerProps,
   ApigeeProps,
   MemorystoreProps,
+  AlloydbProps,
   CloudShellProps,
 } from "./resources";
 
@@ -113,6 +114,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "certificatemanager"; data: CertificateManagerProps })
   | (NodeBase & { kind: "apigee"; data: ApigeeProps })
   | (NodeBase & { kind: "memorystore"; data: MemorystoreProps })
+  | (NodeBase & { kind: "alloydb"; data: AlloydbProps })
   | (NodeBase & { kind: "cloudshell"; data: CloudShellProps });
 
 export type DiagramEdge = {
@@ -316,6 +318,11 @@ export type DiagramEdge = {
     | "gke-memorystore"
     | "run-memorystore"
     | "memorystore-kms"
+    | "alloydb-subnet"
+    | "vm-alloydb"
+    | "gke-alloydb"
+    | "run-alloydb"
+    | "alloydb-kms"
     | "infocard-link"
     | "zone-link";
 };

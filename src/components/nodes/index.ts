@@ -51,6 +51,7 @@ export { SecretManagerNode } from "./SecretManagerNode";
 export { CertificateManagerNode } from "./CertificateManagerNode";
 export { ApigeeNode } from "./ApigeeNode";
 export { MemorystoreNode } from "./MemorystoreNode";
+export { AlloydbNode } from "./AlloydbNode";
 export { CloudShellNode } from "./CloudShellNode";
 export type { IamNodeData } from "./IamNode";
 export { IamNode } from "./IamNode";

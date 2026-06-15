@@ -185,6 +185,9 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("memorystore", "subnet")).toBe("memorystore-subnet");
     expect(getEdgeKind("vm", "memorystore")).toBe("vm-memorystore");
     expect(getEdgeKind("memorystore", "kms")).toBe("memorystore-kms");
+    expect(getEdgeKind("alloydb", "subnet")).toBe("alloydb-subnet");
+    expect(getEdgeKind("vm", "alloydb")).toBe("vm-alloydb");
+    expect(getEdgeKind("alloydb", "kms")).toBe("alloydb-kms");
     expect(getEdgeKind("psc", "subnet")).toBe("psc-subnet");
     expect(getEdgeKind("psc", "vpc")).toBeNull();
     expect(getEdgeKind("vm", "secretmanager")).toBe("vm-secretmanager");

@@ -72,6 +72,7 @@ import {
   type MemorystoreProps,
   type MemorystoreEngine,
   type MemorystoreTier,
+  type AlloydbProps,
   type CloudShellProps,
 } from "../types";
 
@@ -882,6 +883,20 @@ function parseMemorystoreData(raw: unknown): MemorystoreProps {
   };
 }
 
+function parseAlloydbData(raw: unknown): AlloydbProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de AlloyDB inválidos.");
+  }
+  return {
+    name: raw.name,
+    region:
+      typeof raw.region === "string" && raw.region.trim()
+        ? raw.region
+        : "southamerica-east1",
+    ...(typeof raw.internalIp === "string" ? { internalIp: raw.internalIp } : {}),
+  };
+}
+
 function parseZoneData(raw: unknown): ZoneProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de zona inválidos.");
@@ -1540,6 +1555,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseMemorystoreData(data),
       };
+    case "alloydb":
+      if (!nodeIdMatchesKind(nodeId, "alloydb")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo AlloyDB.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "alloydb",
+        position: parsedPosition,
+        zIndex,
+        data: parseAlloydbData(data),
+      };
     case "cloudshell":
       if (!nodeIdMatchesKind(nodeId, "cloudshell")) {
         throw new DiagramParseError(
@@ -1772,6 +1800,11 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "gke-memorystore" &&
     kind !== "run-memorystore" &&
     kind !== "memorystore-kms" &&
+    kind !== "alloydb-subnet" &&
+    kind !== "vm-alloydb" &&
+    kind !== "gke-alloydb" &&
+    kind !== "run-alloydb" &&
+    kind !== "alloydb-kms" &&
     kind !== "infocard-link" &&
     kind !== "zone-link" &&
     kind !== "sql-vpc"
@@ -2026,6 +2059,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.memorystore === "string"
           ? patterns.memorystore
           : DEFAULT_NAMING_PATTERNS.memorystore,
+      alloydb:
+        typeof patterns.alloydb === "string"
+          ? patterns.alloydb
+          : DEFAULT_NAMING_PATTERNS.alloydb,
       cloudshell:
         typeof patterns.cloudshell === "string"
           ? patterns.cloudshell
@@ -2230,6 +2267,7 @@ function namingMetadataEqual(
     a.patterns.certificatemanager === b.patterns.certificatemanager &&
     a.patterns.apigee === b.patterns.apigee &&
     a.patterns.memorystore === b.patterns.memorystore &&
+    a.patterns.alloydb === b.patterns.alloydb &&
     a.patterns.cloudshell === b.patterns.cloudshell
   );
 }

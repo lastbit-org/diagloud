@@ -24,6 +24,9 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
     "Esta instância Memorystore já está ligada a uma sub-rede.",
   "subnet-memorystore-capacity":
     "Não há mais endereços de IP na sub-rede para Memorystore (após os demais recursos).",
+  "alloydb-has-subnet": "Este cluster AlloyDB já está ligado a uma sub-rede.",
+  "subnet-alloydb-capacity":
+    "Não há mais endereços de IP na sub-rede para AlloyDB (após os demais recursos).",
   "gke-has-subnet": "Este cluster GKE já está ligado a uma sub-rede.",
   "subnet-gke-capacity":
     "Não há mais endereços de IP na sub-rede para o cluster GKE.",

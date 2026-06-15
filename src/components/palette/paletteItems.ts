@@ -93,6 +93,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "iam" ||
     value === "bigtable" ||
     value === "memorystore" ||
+    value === "alloydb" ||
     value === "firebase" ||
     value === "notebook" ||
     value === "loadbalancer" ||
@@ -103,6 +104,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "certificatemanager" ||
     value === "apigee" ||
     value === "memorystore" ||
+    value === "alloydb" ||
     value === "cloudshell"
   );
 }
@@ -371,6 +373,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.memorystore,
     description: "Cache em memória gerenciado (Redis / Memcached)",
     icon: GCP_RESOURCE_ICONS.memorystore,
+  },
+  {
+    paletteKey: "alloydb",
+    kind: "alloydb",
+    category: "databases",
+    label: GCP_RESOURCE_LABELS.alloydb,
+    description: "Banco PostgreSQL compatível de alta performance",
+    icon: GCP_RESOURCE_ICONS.alloydb,
   },
   {
     paletteKey: "firebase",

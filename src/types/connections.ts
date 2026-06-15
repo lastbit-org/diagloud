@@ -274,6 +274,11 @@ export const EDGE_ENDPOINTS = {
   "gke-memorystore": { from: "gke", to: "memorystore" },
   "run-memorystore": { from: "run", to: "memorystore" },
   "memorystore-kms": { from: "memorystore", to: "kms" },
+  "alloydb-subnet": { from: "alloydb", to: "subnet" },
+  "vm-alloydb": { from: "vm", to: "alloydb" },
+  "gke-alloydb": { from: "gke", to: "alloydb" },
+  "run-alloydb": { from: "run", to: "alloydb" },
+  "alloydb-kms": { from: "alloydb", to: "kms" },
   "infocard-link": { from: "infocard", to: "vpc" },
   "zone-link": { from: "vpc", to: "zone" },
 } as const satisfies Record<

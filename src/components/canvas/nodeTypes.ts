@@ -47,6 +47,7 @@ import {
   CertificateManagerNode,
   ApigeeNode,
   MemorystoreNode,
+  AlloydbNode,
   CloudShellNode,
 } from "../nodes";
 
@@ -99,5 +100,6 @@ export const nodeTypes = {
   certificatemanager: CertificateManagerNode,
   apigee: ApigeeNode,
   memorystore: MemorystoreNode,
+  alloydb: AlloydbNode,
   cloudshell: CloudShellNode,
 };

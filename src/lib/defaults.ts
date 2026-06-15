@@ -54,6 +54,7 @@ import type {
   CertificateManagerProps,
   ApigeeProps,
   MemorystoreProps,
+  AlloydbProps,
   CloudShellProps,
 } from "../types";
 
@@ -326,6 +327,11 @@ export function defaultResourceData<K extends ResourceKind>(
         engine: "redis",
         tier: "standard",
       } as MemorystoreProps as ResourcePropsByKind[K];
+    case "alloydb":
+      return {
+        name,
+        region: "southamerica-east1",
+      } as AlloydbProps as ResourcePropsByKind[K];
     case "cloudshell":
       return { name } as CloudShellProps as ResourcePropsByKind[K];
   }
@@ -430,6 +436,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `apigee-${count}`;
     case "memorystore":
       return `ms-${count}`;
+    case "alloydb":
+      return `alloydb-${count}`;
     case "cloudshell":
       return `cloudshell-${count}`;
   }
