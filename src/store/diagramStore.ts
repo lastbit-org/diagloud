@@ -106,6 +106,7 @@ import type {
   OnpremProps,
   GithubProps,
   LoadBalancerProps,
+  CdnProps,
   OrgPolicyProps,
   PscProps,
   SecretManagerProps,
@@ -175,6 +176,7 @@ type DiagramActions = {
       | Partial<OnpremProps>
       | Partial<GithubProps>
       | Partial<LoadBalancerProps>
+      | Partial<CdnProps>
       | Partial<OrgPolicyProps>
       | Partial<PscProps>
       | Partial<SecretManagerProps>
@@ -562,6 +564,15 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "cdn":
+      return {
+        ...base,
+        kind: "cdn",
+        data: {
+          ...defaultResourceData("cdn", resourceContext),
+          ...data,
+        },
+      };
     case "orgpolicy":
       return {
         ...base,
@@ -846,6 +857,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<LoadBalancerProps>) },
+      };
+    case "cdn":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<CdnProps>) },
       };
     case "orgpolicy":
       return {

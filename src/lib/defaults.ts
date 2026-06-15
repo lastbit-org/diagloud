@@ -47,6 +47,7 @@ import type {
   IamProps,
   GithubProps,
   LoadBalancerProps,
+  CdnProps,
   OrgPolicyProps,
   PscProps,
   SecretManagerProps,
@@ -282,6 +283,12 @@ export function defaultResourceData<K extends ResourceKind>(
         type: "external",
         region: "southamerica-east1",
       } as LoadBalancerProps as ResourcePropsByKind[K];
+    case "cdn":
+      return {
+        name,
+        region: "southamerica-east1",
+        originType: "storage",
+      } as CdnProps as ResourcePropsByKind[K];
     case "orgpolicy":
       return {
         name,
@@ -387,6 +394,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `github-${count}`;
     case "loadbalancer":
       return `lb-${count}`;
+    case "cdn":
+      return `cdn-${count}`;
     case "orgpolicy":
       return `orgpol-${count}`;
     case "psc":

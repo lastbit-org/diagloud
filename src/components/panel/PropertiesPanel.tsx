@@ -44,6 +44,7 @@ import type {
   SparkDeployMode,
   DataflowPipelineType,
   LoadBalancerType,
+  CdnOriginType,
   IamVariant,
 } from "../../types";
 import { EDGE_ENDPOINTS } from "../../types/connections";
@@ -1703,6 +1704,52 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <LoadBalancerConnectionsInfo
             loadbalancer={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "cdn" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="cdn-name">CDN</label>
+            <input
+              id="cdn-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="cdn-region">Região</label>
+            <input
+              id="cdn-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="cdn-origin-type">Origem</label>
+            <select
+              id="cdn-origin-type"
+              value={selectedNode.data.originType}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  originType: e.target.value as CdnOriginType,
+                })
+              }
+            >
+              <option value="storage">Cloud Storage (backend bucket)</option>
+              <option value="loadbalancer">Load Balancer</option>
+              <option value="custom">Personalizada</option>
+            </select>
+          </div>
+          <CdnConnectionsInfo
+            cdn={selectedNode}
             edges={edges}
             nodes={nodes}
           />
@@ -5655,6 +5702,103 @@ function LoadBalancerConnectionsInfo({
         <>
           <dt>VPC</dt>
           <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs (backend)</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE (backend)</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run (backend)</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function CdnConnectionsInfo({
+  cdn,
+  edges,
+  nodes,
+}: {
+  cdn: Extract<DiagramNode, { kind: "cdn" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const internet = edges.find(
+    (e) => e.kind === "internet-cdn" && e.target === cdn.id,
+  );
+  const storageEdge = edges.find(
+    (e) => e.kind === "cdn-storage" && e.source === cdn.id,
+  );
+  const storage = storageEdge
+    ? nodes.find((n) => n.id === storageEdge.target && n.kind === "storage")
+    : undefined;
+  const lbEdge = edges.find(
+    (e) => e.kind === "cdn-loadbalancer" && e.source === cdn.id,
+  );
+  const loadbalancer = lbEdge
+    ? nodes.find(
+        (n) => n.id === lbEdge.target && n.kind === "loadbalancer",
+      )
+    : undefined;
+  const vms = edges
+    .filter((e) => e.kind === "cdn-vm" && e.source === cdn.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "cdn-gke" && e.source === cdn.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "cdn-run" && e.source === cdn.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+
+  if (
+    !internet &&
+    !storage &&
+    !loadbalancer &&
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à Internet, Cloud Storage, Load Balancer ou backends VM, GKE e
+        Cloud Run.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {internet ? (
+        <>
+          <dt>Internet</dt>
+          <dd>Entrada pública</dd>
+        </>
+      ) : null}
+      {storage && storage.kind === "storage" ? (
+        <>
+          <dt>Cloud Storage</dt>
+          <dd>{storage.data.name}</dd>
+        </>
+      ) : null}
+      {loadbalancer && loadbalancer.kind === "loadbalancer" ? (
+        <>
+          <dt>Load Balancer</dt>
+          <dd>{loadbalancer.data.name}</dd>
         </>
       ) : null}
       {vms.length > 0 ? (

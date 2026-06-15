@@ -43,6 +43,7 @@ export type ResourceKind =
   | "github"
   | "iam"
   | "loadbalancer"
+  | "cdn"
   | "orgpolicy"
   | "psc"
   | "secretmanager"
@@ -360,6 +361,14 @@ export type LoadBalancerProps = {
   region: string;
 };
 
+export type CdnOriginType = "storage" | "loadbalancer" | "custom";
+
+export type CdnProps = {
+  name: string;
+  region: string;
+  originType: CdnOriginType;
+};
+
 export type OrgPolicyProps = {
   /** Nome no diagrama. */
   name: string;
@@ -424,6 +433,7 @@ export type ResourcePropsByKind = {
   github: GithubProps;
   iam: IamProps;
   loadbalancer: LoadBalancerProps;
+  cdn: CdnProps;
   orgpolicy: OrgPolicyProps;
   psc: PscProps;
   secretmanager: SecretManagerProps;

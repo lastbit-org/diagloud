@@ -60,6 +60,8 @@ import {
   type GithubProps,
   type LoadBalancerProps,
   type LoadBalancerType,
+  type CdnProps,
+  type CdnOriginType,
   type OrgPolicyProps,
   type PscProps,
   type SecretManagerProps,
@@ -728,6 +730,35 @@ function parseLoadBalancerData(raw: unknown): LoadBalancerProps {
   };
 }
 
+const CDN_ORIGIN_TYPES = new Set<CdnOriginType>([
+  "storage",
+  "loadbalancer",
+  "custom",
+]);
+
+function parseCdnData(raw: unknown): CdnProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Cloud CDN inválidos.");
+  }
+  const originType =
+    raw.originType === "storage" ||
+    raw.originType === "loadbalancer" ||
+    raw.originType === "custom"
+      ? raw.originType
+      : "storage";
+  if (!CDN_ORIGIN_TYPES.has(originType)) {
+    throw new DiagramParseError("Dados de Cloud CDN inválidos.");
+  }
+  return {
+    name: raw.name,
+    region:
+      typeof raw.region === "string" && raw.region.trim()
+        ? raw.region
+        : "southamerica-east1",
+    originType,
+  };
+}
+
 function parseOrgPolicyData(raw: unknown): OrgPolicyProps {
   if (
     !isRecord(raw) ||
@@ -1338,6 +1369,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseLoadBalancerData(data),
       };
+    case "cdn":
+      if (!nodeIdMatchesKind(nodeId, "cdn")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud CDN.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "cdn",
+        position: parsedPosition,
+        zIndex,
+        data: parseCdnData(data),
+      };
     case "orgpolicy":
       if (!nodeIdMatchesKind(nodeId, "orgpolicy")) {
         throw new DiagramParseError(
@@ -1576,6 +1620,12 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "loadbalancer-gke" &&
     kind !== "loadbalancer-run" &&
     kind !== "loadbalancer-vpc" &&
+    kind !== "internet-cdn" &&
+    kind !== "cdn-storage" &&
+    kind !== "cdn-loadbalancer" &&
+    kind !== "cdn-vm" &&
+    kind !== "cdn-gke" &&
+    kind !== "cdn-run" &&
     kind !== "orgpolicy-folder" &&
     kind !== "orgpolicy-project" &&
     kind !== "psc-subnet" &&
@@ -1815,6 +1865,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.loadbalancer === "string"
           ? patterns.loadbalancer
           : DEFAULT_NAMING_PATTERNS.loadbalancer,
+      cdn:
+        typeof patterns.cdn === "string"
+          ? patterns.cdn
+          : DEFAULT_NAMING_PATTERNS.cdn,
       orgpolicy:
         typeof patterns.orgpolicy === "string"
           ? patterns.orgpolicy
@@ -2024,6 +2078,7 @@ function namingMetadataEqual(
     a.patterns.onprem === b.patterns.onprem &&
     a.patterns.github === b.patterns.github &&
     a.patterns.loadbalancer === b.patterns.loadbalancer &&
+    a.patterns.cdn === b.patterns.cdn &&
     a.patterns.orgpolicy === b.patterns.orgpolicy &&
     a.patterns.psc === b.patterns.psc &&
     a.patterns.secretmanager === b.patterns.secretmanager &&

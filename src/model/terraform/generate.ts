@@ -56,6 +56,7 @@ const EXPORTABLE_KINDS = new Set<ResourceKind>([
   "dataflow",
   "modelregistry",
   "loadbalancer",
+  "cdn",
   "psc",
   "secretmanager",
   "orgpolicy",

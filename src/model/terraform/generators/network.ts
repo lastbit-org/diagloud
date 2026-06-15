@@ -226,6 +226,38 @@ resource "google_compute_network_peering" "${resourceName}_b_to_a" {
 }`);
   }
 
+  for (const node of nodesOfKind(ctx, "cdn")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const storageId = ctx.graph.storageForCdn.get(node.id);
+    const storageNode = storageId
+      ? findNode(ctx.document.nodes, storageId)
+      : undefined;
+    const lbId = ctx.graph.loadBalancerForCdn.get(node.id);
+    const lbNode = lbId ? findNode(ctx.document.nodes, lbId) : undefined;
+
+    if (storageNode?.kind === "storage") {
+      blocks.push(`resource "google_compute_backend_bucket" "${resourceName}" {
+  name        = "${escapeHclString(node.data.name)}"
+  bucket_name = google_storage_bucket.${ctx.getTfResourceName(storageNode)}.name
+  enable_cdn  = true
+}`);
+    } else if (lbNode?.kind === "loadbalancer") {
+      blocks.push(`# Cloud CDN "${escapeHclString(node.data.name)}" — origem: Load Balancer
+# Configure google_compute_backend_service com cdn_policy no backend do LB
+resource "google_compute_backend_bucket" "${resourceName}" {
+  name       = "${escapeHclString(node.data.name)}"
+  enable_cdn = true
+}`);
+    } else {
+      blocks.push(`resource "google_compute_backend_bucket" "${resourceName}" {
+  name       = "${escapeHclString(node.data.name)}"
+  enable_cdn = true
+
+  # Origem no diagrama: ${node.data.originType}
+}`);
+    }
+  }
+
   for (const node of nodesOfKind(ctx, "psc")) {
     const resourceName = ctx.getTfResourceName(node);
     const subnetId = ctx.graph.subnetForPsc.get(node.id);

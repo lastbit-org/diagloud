@@ -42,6 +42,7 @@ import type {
   GithubProps,
   IamProps,
   LoadBalancerProps,
+  CdnProps,
   OrgPolicyProps,
   PscProps,
   SecretManagerProps,
@@ -102,6 +103,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "github"; data: GithubProps })
   | (NodeBase & { kind: "iam"; data: IamProps })
   | (NodeBase & { kind: "loadbalancer"; data: LoadBalancerProps })
+  | (NodeBase & { kind: "cdn"; data: CdnProps })
   | (NodeBase & { kind: "orgpolicy"; data: OrgPolicyProps })
   | (NodeBase & { kind: "psc"; data: PscProps })
   | (NodeBase & { kind: "secretmanager"; data: SecretManagerProps })
@@ -275,6 +277,12 @@ export type DiagramEdge = {
     | "loadbalancer-gke"
     | "loadbalancer-run"
     | "loadbalancer-vpc"
+    | "internet-cdn"
+    | "cdn-storage"
+    | "cdn-loadbalancer"
+    | "cdn-vm"
+    | "cdn-gke"
+    | "cdn-run"
     | "orgpolicy-folder"
     | "orgpolicy-project"
     | "psc-subnet"

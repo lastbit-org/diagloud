@@ -176,6 +176,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `github-${count}`;
     case "loadbalancer":
       return `lb-${count}`;
+    case "cdn":
+      return `cdn-${count}`;
     case "orgpolicy":
       return `orgpol-${count}`;
     case "psc":

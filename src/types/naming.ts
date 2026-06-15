@@ -49,6 +49,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   github: "github-AREA-AMBIENTE",
   iam: "iam-AREA-AMBIENTE",
   loadbalancer: "lb-AREA-AMBIENTE",
+  cdn: "cdn-AREA-AMBIENTE",
   orgpolicy: "orgpol-AREA-AMBIENTE",
   psc: "psc-AREA-AMBIENTE",
   secretmanager: "secret-AREA-AMBIENTE",

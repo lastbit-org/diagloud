@@ -30,6 +30,8 @@ export type ResolvedGraph = {
   vpcForInterconnect: Map<string, string>;
   vpcForPeering: Map<string, string[]>;
   vpcForLoadBalancer: Map<string, string>;
+  storageForCdn: Map<string, string>;
+  loadBalancerForCdn: Map<string, string>;
   subnetForPsc: Map<string, string>;
   subnetForGke: Map<string, string>;
   subnetForRun: Map<string, string>;
@@ -94,6 +96,12 @@ function applyEdge(
     case "loadbalancer-vpc":
       graph.vpcForLoadBalancer.set(source, target);
       break;
+    case "cdn-storage":
+      graph.storageForCdn.set(source, target);
+      break;
+    case "cdn-loadbalancer":
+      graph.loadBalancerForCdn.set(source, target);
+      break;
     case "psc-subnet":
       graph.subnetForPsc.set(source, target);
       break;
@@ -150,6 +158,8 @@ export function resolveGraph(document: DiagramDocument): ResolvedGraph {
     vpcForInterconnect: new Map(),
     vpcForPeering: new Map(),
     vpcForLoadBalancer: new Map(),
+    storageForCdn: new Map(),
+    loadBalancerForCdn: new Map(),
     subnetForPsc: new Map(),
     subnetForGke: new Map(),
     subnetForRun: new Map(),

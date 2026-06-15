@@ -44,6 +44,7 @@ export { PcUserNode } from "./PcUserNode";
 export { OnpremNode } from "./OnpremNode";
 export { GithubNode } from "./GithubNode";
 export { LoadBalancerNode } from "./LoadBalancerNode";
+export { CdnNode } from "./CdnNode";
 export { OrgPolicyNode } from "./OrgPolicyNode";
 export { PscNode } from "./PscNode";
 export { SecretManagerNode } from "./SecretManagerNode";

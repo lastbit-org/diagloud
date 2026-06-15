@@ -39,6 +39,7 @@ import pcUserIcon from "./icons/pc-user.svg";
 import onpremIcon from "./icons/onprem.svg";
 import githubIcon from "./github/github.svg";
 import loadBalancerIcon from "./google-cloud-legacy-icons/cloud_load_balancing/cloud_load_balancing.svg";
+import cdnIcon from "./google-cloud-legacy-icons/cloud_cdn/cloud_cdn.svg";
 import orgPolicyIcon from "./google-cloud-legacy-icons/policy_analyzer/policy_analyzer.svg";
 import pscIcon from "./google-cloud-legacy-icons/private_service_connect/private_service_connect.svg";
 import cloudShellIcon from "./google-cloud-legacy-icons/cloud_shell/cloud_shell.svg";
@@ -87,6 +88,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   onprem: onpremIcon,
   github: githubIcon,
   loadbalancer: loadBalancerIcon,
+  cdn: cdnIcon,
   orgpolicy: orgPolicyIcon,
   psc: pscIcon,
   secretmanager: secretManagerIcon,
@@ -135,6 +137,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   onprem: "On-premises",
   github: "GitHub",
   loadbalancer: "Cloud Load Balancing",
+  cdn: "Cloud CDN",
   orgpolicy: "Organization Policy",
   psc: "Private Service Connect",
   secretmanager: "Secret Manager",

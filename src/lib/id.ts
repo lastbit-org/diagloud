@@ -46,6 +46,7 @@ const ID_PREFIXES = [
   "github",
   "iam",
   "loadbalancer",
+  "cdn",
   "orgpolicy",
   "psc",
   "secretmanager",
@@ -110,6 +111,7 @@ export function createId(prefix = "node"): string {
     prefix === "github" ||
     prefix === "iam" ||
     prefix === "loadbalancer" ||
+    prefix === "cdn" ||
     prefix === "orgpolicy" ||
     prefix === "psc" ||
     prefix === "secretmanager" ||
@@ -125,7 +127,7 @@ export function isUuid(value: string): boolean {
 }
 
 const ID_PREFIX_PATTERN =
-  /^(vpc|subnet|vm|storage|sql|gke|nat|router|peering|vpn|interconnect|firewall|dns|artifact|build|kms|internet|run|pubsub|eventarc|bigquery|spanner|firestore|bigtable|firebase|workbench|notebook|spark|airflow|dataflow|modelregistry|zone|folder|project|entra|infocard|pcuser|onprem|github|iam|loadbalancer|orgpolicy|psc|secretmanager|cloudshell|edge)-(.+)$/;
+  /^(vpc|subnet|vm|storage|sql|gke|nat|router|peering|vpn|interconnect|firewall|dns|artifact|build|kms|internet|run|pubsub|eventarc|bigquery|spanner|firestore|bigtable|firebase|workbench|notebook|spark|airflow|dataflow|modelregistry|zone|folder|project|entra|infocard|pcuser|onprem|github|iam|loadbalancer|cdn|orgpolicy|psc|secretmanager|cloudshell|edge)-(.+)$/;
 
 function parsePrefixedId(
   id: string,

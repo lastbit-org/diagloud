@@ -40,6 +40,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "kms",
   "iam",
   "loadbalancer",
+  "cdn",
   "orgpolicy",
   "psc",
   "secretmanager",

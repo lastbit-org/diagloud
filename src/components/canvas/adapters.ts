@@ -112,6 +112,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "loadbalancer") {
     return node.data.type === "internal" ? "Interno" : node.data.region;
   }
+  if (node.kind === "cdn") {
+    return node.data.region;
+  }
   if (node.kind === "orgpolicy") {
     return node.data.constraintId;
   }

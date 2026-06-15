@@ -166,6 +166,10 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("cloudshell", "sql")).toBe("cloudshell-sql");
     expect(getEdgeKind("cloudshell", "build")).toBe("cloudshell-build");
     expect(getEdgeKind("internet", "loadbalancer")).toBe("internet-loadbalancer");
+    expect(getEdgeKind("internet", "cdn")).toBe("internet-cdn");
+    expect(getEdgeKind("cdn", "storage")).toBe("cdn-storage");
+    expect(getEdgeKind("cdn", "loadbalancer")).toBe("cdn-loadbalancer");
+    expect(getEdgeKind("cdn", "vm")).toBe("cdn-vm");
     expect(getEdgeKind("psc", "subnet")).toBe("psc-subnet");
     expect(getEdgeKind("psc", "vpc")).toBeNull();
     expect(getEdgeKind("vm", "secretmanager")).toBe("vm-secretmanager");

@@ -95,6 +95,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "firebase" ||
     value === "notebook" ||
     value === "loadbalancer" ||
+    value === "cdn" ||
     value === "orgpolicy" ||
     value === "psc" ||
     value === "secretmanager" ||
@@ -302,6 +303,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.loadbalancer,
     description: "Balanceamento de carga HTTP(S), TCP ou interno",
     icon: GCP_RESOURCE_ICONS.loadbalancer,
+  },
+  {
+    paletteKey: "cdn",
+    kind: "cdn",
+    category: "networking",
+    label: GCP_RESOURCE_LABELS.cdn,
+    description: "Cache de conteúdo estático e dinâmico na borda",
+    icon: GCP_RESOURCE_ICONS.cdn,
   },
   {
     paletteKey: "psc",
