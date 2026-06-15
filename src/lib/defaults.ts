@@ -51,6 +51,7 @@ import type {
   OrgPolicyProps,
   PscProps,
   SecretManagerProps,
+  CertificateManagerProps,
   CloudShellProps,
 } from "../types";
 
@@ -304,6 +305,12 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         location: "southamerica-east1",
       } as SecretManagerProps as ResourcePropsByKind[K];
+    case "certificatemanager":
+      return {
+        name,
+        location: "global",
+        certificateType: "managed",
+      } as CertificateManagerProps as ResourcePropsByKind[K];
     case "cloudshell":
       return { name } as CloudShellProps as ResourcePropsByKind[K];
   }
@@ -402,6 +409,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `psc-${count}`;
     case "secretmanager":
       return `secret-${count}`;
+    case "certificatemanager":
+      return `cert-${count}`;
     case "cloudshell":
       return `cloudshell-${count}`;
   }

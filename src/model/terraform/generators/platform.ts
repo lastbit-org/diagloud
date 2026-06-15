@@ -1,4 +1,4 @@
-import { kmsKeyReference, nodesOfKind, type TerraformGenContext } from "../context";
+import { findNode, kmsKeyReference, nodesOfKind, type TerraformGenContext } from "../context";
 import { escapeHclString, sectionHeader } from "../hcl";
 
 const ARTIFACT_FORMAT_MAP = {
@@ -61,6 +61,36 @@ resource "google_kms_crypto_key" "${resourceName}_key" {
     blocks.push(`resource "google_secret_manager_secret" "${resourceName}" {
   secret_id = "${escapeHclString(node.data.name)}"${replication}
 }`);
+  }
+
+  for (const node of nodesOfKind(ctx, "certificatemanager")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const dnsId = ctx.graph.dnsForCertificateManager.get(node.id);
+    const dnsNode = dnsId ? findNode(ctx.document.nodes, dnsId) : undefined;
+
+    if (node.data.certificateType === "managed") {
+      const dnsAuthBlock =
+        dnsNode?.kind === "dns"
+          ? `
+  # Autorização DNS via zona "${escapeHclString(dnsNode.data.name)}"`
+          : "";
+
+      blocks.push(`resource "google_certificate_manager_certificate" "${resourceName}" {
+  name     = "${escapeHclString(node.data.name)}"
+  location = "${escapeHclString(node.data.location)}"${dnsAuthBlock}
+
+  managed {
+    domains = ["example.com"]
+  }
+}`);
+    } else {
+      blocks.push(`resource "google_certificate_manager_certificate" "${resourceName}" {
+  name     = "${escapeHclString(node.data.name)}"
+  location = "${escapeHclString(node.data.location)}"
+
+  # Certificado próprio — configure self_managed { pem_certificate, pem_private_key }
+}`);
+    }
   }
 
   for (const node of nodesOfKind(ctx, "pubsub")) {

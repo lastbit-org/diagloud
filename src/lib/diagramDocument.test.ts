@@ -71,6 +71,7 @@ const sampleDocument: DiagramDocument = {
         orgpolicy: "orgpol-AREA-AMBIENTE",
         psc: "psc-AREA-AMBIENTE",
         secretmanager: "secret-AREA-AMBIENTE",
+        certificatemanager: "cert-AREA-AMBIENTE",
         cloudshell: "shell-AREA-AMBIENTE",
       },
     },

@@ -32,6 +32,9 @@ export type ResolvedGraph = {
   vpcForLoadBalancer: Map<string, string>;
   storageForCdn: Map<string, string>;
   loadBalancerForCdn: Map<string, string>;
+  certificateManagerForLoadBalancer: Map<string, string>;
+  certificateManagerForCdn: Map<string, string>;
+  dnsForCertificateManager: Map<string, string>;
   subnetForPsc: Map<string, string>;
   subnetForGke: Map<string, string>;
   subnetForRun: Map<string, string>;
@@ -102,6 +105,15 @@ function applyEdge(
     case "cdn-loadbalancer":
       graph.loadBalancerForCdn.set(source, target);
       break;
+    case "loadbalancer-certificatemanager":
+      graph.certificateManagerForLoadBalancer.set(source, target);
+      break;
+    case "cdn-certificatemanager":
+      graph.certificateManagerForCdn.set(source, target);
+      break;
+    case "certificatemanager-dns":
+      graph.dnsForCertificateManager.set(source, target);
+      break;
     case "psc-subnet":
       graph.subnetForPsc.set(source, target);
       break;
@@ -160,6 +172,9 @@ export function resolveGraph(document: DiagramDocument): ResolvedGraph {
     vpcForLoadBalancer: new Map(),
     storageForCdn: new Map(),
     loadBalancerForCdn: new Map(),
+    certificateManagerForLoadBalancer: new Map(),
+    certificateManagerForCdn: new Map(),
+    dnsForCertificateManager: new Map(),
     subnetForPsc: new Map(),
     subnetForGke: new Map(),
     subnetForRun: new Map(),

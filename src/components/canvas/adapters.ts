@@ -124,6 +124,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "secretmanager") {
     return node.data.location;
   }
+  if (node.kind === "certificatemanager") {
+    return node.data.certificateType === "managed" ? "Gerenciado" : "Próprio";
+  }
   if (node.kind === "onprem") {
     return node.data.location;
   }

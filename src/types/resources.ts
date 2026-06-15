@@ -47,6 +47,7 @@ export type ResourceKind =
   | "orgpolicy"
   | "psc"
   | "secretmanager"
+  | "certificatemanager"
   | "cloudshell";
 
 export type RunAccessMode = "public" | "vpc";
@@ -391,6 +392,15 @@ export type SecretManagerProps = {
   location: string;
 };
 
+export type CertificateType = "managed" | "self_managed";
+
+export type CertificateManagerProps = {
+  /** Nome do certificado. */
+  name: string;
+  location: string;
+  certificateType: CertificateType;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
@@ -437,5 +447,6 @@ export type ResourcePropsByKind = {
   orgpolicy: OrgPolicyProps;
   psc: PscProps;
   secretmanager: SecretManagerProps;
+  certificatemanager: CertificateManagerProps;
   cloudshell: CloudShellProps;
 };

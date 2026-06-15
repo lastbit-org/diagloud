@@ -46,6 +46,7 @@ import type {
   OrgPolicyProps,
   PscProps,
   SecretManagerProps,
+  CertificateManagerProps,
   CloudShellProps,
 } from "./resources";
 
@@ -107,6 +108,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "orgpolicy"; data: OrgPolicyProps })
   | (NodeBase & { kind: "psc"; data: PscProps })
   | (NodeBase & { kind: "secretmanager"; data: SecretManagerProps })
+  | (NodeBase & { kind: "certificatemanager"; data: CertificateManagerProps })
   | (NodeBase & { kind: "cloudshell"; data: CloudShellProps });
 
 export type DiagramEdge = {
@@ -296,6 +298,9 @@ export type DiagramEdge = {
     | "build-secretmanager"
     | "airflow-secretmanager"
     | "secretmanager-kms"
+    | "loadbalancer-certificatemanager"
+    | "cdn-certificatemanager"
+    | "certificatemanager-dns"
     | "infocard-link"
     | "zone-link";
 };

@@ -53,6 +53,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   orgpolicy: "orgpol-AREA-AMBIENTE",
   psc: "psc-AREA-AMBIENTE",
   secretmanager: "secret-AREA-AMBIENTE",
+  certificatemanager: "cert-AREA-AMBIENTE",
   cloudshell: "shell-AREA-AMBIENTE",
 };
 

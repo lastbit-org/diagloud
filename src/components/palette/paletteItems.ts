@@ -99,6 +99,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "orgpolicy" ||
     value === "psc" ||
     value === "secretmanager" ||
+    value === "certificatemanager" ||
     value === "cloudshell"
   );
 }
@@ -447,6 +448,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.secretmanager,
     description: "Armazenamento de segredos e credenciais",
     icon: GCP_RESOURCE_ICONS.secretmanager,
+  },
+  {
+    paletteKey: "certificatemanager",
+    kind: "certificatemanager",
+    category: "security",
+    label: GCP_RESOURCE_LABELS.certificatemanager,
+    description: "Certificados TLS/SSL gerenciados ou próprios",
+    icon: GCP_RESOURCE_ICONS.certificatemanager,
   },
   {
     paletteKey: "pcuser",

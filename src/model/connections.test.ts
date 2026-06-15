@@ -170,6 +170,15 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("cdn", "storage")).toBe("cdn-storage");
     expect(getEdgeKind("cdn", "loadbalancer")).toBe("cdn-loadbalancer");
     expect(getEdgeKind("cdn", "vm")).toBe("cdn-vm");
+    expect(getEdgeKind("loadbalancer", "certificatemanager")).toBe(
+      "loadbalancer-certificatemanager",
+    );
+    expect(getEdgeKind("cdn", "certificatemanager")).toBe(
+      "cdn-certificatemanager",
+    );
+    expect(getEdgeKind("certificatemanager", "dns")).toBe(
+      "certificatemanager-dns",
+    );
     expect(getEdgeKind("psc", "subnet")).toBe("psc-subnet");
     expect(getEdgeKind("psc", "vpc")).toBeNull();
     expect(getEdgeKind("vm", "secretmanager")).toBe("vm-secretmanager");

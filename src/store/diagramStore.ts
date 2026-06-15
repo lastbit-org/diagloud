@@ -110,6 +110,7 @@ import type {
   OrgPolicyProps,
   PscProps,
   SecretManagerProps,
+  CertificateManagerProps,
   CloudShellProps,
   IamProps,
 } from "../types";
@@ -180,6 +181,7 @@ type DiagramActions = {
       | Partial<OrgPolicyProps>
       | Partial<PscProps>
       | Partial<SecretManagerProps>
+      | Partial<CertificateManagerProps>
       | Partial<CloudShellProps>
       | Partial<IamProps>,
   ) => void;
@@ -594,6 +596,15 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "certificatemanager":
+      return {
+        ...base,
+        kind: "certificatemanager",
+        data: {
+          ...defaultResourceData("certificatemanager", resourceContext),
+          ...data,
+        },
+      };
     case "cloudshell":
       return {
         ...base,
@@ -649,6 +660,7 @@ function mergeNodeData(
     | Partial<OrgPolicyProps>
     | Partial<PscProps>
     | Partial<SecretManagerProps>
+    | Partial<CertificateManagerProps>
     | Partial<CloudShellProps>
     | Partial<IamProps>,
 ): DiagramNode {
@@ -877,6 +889,14 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<SecretManagerProps>) },
+      };
+    case "certificatemanager":
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          ...(patch as Partial<CertificateManagerProps>),
+        },
       };
     case "cloudshell":
       return {

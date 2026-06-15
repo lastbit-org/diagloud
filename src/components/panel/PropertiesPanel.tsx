@@ -45,6 +45,7 @@ import type {
   DataflowPipelineType,
   LoadBalancerType,
   CdnOriginType,
+  CertificateType,
   IamVariant,
 } from "../../types";
 import { EDGE_ENDPOINTS } from "../../types/connections";
@@ -1659,6 +1660,52 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <SecretManagerConsumersInfo
             secretmanager={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "certificatemanager" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="certificatemanager-name">Certificado</label>
+            <input
+              id="certificatemanager-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="certificatemanager-location">Localização</label>
+            <input
+              id="certificatemanager-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="global ou southamerica-east1"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="certificatemanager-type">Tipo</label>
+            <select
+              id="certificatemanager-type"
+              value={selectedNode.data.certificateType}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  certificateType: e.target.value as CertificateType,
+                })
+              }
+            >
+              <option value="managed">Gerenciado (Google)</option>
+              <option value="self_managed">Próprio (self-managed)</option>
+            </select>
+          </div>
+          <CertificateManagerConnectionsInfo
+            certificatemanager={selectedNode}
             edges={edges}
             nodes={nodes}
           />
@@ -5638,6 +5685,77 @@ function SecretManagerConsumersInfo({
         <>
           <dt>Cloud KMS</dt>
           <dd>{kmsKeys.map((k) => k.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function CertificateManagerConnectionsInfo({
+  certificatemanager,
+  edges,
+  nodes,
+}: {
+  certificatemanager: Extract<DiagramNode, { kind: "certificatemanager" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const loadBalancers = edges
+    .filter(
+      (e) =>
+        e.kind === "loadbalancer-certificatemanager" &&
+        e.target === certificatemanager.id,
+    )
+    .map((e) =>
+      nodes.find((n) => n.id === e.source && n.kind === "loadbalancer"),
+    )
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "loadbalancer" }> => n != null,
+    );
+  const cdns = edges
+    .filter(
+      (e) =>
+        e.kind === "cdn-certificatemanager" &&
+        e.target === certificatemanager.id,
+    )
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "cdn"))
+    .filter((n): n is Extract<DiagramNode, { kind: "cdn" }> => n != null);
+  const dnsEdge = edges.find(
+    (e) =>
+      e.kind === "certificatemanager-dns" &&
+      e.source === certificatemanager.id,
+  );
+  const dns = dnsEdge
+    ? nodes.find((n) => n.id === dnsEdge.target && n.kind === "dns")
+    : undefined;
+
+  if (loadBalancers.length === 0 && cdns.length === 0 && !dns) {
+    return (
+      <p className="properties-field__hint">
+        Ligue Load Balancers, Cloud CDN ou Cloud DNS para documentar uso e
+        autorização do certificado.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {loadBalancers.length > 0 ? (
+        <>
+          <dt>Load Balancers</dt>
+          <dd>{loadBalancers.map((lb) => lb.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {cdns.length > 0 ? (
+        <>
+          <dt>Cloud CDN</dt>
+          <dd>{cdns.map((c) => c.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {dns && dns.kind === "dns" ? (
+        <>
+          <dt>Cloud DNS</dt>
+          <dd>{dns.data.name}</dd>
         </>
       ) : null}
     </dl>

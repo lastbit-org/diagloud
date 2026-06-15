@@ -257,6 +257,12 @@ export const EDGE_ENDPOINTS = {
   "build-secretmanager": { from: "build", to: "secretmanager" },
   "airflow-secretmanager": { from: "airflow", to: "secretmanager" },
   "secretmanager-kms": { from: "secretmanager", to: "kms" },
+  "loadbalancer-certificatemanager": {
+    from: "loadbalancer",
+    to: "certificatemanager",
+  },
+  "cdn-certificatemanager": { from: "cdn", to: "certificatemanager" },
+  "certificatemanager-dns": { from: "certificatemanager", to: "dns" },
   "infocard-link": { from: "infocard", to: "vpc" },
   "zone-link": { from: "vpc", to: "zone" },
 } as const satisfies Record<

@@ -59,6 +59,7 @@ const EXPORTABLE_KINDS = new Set<ResourceKind>([
   "cdn",
   "psc",
   "secretmanager",
+  "certificatemanager",
   "orgpolicy",
   "folder",
   "project",

@@ -65,6 +65,8 @@ import {
   type OrgPolicyProps,
   type PscProps,
   type SecretManagerProps,
+  type CertificateManagerProps,
+  type CertificateType,
   type CloudShellProps,
 } from "../types";
 
@@ -802,6 +804,30 @@ function parseSecretManagerData(raw: unknown): SecretManagerProps {
   };
 }
 
+const CERTIFICATE_TYPES = new Set<CertificateType>(["managed", "self_managed"]);
+
+function parseCertificateManagerData(raw: unknown): CertificateManagerProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.location !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Certificate Manager inválidos.");
+  }
+  const certificateType =
+    raw.certificateType === "managed" || raw.certificateType === "self_managed"
+      ? raw.certificateType
+      : "managed";
+  if (!CERTIFICATE_TYPES.has(certificateType)) {
+    throw new DiagramParseError("Dados de Certificate Manager inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: raw.location,
+    certificateType,
+  };
+}
+
 function parseZoneData(raw: unknown): ZoneProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de zona inválidos.");
@@ -1421,6 +1447,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseSecretManagerData(data),
       };
+    case "certificatemanager":
+      if (!nodeIdMatchesKind(nodeId, "certificatemanager")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Certificate Manager.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "certificatemanager",
+        position: parsedPosition,
+        zIndex,
+        data: parseCertificateManagerData(data),
+      };
     case "cloudshell":
       if (!nodeIdMatchesKind(nodeId, "cloudshell")) {
         throw new DiagramParseError(
@@ -1639,6 +1678,9 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "build-secretmanager" &&
     kind !== "airflow-secretmanager" &&
     kind !== "secretmanager-kms" &&
+    kind !== "loadbalancer-certificatemanager" &&
+    kind !== "cdn-certificatemanager" &&
+    kind !== "certificatemanager-dns" &&
     kind !== "infocard-link" &&
     kind !== "zone-link" &&
     kind !== "sql-vpc"
@@ -1881,6 +1923,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.secretmanager === "string"
           ? patterns.secretmanager
           : DEFAULT_NAMING_PATTERNS.secretmanager,
+      certificatemanager:
+        typeof patterns.certificatemanager === "string"
+          ? patterns.certificatemanager
+          : DEFAULT_NAMING_PATTERNS.certificatemanager,
       cloudshell:
         typeof patterns.cloudshell === "string"
           ? patterns.cloudshell
@@ -2082,6 +2128,7 @@ function namingMetadataEqual(
     a.patterns.orgpolicy === b.patterns.orgpolicy &&
     a.patterns.psc === b.patterns.psc &&
     a.patterns.secretmanager === b.patterns.secretmanager &&
+    a.patterns.certificatemanager === b.patterns.certificatemanager &&
     a.patterns.cloudshell === b.patterns.cloudshell
   );
 }

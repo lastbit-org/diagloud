@@ -44,6 +44,7 @@ import {
   OrgPolicyNode,
   PscNode,
   SecretManagerNode,
+  CertificateManagerNode,
   CloudShellNode,
 } from "../nodes";
 
@@ -93,5 +94,6 @@ export const nodeTypes = {
   orgpolicy: OrgPolicyNode,
   psc: PscNode,
   secretmanager: SecretManagerNode,
+  certificatemanager: CertificateManagerNode,
   cloudshell: CloudShellNode,
 };

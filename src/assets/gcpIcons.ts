@@ -44,6 +44,7 @@ import orgPolicyIcon from "./google-cloud-legacy-icons/policy_analyzer/policy_an
 import pscIcon from "./google-cloud-legacy-icons/private_service_connect/private_service_connect.svg";
 import cloudShellIcon from "./google-cloud-legacy-icons/cloud_shell/cloud_shell.svg";
 import secretManagerIcon from "./google-cloud-legacy-icons/secret_manager/secret_manager.svg";
+import certificateManagerIcon from "./google-cloud-legacy-icons/certificate_manager/certificate_manager.svg";
 
 /** Ícones oficiais GCP (legacy 24px). Sub-rede usa Cloud Network (sem ícone subnet no pacote). */
 export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
@@ -92,6 +93,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   orgpolicy: orgPolicyIcon,
   psc: pscIcon,
   secretmanager: secretManagerIcon,
+  certificatemanager: certificateManagerIcon,
   cloudshell: cloudShellIcon,
 };
 
@@ -141,5 +143,6 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   orgpolicy: "Organization Policy",
   psc: "Private Service Connect",
   secretmanager: "Secret Manager",
+  certificatemanager: "Certificate Manager",
   cloudshell: "Cloud Shell",
 };

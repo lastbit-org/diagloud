@@ -48,6 +48,7 @@ export { CdnNode } from "./CdnNode";
 export { OrgPolicyNode } from "./OrgPolicyNode";
 export { PscNode } from "./PscNode";
 export { SecretManagerNode } from "./SecretManagerNode";
+export { CertificateManagerNode } from "./CertificateManagerNode";
 export { CloudShellNode } from "./CloudShellNode";
 export type { IamNodeData } from "./IamNode";
 export { IamNode } from "./IamNode";
