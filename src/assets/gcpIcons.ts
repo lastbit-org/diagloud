@@ -45,6 +45,7 @@ import pscIcon from "./google-cloud-legacy-icons/private_service_connect/private
 import cloudShellIcon from "./google-cloud-legacy-icons/cloud_shell/cloud_shell.svg";
 import secretManagerIcon from "./google-cloud-legacy-icons/secret_manager/secret_manager.svg";
 import certificateManagerIcon from "./google-cloud-legacy-icons/certificate_manager/certificate_manager.svg";
+import apigeeIcon from "./google-cloud-legacy-icons/apigee_api_platform/apigee_api_platform.svg";
 
 /** Ícones oficiais GCP (legacy 24px). Sub-rede usa Cloud Network (sem ícone subnet no pacote). */
 export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
@@ -94,6 +95,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   psc: pscIcon,
   secretmanager: secretManagerIcon,
   certificatemanager: certificateManagerIcon,
+  apigee: apigeeIcon,
   cloudshell: cloudShellIcon,
 };
 
@@ -144,5 +146,6 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   psc: "Private Service Connect",
   secretmanager: "Secret Manager",
   certificatemanager: "Certificate Manager",
+  apigee: "Apigee",
   cloudshell: "Cloud Shell",
 };

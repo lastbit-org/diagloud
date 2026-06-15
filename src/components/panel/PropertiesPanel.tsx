@@ -46,6 +46,7 @@ import type {
   LoadBalancerType,
   CdnOriginType,
   CertificateType,
+  ApigeeEnvType,
   IamVariant,
 } from "../../types";
 import { EDGE_ENDPOINTS } from "../../types/connections";
@@ -1706,6 +1707,51 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </div>
           <CertificateManagerConnectionsInfo
             certificatemanager={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "apigee" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="apigee-name">Organização</label>
+            <input
+              id="apigee-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="apigee-region">Região</label>
+            <input
+              id="apigee-region"
+              value={selectedNode.data.region}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { region: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="apigee-env-type">Tipo</label>
+            <select
+              id="apigee-env-type"
+              value={selectedNode.data.envType}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  envType: e.target.value as ApigeeEnvType,
+                })
+              }
+            >
+              <option value="x">Apigee X</option>
+              <option value="hybrid">Apigee Hybrid</option>
+            </select>
+          </div>
+          <ApigeeConnectionsInfo
+            apigee={selectedNode}
             edges={edges}
             nodes={nodes}
           />
@@ -5756,6 +5802,100 @@ function CertificateManagerConnectionsInfo({
         <>
           <dt>Cloud DNS</dt>
           <dd>{dns.data.name}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function ApigeeConnectionsInfo({
+  apigee,
+  edges,
+  nodes,
+}: {
+  apigee: Extract<DiagramNode, { kind: "apigee" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const internet = edges.find(
+    (e) => e.kind === "internet-apigee" && e.target === apigee.id,
+  );
+  const vms = edges
+    .filter((e) => e.kind === "apigee-vm" && e.source === apigee.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "vm"))
+    .filter((n): n is Extract<DiagramNode, { kind: "vm" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "apigee-gke" && e.source === apigee.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "apigee-run" && e.source === apigee.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const vpcEdge = edges.find(
+    (e) => e.kind === "apigee-vpc" && e.source === apigee.id,
+  );
+  const vpc = vpcEdge
+    ? nodes.find((n) => n.id === vpcEdge.target && n.kind === "vpc")
+    : undefined;
+  const dnsEdge = edges.find(
+    (e) => e.kind === "apigee-dns" && e.source === apigee.id,
+  );
+  const dns = dnsEdge
+    ? nodes.find((n) => n.id === dnsEdge.target && n.kind === "dns")
+    : undefined;
+
+  if (
+    !internet &&
+    vms.length === 0 &&
+    clusters.length === 0 &&
+    runs.length === 0 &&
+    !vpc &&
+    !dns
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à Internet, VPC, Cloud DNS e backends VM, GKE ou Cloud Run.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {internet ? (
+        <>
+          <dt>Internet</dt>
+          <dd>Entrada pública de APIs</dd>
+        </>
+      ) : null}
+      {vpc && vpc.kind === "vpc" ? (
+        <>
+          <dt>VPC</dt>
+          <dd>{vpc.data.name}</dd>
+        </>
+      ) : null}
+      {dns && dns.kind === "dns" ? (
+        <>
+          <dt>Cloud DNS</dt>
+          <dd>{dns.data.name}</dd>
+        </>
+      ) : null}
+      {vms.length > 0 ? (
+        <>
+          <dt>VMs (backend)</dt>
+          <dd>{vms.map((v) => v.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE (backend)</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run (backend)</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

@@ -52,6 +52,7 @@ import type {
   PscProps,
   SecretManagerProps,
   CertificateManagerProps,
+  ApigeeProps,
   CloudShellProps,
 } from "../types";
 
@@ -311,6 +312,12 @@ export function defaultResourceData<K extends ResourceKind>(
         location: "global",
         certificateType: "managed",
       } as CertificateManagerProps as ResourcePropsByKind[K];
+    case "apigee":
+      return {
+        name,
+        region: "southamerica-east1",
+        envType: "x",
+      } as ApigeeProps as ResourcePropsByKind[K];
     case "cloudshell":
       return { name } as CloudShellProps as ResourcePropsByKind[K];
   }
@@ -411,6 +418,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `secret-${count}`;
     case "certificatemanager":
       return `cert-${count}`;
+    case "apigee":
+      return `apigee-${count}`;
     case "cloudshell":
       return `cloudshell-${count}`;
   }

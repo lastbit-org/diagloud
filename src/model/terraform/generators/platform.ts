@@ -93,6 +93,37 @@ resource "google_kms_crypto_key" "${resourceName}_key" {
     }
   }
 
+  for (const node of nodesOfKind(ctx, "apigee")) {
+    const resourceName = ctx.getTfResourceName(node);
+    const vpcId = ctx.graph.vpcForApigee.get(node.id);
+    const vpcNode = vpcId ? findNode(ctx.document.nodes, vpcId) : undefined;
+    const dnsId = ctx.graph.dnsForApigee.get(node.id);
+    const dnsNode = dnsId ? findNode(ctx.document.nodes, dnsId) : undefined;
+    const vpcComment =
+      vpcNode?.kind === "vpc"
+        ? `
+  # VPC no diagrama: ${escapeHclString(vpcNode.data.name)}`
+        : "";
+    const dnsComment =
+      dnsNode?.kind === "dns"
+        ? `
+  # Cloud DNS no diagrama: ${escapeHclString(dnsNode.data.name)}`
+        : "";
+
+    blocks.push(`resource "google_apigee_organization" "${resourceName}" {
+  analytics_region = "${escapeHclString(node.data.region)}"
+  project_id       = var.project_id${vpcComment}${dnsComment}
+
+  # Tipo no diagrama: ${node.data.envType === "hybrid" ? "Apigee Hybrid" : "Apigee X"}
+}
+
+resource "google_apigee_environment" "${resourceName}_env" {
+  name       = "${escapeHclString(node.data.name)}-env"
+  org_id     = google_apigee_organization.${resourceName}.id
+  display_name = "${escapeHclString(node.data.name)}"
+}`);
+  }
+
   for (const node of nodesOfKind(ctx, "pubsub")) {
     const resourceName = ctx.getTfResourceName(node);
 

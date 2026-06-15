@@ -111,6 +111,7 @@ import type {
   PscProps,
   SecretManagerProps,
   CertificateManagerProps,
+  ApigeeProps,
   CloudShellProps,
   IamProps,
 } from "../types";
@@ -182,6 +183,7 @@ type DiagramActions = {
       | Partial<PscProps>
       | Partial<SecretManagerProps>
       | Partial<CertificateManagerProps>
+      | Partial<ApigeeProps>
       | Partial<CloudShellProps>
       | Partial<IamProps>,
   ) => void;
@@ -605,6 +607,15 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "apigee":
+      return {
+        ...base,
+        kind: "apigee",
+        data: {
+          ...defaultResourceData("apigee", resourceContext),
+          ...data,
+        },
+      };
     case "cloudshell":
       return {
         ...base,
@@ -661,6 +672,7 @@ function mergeNodeData(
     | Partial<PscProps>
     | Partial<SecretManagerProps>
     | Partial<CertificateManagerProps>
+    | Partial<ApigeeProps>
     | Partial<CloudShellProps>
     | Partial<IamProps>,
 ): DiagramNode {
@@ -897,6 +909,11 @@ function mergeNodeData(
           ...node.data,
           ...(patch as Partial<CertificateManagerProps>),
         },
+      };
+    case "apigee":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<ApigeeProps>) },
       };
     case "cloudshell":
       return {

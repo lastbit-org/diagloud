@@ -35,6 +35,8 @@ export type ResolvedGraph = {
   certificateManagerForLoadBalancer: Map<string, string>;
   certificateManagerForCdn: Map<string, string>;
   dnsForCertificateManager: Map<string, string>;
+  vpcForApigee: Map<string, string>;
+  dnsForApigee: Map<string, string>;
   subnetForPsc: Map<string, string>;
   subnetForGke: Map<string, string>;
   subnetForRun: Map<string, string>;
@@ -114,6 +116,12 @@ function applyEdge(
     case "certificatemanager-dns":
       graph.dnsForCertificateManager.set(source, target);
       break;
+    case "apigee-vpc":
+      graph.vpcForApigee.set(source, target);
+      break;
+    case "apigee-dns":
+      graph.dnsForApigee.set(source, target);
+      break;
     case "psc-subnet":
       graph.subnetForPsc.set(source, target);
       break;
@@ -175,6 +183,8 @@ export function resolveGraph(document: DiagramDocument): ResolvedGraph {
     certificateManagerForLoadBalancer: new Map(),
     certificateManagerForCdn: new Map(),
     dnsForCertificateManager: new Map(),
+    vpcForApigee: new Map(),
+    dnsForApigee: new Map(),
     subnetForPsc: new Map(),
     subnetForGke: new Map(),
     subnetForRun: new Map(),

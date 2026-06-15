@@ -48,6 +48,7 @@ export type ResourceKind =
   | "psc"
   | "secretmanager"
   | "certificatemanager"
+  | "apigee"
   | "cloudshell";
 
 export type RunAccessMode = "public" | "vpc";
@@ -401,6 +402,15 @@ export type CertificateManagerProps = {
   certificateType: CertificateType;
 };
 
+export type ApigeeEnvType = "x" | "hybrid";
+
+export type ApigeeProps = {
+  /** Nome da organização Apigee no diagrama. */
+  name: string;
+  region: string;
+  envType: ApigeeEnvType;
+};
+
 export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
@@ -448,5 +458,6 @@ export type ResourcePropsByKind = {
   psc: PscProps;
   secretmanager: SecretManagerProps;
   certificatemanager: CertificateManagerProps;
+  apigee: ApigeeProps;
   cloudshell: CloudShellProps;
 };

@@ -67,6 +67,8 @@ import {
   type SecretManagerProps,
   type CertificateManagerProps,
   type CertificateType,
+  type ApigeeProps,
+  type ApigeeEnvType,
   type CloudShellProps,
 } from "../types";
 
@@ -828,6 +830,27 @@ function parseCertificateManagerData(raw: unknown): CertificateManagerProps {
   };
 }
 
+const APIGEE_ENV_TYPES = new Set<ApigeeEnvType>(["x", "hybrid"]);
+
+function parseApigeeData(raw: unknown): ApigeeProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Apigee inválidos.");
+  }
+  const envType =
+    raw.envType === "x" || raw.envType === "hybrid" ? raw.envType : "x";
+  if (!APIGEE_ENV_TYPES.has(envType)) {
+    throw new DiagramParseError("Dados de Apigee inválidos.");
+  }
+  return {
+    name: raw.name,
+    region:
+      typeof raw.region === "string" && raw.region.trim()
+        ? raw.region
+        : "southamerica-east1",
+    envType,
+  };
+}
+
 function parseZoneData(raw: unknown): ZoneProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de zona inválidos.");
@@ -1460,6 +1483,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseCertificateManagerData(data),
       };
+    case "apigee":
+      if (!nodeIdMatchesKind(nodeId, "apigee")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Apigee.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "apigee",
+        position: parsedPosition,
+        zIndex,
+        data: parseApigeeData(data),
+      };
     case "cloudshell":
       if (!nodeIdMatchesKind(nodeId, "cloudshell")) {
         throw new DiagramParseError(
@@ -1681,6 +1717,12 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "loadbalancer-certificatemanager" &&
     kind !== "cdn-certificatemanager" &&
     kind !== "certificatemanager-dns" &&
+    kind !== "internet-apigee" &&
+    kind !== "apigee-vm" &&
+    kind !== "apigee-gke" &&
+    kind !== "apigee-run" &&
+    kind !== "apigee-vpc" &&
+    kind !== "apigee-dns" &&
     kind !== "infocard-link" &&
     kind !== "zone-link" &&
     kind !== "sql-vpc"
@@ -1927,6 +1969,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.certificatemanager === "string"
           ? patterns.certificatemanager
           : DEFAULT_NAMING_PATTERNS.certificatemanager,
+      apigee:
+        typeof patterns.apigee === "string"
+          ? patterns.apigee
+          : DEFAULT_NAMING_PATTERNS.apigee,
       cloudshell:
         typeof patterns.cloudshell === "string"
           ? patterns.cloudshell
@@ -2129,6 +2175,7 @@ function namingMetadataEqual(
     a.patterns.psc === b.patterns.psc &&
     a.patterns.secretmanager === b.patterns.secretmanager &&
     a.patterns.certificatemanager === b.patterns.certificatemanager &&
+    a.patterns.apigee === b.patterns.apigee &&
     a.patterns.cloudshell === b.patterns.cloudshell
   );
 }

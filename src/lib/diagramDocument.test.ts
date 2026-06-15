@@ -72,6 +72,7 @@ const sampleDocument: DiagramDocument = {
         psc: "psc-AREA-AMBIENTE",
         secretmanager: "secret-AREA-AMBIENTE",
         certificatemanager: "cert-AREA-AMBIENTE",
+        apigee: "apigee-AREA-AMBIENTE",
         cloudshell: "shell-AREA-AMBIENTE",
       },
     },

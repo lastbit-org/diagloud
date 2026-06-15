@@ -45,6 +45,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "psc",
   "secretmanager",
   "certificatemanager",
+  "apigee",
   "cloudshell",
   "entra",
   "pcuser",

@@ -263,6 +263,12 @@ export const EDGE_ENDPOINTS = {
   },
   "cdn-certificatemanager": { from: "cdn", to: "certificatemanager" },
   "certificatemanager-dns": { from: "certificatemanager", to: "dns" },
+  "internet-apigee": { from: "internet", to: "apigee" },
+  "apigee-vm": { from: "apigee", to: "vm" },
+  "apigee-gke": { from: "apigee", to: "gke" },
+  "apigee-run": { from: "apigee", to: "run" },
+  "apigee-vpc": { from: "apigee", to: "vpc" },
+  "apigee-dns": { from: "apigee", to: "dns" },
   "infocard-link": { from: "infocard", to: "vpc" },
   "zone-link": { from: "vpc", to: "zone" },
 } as const satisfies Record<

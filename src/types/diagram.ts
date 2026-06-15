@@ -47,6 +47,7 @@ import type {
   PscProps,
   SecretManagerProps,
   CertificateManagerProps,
+  ApigeeProps,
   CloudShellProps,
 } from "./resources";
 
@@ -109,6 +110,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "psc"; data: PscProps })
   | (NodeBase & { kind: "secretmanager"; data: SecretManagerProps })
   | (NodeBase & { kind: "certificatemanager"; data: CertificateManagerProps })
+  | (NodeBase & { kind: "apigee"; data: ApigeeProps })
   | (NodeBase & { kind: "cloudshell"; data: CloudShellProps });
 
 export type DiagramEdge = {
@@ -301,6 +303,12 @@ export type DiagramEdge = {
     | "loadbalancer-certificatemanager"
     | "cdn-certificatemanager"
     | "certificatemanager-dns"
+    | "internet-apigee"
+    | "apigee-vm"
+    | "apigee-gke"
+    | "apigee-run"
+    | "apigee-vpc"
+    | "apigee-dns"
     | "infocard-link"
     | "zone-link";
 };

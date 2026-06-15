@@ -45,6 +45,7 @@ import {
   PscNode,
   SecretManagerNode,
   CertificateManagerNode,
+  ApigeeNode,
   CloudShellNode,
 } from "../nodes";
 
@@ -95,5 +96,6 @@ export const nodeTypes = {
   psc: PscNode,
   secretmanager: SecretManagerNode,
   certificatemanager: CertificateManagerNode,
+  apigee: ApigeeNode,
   cloudshell: CloudShellNode,
 };

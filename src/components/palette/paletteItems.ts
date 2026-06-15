@@ -100,6 +100,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "psc" ||
     value === "secretmanager" ||
     value === "certificatemanager" ||
+    value === "apigee" ||
     value === "cloudshell"
   );
 }
@@ -416,6 +417,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.eventarc,
     description: "Roteamento de eventos para destinos gerenciados",
     icon: GCP_RESOURCE_ICONS.eventarc,
+  },
+  {
+    paletteKey: "apigee",
+    kind: "apigee",
+    category: "integration",
+    label: GCP_RESOURCE_LABELS.apigee,
+    description: "Gerenciamento e gateway de APIs",
+    icon: GCP_RESOURCE_ICONS.apigee,
   },
   {
     paletteKey: "workbench",

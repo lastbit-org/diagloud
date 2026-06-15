@@ -127,6 +127,9 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "certificatemanager") {
     return node.data.certificateType === "managed" ? "Gerenciado" : "Próprio";
   }
+  if (node.kind === "apigee") {
+    return node.data.envType === "hybrid" ? "Hybrid" : node.data.region;
+  }
   if (node.kind === "onprem") {
     return node.data.location;
   }

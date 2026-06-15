@@ -179,6 +179,9 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("certificatemanager", "dns")).toBe(
       "certificatemanager-dns",
     );
+    expect(getEdgeKind("internet", "apigee")).toBe("internet-apigee");
+    expect(getEdgeKind("apigee", "run")).toBe("apigee-run");
+    expect(getEdgeKind("apigee", "vpc")).toBe("apigee-vpc");
     expect(getEdgeKind("psc", "subnet")).toBe("psc-subnet");
     expect(getEdgeKind("psc", "vpc")).toBeNull();
     expect(getEdgeKind("vm", "secretmanager")).toBe("vm-secretmanager");
