@@ -16,6 +16,7 @@ const run: DiagramNode = {
   data: {
     name: "run-1",
     imageUrl: "",
+    sourceType: "docker",
     cpu: "1",
     memory: "512Mi",
     minInstances: 0,

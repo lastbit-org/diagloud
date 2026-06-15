@@ -671,6 +671,7 @@ describe("validateConnection", () => {
       data: {
         name: "run-1",
         imageUrl: "",
+        sourceType: "docker",
         cpu: "1",
         memory: "512Mi",
         minInstances: 0,
@@ -697,6 +698,7 @@ describe("validateConnection", () => {
       data: {
         name: "run-pub",
         imageUrl: "",
+        sourceType: "docker",
         cpu: "1",
         memory: "512Mi",
         minInstances: 0,
@@ -723,6 +725,7 @@ describe("validateConnection", () => {
       data: {
         name: "run-1",
         imageUrl: "",
+        sourceType: "docker",
         cpu: "1",
         memory: "512Mi",
         minInstances: 0,
@@ -1476,6 +1479,7 @@ describe("validateConnection", () => {
       data: {
         name: "run-api",
         imageUrl: "",
+        sourceType: "docker",
         cpu: "1",
         memory: "512Mi",
         minInstances: 0,

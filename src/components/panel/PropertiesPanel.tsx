@@ -35,6 +35,7 @@ import type {
   DiagramEdge,
   DiagramNode,
   RunAccessMode,
+  RunSourceType,
   SqlAccessMode,
   SqlEngine,
   FirewallDirection,
@@ -579,6 +580,7 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             >
               <option value="POSTGRES_15">PostgreSQL 15</option>
               <option value="MYSQL_8_0">MySQL 8.0</option>
+              <option value="SQLSERVER_2019_STANDARD">SQL Server 2019</option>
             </select>
           </div>
           <div className="properties-field">
@@ -710,19 +712,37 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             />
           </div>
           <div className="properties-field">
-            <label htmlFor="run-image">Imagem do container</label>
-            <input
-              id="run-image"
-              value={selectedNode.data.imageUrl}
+            <label htmlFor="run-source-type">Origem</label>
+            <select
+              id="run-source-type"
+              value={selectedNode.data.sourceType}
               onChange={(e) =>
-                updateNodeData(selectedNode.id, { imageUrl: e.target.value })
+                updateNodeData(selectedNode.id, {
+                  sourceType: e.target.value as RunSourceType,
+                })
               }
-              placeholder="us-docker.pkg.dev/cloudrun/container/hello"
-            />
-            <span className="properties-field__hint">
-              URL completa da imagem (Artifact Registry, GCR ou Docker Hub).
-            </span>
+            >
+              <option value="docker">Imagem Docker</option>
+              <option value="github">GitHub</option>
+              <option value="function">Function</option>
+            </select>
           </div>
+          {selectedNode.data.sourceType === "docker" ? (
+            <div className="properties-field">
+              <label htmlFor="run-image">Imagem do container</label>
+              <input
+                id="run-image"
+                value={selectedNode.data.imageUrl}
+                onChange={(e) =>
+                  updateNodeData(selectedNode.id, { imageUrl: e.target.value })
+                }
+                placeholder="us-docker.pkg.dev/cloudrun/container/hello"
+              />
+              <span className="properties-field__hint">
+                URL completa da imagem (Artifact Registry, GCR ou Docker Hub).
+              </span>
+            </div>
+          ) : null}
           <div className="properties-field">
             <label htmlFor="run-access">Acesso</label>
             <select
@@ -1980,36 +2000,11 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
       )}
 
       {selectedNode?.kind === "orgpolicy" && (
-        <>
-          <div className="properties-field">
-            <label htmlFor="orgpolicy-name">Nome</label>
-            <input
-              id="orgpolicy-name"
-              value={selectedNode.data.name}
-              onChange={(e) =>
-                updateNodeData(selectedNode.id, { name: e.target.value })
-              }
-            />
-          </div>
-          <div className="properties-field">
-            <label htmlFor="orgpolicy-constraint">Constraint</label>
-            <input
-              id="orgpolicy-constraint"
-              value={selectedNode.data.constraintId}
-              onChange={(e) =>
-                updateNodeData(selectedNode.id, {
-                  constraintId: e.target.value,
-                })
-              }
-              placeholder="constraints/compute.disableSerialPortAccess"
-            />
-          </div>
-          <OrgPolicyScopeInfo
-            orgpolicy={selectedNode}
-            edges={edges}
-            nodes={nodes}
-          />
-        </>
+        <OrgPolicyScopeInfo
+          orgpolicy={selectedNode}
+          edges={edges}
+          nodes={nodes}
+        />
       )}
 
       {selectedNode?.kind === "psc" && (

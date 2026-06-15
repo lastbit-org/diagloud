@@ -57,7 +57,7 @@ export type RunAccessMode = "public" | "vpc";
 
 export type ArtifactFormat = "DOCKER" | "MAVEN" | "NPM";
 
-export type SqlEngine = "MYSQL_8_0" | "POSTGRES_15";
+export type SqlEngine = "MYSQL_8_0" | "POSTGRES_15" | "SQLSERVER_2019_STANDARD";
 
 /** `public` = IP público; `private` = IP interno na VPC ligada. */
 export type SqlAccessMode = "public" | "private";
@@ -199,8 +199,12 @@ export type InternetProps = {
   name: string;
 };
 
+export type RunSourceType = "docker" | "github" | "function";
+
 export type RunProps = {
   name: string;
+  /** Origem do workload: imagem Docker, repositório GitHub ou Cloud Function. */
+  sourceType: RunSourceType;
   /** URL da imagem do container (ex.: Artifact Registry ou Docker Hub). */
   imageUrl: string;
   cpu: string;
@@ -374,10 +378,8 @@ export type CdnProps = {
 };
 
 export type OrgPolicyProps = {
-  /** Nome no diagrama. */
+  /** Rótulo fixo no diagrama. */
   name: string;
-  /** ID da constraint (ex.: constraints/compute.disableSerialPortAccess). */
-  constraintId: string;
 };
 
 export type PscProps = {

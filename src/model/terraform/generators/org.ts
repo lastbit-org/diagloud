@@ -42,7 +42,8 @@ export function generateOrgTerraform(ctx: TerraformGenContext): string {
     const resourceName = ctx.getTfResourceName(node);
 
     blocks.push(`resource "google_org_policy_policy" "${resourceName}" {
-  name   = "${escapeHclString(node.data.constraintId.startsWith("organizations/") ? node.data.constraintId : `organizations/\${var.organization_id}/policies/${node.data.constraintId.replace(/^constraints\//, "")}`)}"
+  # Organization Policy — configure constraint e regras conforme necessidade
+  name   = "organizations/\${var.organization_id}/policies/placeholder"
   parent = "organizations/\${var.organization_id}"
 
   spec {

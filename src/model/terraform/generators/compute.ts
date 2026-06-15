@@ -107,9 +107,10 @@ resource "google_container_node_pool" "${resourceName}_pool" {
   location = "${escapeHclString(region)}"
   ingress  = "${node.data.accessMode === "public" ? "INGRESS_TRAFFIC_ALL" : "INGRESS_TRAFFIC_INTERNAL_ONLY"}"
 
+  # Origem no diagrama: ${node.data.sourceType === "github" ? "GitHub" : node.data.sourceType === "function" ? "Function" : "Imagem Docker"}
   template {
     containers {
-      image = "${escapeHclString(node.data.imageUrl.trim() || "us-docker.pkg.dev/cloudrun/container/hello")}"
+      image = "${escapeHclString(node.data.sourceType === "docker" ? node.data.imageUrl.trim() || "us-docker.pkg.dev/cloudrun/container/hello" : "us-docker.pkg.dev/cloudrun/container/hello")}"
       resources {
         limits = {
           cpu    = "${escapeHclString(node.data.cpu)}"

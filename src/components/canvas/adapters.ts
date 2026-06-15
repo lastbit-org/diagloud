@@ -3,6 +3,7 @@ import { issueCountForNode, type DiagramIssue } from "../../model/validation";
 import { resolveEdgeHandles } from "../../lib/dynamicHandles";
 import { resolveEdgeLineStyle } from "../../lib/edgeLineStyle";
 import type { DiagramEdge, DiagramNode } from "../../types";
+import { GCP_RESOURCE_LABELS } from "../../assets/gcpIcons";
 import { resolveNodeZIndex } from "../../lib/nodeLayers";
 import type {
   FolderNodeData,
@@ -29,12 +30,19 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     return node.data.internalIp;
   }
   if (node.kind === "run") {
+    if (node.data.internalIp) {
+      return node.data.internalIp;
+    }
+    if (node.data.sourceType === "github") {
+      return "GitHub";
+    }
+    if (node.data.sourceType === "function") {
+      return "Function";
+    }
     if (node.data.accessMode === "public") {
-      return "URL pública";
+      return "Imagem Docker";
     }
-    if (!node.data.internalIp) {
-      return "VPC connector";
-    }
+    return "VPC connector";
   }
   if (node.kind === "pubsub") {
     return "Tópico";
@@ -116,7 +124,7 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
     return node.data.region;
   }
   if (node.kind === "orgpolicy") {
-    return node.data.constraintId;
+    return undefined;
   }
   if (node.kind === "psc") {
     return node.data.internalIp ?? node.data.region;
@@ -261,6 +269,22 @@ export function toFlowNode(
         workloadProviderId: node.data.workloadProviderId,
         groupEmail: node.data.groupEmail,
         roles: node.data.roles,
+        issueCount: issueCount > 0 ? issueCount : undefined,
+      },
+    };
+  }
+
+  if (node.kind === "orgpolicy") {
+    const issueCount = issueCountForNode(node.id, issues);
+    return {
+      id: node.id,
+      type: "orgpolicy",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      data: {
+        kind: "orgpolicy",
+        label: GCP_RESOURCE_LABELS.orgpolicy,
         issueCount: issueCount > 0 ? issueCount : undefined,
       },
     };

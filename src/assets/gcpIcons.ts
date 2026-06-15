@@ -106,7 +106,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
 export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   vpc: "VPC",
   subnet: "Sub-rede",
-  vm: "Compute Engine ou VM",
+  vm: "Compute Engine",
   storage: "Cloud Storage",
   sql: "Cloud SQL",
   gke: "GKE",

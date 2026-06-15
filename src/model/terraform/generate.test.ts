@@ -121,6 +121,7 @@ describe("generateTerraform", () => {
       data: {
         name: "service-api",
         imageUrl: "",
+        sourceType: "docker",
         cpu: "1",
         memory: "512Mi",
         minInstances: 1,

@@ -174,7 +174,11 @@ function parseStorageData(raw: unknown): StorageProps {
   };
 }
 
-const SQL_ENGINES = new Set(["MYSQL_8_0", "POSTGRES_15"]);
+const SQL_ENGINES = new Set([
+  "MYSQL_8_0",
+  "POSTGRES_15",
+  "SQLSERVER_2019_STANDARD",
+]);
 
 function parseSqlData(raw: unknown): SqlProps {
   if (
@@ -425,8 +429,15 @@ function parseRunData(raw: unknown): RunProps {
     raw.accessMode === "vpc" || raw.accessMode === "public"
       ? raw.accessMode
       : "public";
+  const sourceType =
+    raw.sourceType === "docker" ||
+    raw.sourceType === "github" ||
+    raw.sourceType === "function"
+      ? raw.sourceType
+      : "docker";
   const data: RunProps = {
     name: raw.name,
+    sourceType,
     imageUrl: typeof raw.imageUrl === "string" ? raw.imageUrl : "",
     cpu: raw.cpu,
     memory: raw.memory,
@@ -768,16 +779,11 @@ function parseCdnData(raw: unknown): CdnProps {
 }
 
 function parseOrgPolicyData(raw: unknown): OrgPolicyProps {
-  if (
-    !isRecord(raw) ||
-    typeof raw.name !== "string" ||
-    typeof raw.constraintId !== "string"
-  ) {
+  if (!isRecord(raw)) {
     throw new DiagramParseError("Dados de Organization Policy inválidos.");
   }
   return {
-    name: raw.name,
-    constraintId: raw.constraintId,
+    name: "Organization Policy",
   };
 }
 

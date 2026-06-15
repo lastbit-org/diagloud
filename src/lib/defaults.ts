@@ -175,6 +175,7 @@ export function defaultResourceData<K extends ResourceKind>(
     case "run":
       return {
         name,
+        sourceType: "docker",
         imageUrl: "",
         cpu: "1",
         memory: "512Mi",
@@ -295,8 +296,7 @@ export function defaultResourceData<K extends ResourceKind>(
       } as CdnProps as ResourcePropsByKind[K];
     case "orgpolicy":
       return {
-        name,
-        constraintId: "constraints/compute.disableSerialPortAccess",
+        name: "Organization Policy",
       } as OrgPolicyProps as ResourcePropsByKind[K];
     case "psc":
       return {
