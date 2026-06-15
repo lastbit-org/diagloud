@@ -43,6 +43,20 @@
   color: var(--text);
 }
 
+.properties-field__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.properties-field__checkbox input {
+  margin: 0;
+}
+
 .properties-field input,
 .properties-field select {
   font: inherit;

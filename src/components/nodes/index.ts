@@ -20,6 +20,7 @@ export { RouterNode } from "./RouterNode";
 export { PeeringNode } from "./PeeringNode";
 export { VpnNode } from "./VpnNode";
 export { InterconnectNode } from "./InterconnectNode";
+export type { FirewallNodeData } from "./FirewallNode";
 export { FirewallNode } from "./FirewallNode";
 export { DnsNode } from "./DnsNode";
 export { PubsubNode } from "./PubsubNode";

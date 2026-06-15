@@ -414,7 +414,15 @@ describe("validateConnection", () => {
       id: "firewall-1",
       kind: "firewall",
       position: { x: 500, y: 0 },
-      data: { name: "allow-ssh", direction: "ingress" },
+      data: {
+        name: "allow-ssh",
+        direction: "ingress",
+        showDetails: false,
+        action: "allow",
+        source: "0.0.0.0/0",
+        destination: "",
+        protocols: "tcp:80,443",
+      },
     };
     const diagramNodes = [...nodes, iam, nat, firewall];
 
@@ -1199,7 +1207,15 @@ describe("validateConnection", () => {
       id: "firewall-1",
       kind: "firewall",
       position: { x: 200, y: 0 },
-      data: { name: "fw-allow-ssh", direction: "ingress" },
+      data: {
+        name: "fw-allow-ssh",
+        direction: "ingress",
+        showDetails: false,
+        action: "allow",
+        source: "0.0.0.0/0",
+        destination: "",
+        protocols: "tcp:80,443",
+      },
     };
     const diagramNodes = [vpc, firewall];
 
@@ -1241,7 +1257,15 @@ describe("validateConnection", () => {
       id: "firewall-1",
       kind: "firewall",
       position: { x: 200, y: 0 },
-      data: { name: "fw-1", direction: "ingress" },
+      data: {
+        name: "fw-1",
+        direction: "ingress",
+        showDetails: false,
+        action: "allow",
+        source: "0.0.0.0/0",
+        destination: "",
+        protocols: "tcp:80,443",
+      },
     };
     const vpcB: DiagramNode = {
       id: "vpc-2",
@@ -1269,13 +1293,29 @@ describe("validateConnection", () => {
       id: "firewall-1",
       kind: "firewall",
       position: { x: 200, y: 0 },
-      data: { name: "fw-a", direction: "ingress" },
+      data: {
+        name: "fw-a",
+        direction: "ingress",
+        showDetails: false,
+        action: "allow",
+        source: "0.0.0.0/0",
+        destination: "",
+        protocols: "tcp:80,443",
+      },
     };
     const firewallB: DiagramNode = {
       id: "firewall-2",
       kind: "firewall",
       position: { x: 300, y: 0 },
-      data: { name: "fw-b", direction: "egress" },
+      data: {
+        name: "fw-b",
+        direction: "egress",
+        showDetails: false,
+        action: "allow",
+        source: "0.0.0.0/0",
+        destination: "",
+        protocols: "tcp:80,443",
+      },
     };
     const edges: DiagramEdge[] = [
       { id: "e1", source: firewallA.id, target: vpc.id, kind: "firewall-vpc" },

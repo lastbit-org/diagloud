@@ -53,6 +53,59 @@
   padding: 8px 10px;
 }
 
+.gcp-node--firewall-detail {
+  align-items: center;
+  gap: 8px;
+  max-width: 180px;
+  padding: 7px 9px;
+}
+
+.gcp-node__icon--compact {
+  width: 24px;
+  height: 24px;
+}
+
+.gcp-node__body--firewall-detail {
+  gap: 1px;
+}
+
+.gcp-node__label--compact {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.gcp-firewall-detail__summary {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.gcp-firewall-detail__row {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  font-size: 10px;
+  line-height: 1.25;
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+.gcp-firewall-detail__key {
+  flex-shrink: 0;
+  width: 28px;
+  color: var(--text);
+  opacity: 0.75;
+}
+
+.gcp-firewall-detail__value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .gcp-node--github {
   padding-left: 24px;
   padding-right: 24px;

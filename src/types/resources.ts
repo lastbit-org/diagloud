@@ -144,9 +144,18 @@ export type InterconnectProps = {
 
 export type FirewallDirection = "ingress" | "egress";
 
+export type FirewallAction = "allow" | "deny";
+
 export type FirewallProps = {
   name: string;
   direction: FirewallDirection;
+  /** Exibe detalhes da regra no nó do diagrama. */
+  showDetails: boolean;
+  action: FirewallAction;
+  source: string;
+  destination: string;
+  /** Ex.: tcp:80,443 ou icmp,tcp,udp */
+  protocols: string;
 };
 
 export type DnsVisibility = "public" | "private";

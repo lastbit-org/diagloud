@@ -6,6 +6,31 @@ import {
 } from "../context";
 import { escapeHclString, sectionHeader } from "../hcl";
 
+function parseFirewallProtocolSpecs(
+  input: string,
+): Array<{ protocol: string; ports: string[] }> {
+  const specs: Array<{ protocol: string; ports: string[] }> = [];
+  for (const part of input.split(",").map((value) => value.trim()).filter(Boolean)) {
+    const colonIndex = part.indexOf(":");
+    if (colonIndex >= 0) {
+      const protocol = part.slice(0, colonIndex).trim() || "tcp";
+      const ports = part
+        .slice(colonIndex + 1)
+        .split(",")
+        .map((port) => port.trim())
+        .filter(Boolean);
+      specs.push({ protocol, ports });
+      continue;
+    }
+    if (/^\d+$/.test(part) && specs.length > 0) {
+      specs[specs.length - 1]!.ports.push(part);
+      continue;
+    }
+    specs.push({ protocol: part, ports: [] });
+  }
+  return specs.length > 0 ? specs : [{ protocol: "tcp", ports: ["80", "443"] }];
+}
+
 export function generateNetworkTerraform(ctx: TerraformGenContext): string {
   const blocks: string[] = [sectionHeader("Rede")];
 
@@ -83,18 +108,34 @@ resource "google_compute_router_nat" "${resourceName}" {
     const vpcResourceName = ctx.getTfResourceName(vpcNode);
     const direction =
       node.data.direction === "egress" ? "EGRESS" : "INGRESS";
+    const action = node.data.action === "deny" ? "deny" : "allow";
+    const protocolSpecs = parseFirewallProtocolSpecs(node.data.protocols);
+    const ruleBlocks = protocolSpecs
+      .map((spec) => {
+        const portsLine =
+          spec.ports.length > 0
+            ? `\n    ports    = [${spec.ports.map((port) => `"${escapeHclString(port)}"`).join(", ")}]`
+            : "";
+        return `  ${action} {
+    protocol = "${escapeHclString(spec.protocol)}"${portsLine}
+  }`;
+      })
+      .join("\n\n");
+    const source = node.data.source.trim() || "0.0.0.0/0";
+    const destination = node.data.destination.trim();
+    const rangeBlock =
+      direction === "EGRESS"
+        ? destination
+          ? `\n  destination_ranges = ["${escapeHclString(destination)}"]`
+          : ""
+        : `\n  source_ranges = ["${escapeHclString(source)}"]`;
 
     blocks.push(`resource "google_compute_firewall" "${resourceName}" {
   name      = "${escapeHclString(node.data.name)}"
   network   = google_compute_network.${vpcResourceName}.name
   direction = "${direction}"
 
-  allow {
-    protocol = "tcp"
-    ports    = ["80", "443"]
-  }
-
-  source_ranges = ["0.0.0.0/0"]
+${ruleBlocks}${rangeBlock}
 }`);
   }
 

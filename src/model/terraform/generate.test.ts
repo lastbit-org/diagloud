@@ -152,7 +152,15 @@ describe("generateTerraform", () => {
       id: "fw-1",
       kind: "firewall",
       position: { x: 300, y: 0 },
-      data: { name: "allow-web", direction: "ingress" },
+      data: {
+        name: "allow-web",
+        direction: "ingress",
+        showDetails: false,
+        action: "allow",
+        source: "0.0.0.0/0",
+        destination: "",
+        protocols: "tcp:80,443",
+      },
     };
     const edges: DiagramEdge[] = [
       validEdges[0],

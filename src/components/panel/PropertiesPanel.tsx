@@ -39,6 +39,7 @@ import type {
   SqlAccessMode,
   SqlEngine,
   FirewallDirection,
+  FirewallAction,
   DnsVisibility,
   StorageAccessMode,
   StorageClass,
@@ -1613,20 +1614,109 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             />
           </div>
           <div className="properties-field">
-            <label htmlFor="firewall-direction">Direção</label>
-            <select
-              id="firewall-direction"
-              value={selectedNode.data.direction}
-              onChange={(e) =>
-                updateNodeData(selectedNode.id, {
-                  direction: e.target.value as FirewallDirection,
-                })
-              }
-            >
-              <option value="ingress">Entrada (ingress)</option>
-              <option value="egress">Saída (egress)</option>
-            </select>
+            <label className="properties-field__checkbox">
+              <input
+                type="checkbox"
+                checked={selectedNode.data.showDetails}
+                onChange={(e) =>
+                  updateNodeData(selectedNode.id, {
+                    showDetails: e.target.checked,
+                  })
+                }
+              />
+              Mostrar detalhes da regra no diagrama
+            </label>
           </div>
+          {selectedNode.data.showDetails ? (
+            <>
+              <div className="properties-field">
+                <label htmlFor="firewall-direction">Direction</label>
+                <select
+                  id="firewall-direction"
+                  value={selectedNode.data.direction}
+                  onChange={(e) =>
+                    updateNodeData(selectedNode.id, {
+                      direction: e.target.value as FirewallDirection,
+                    })
+                  }
+                >
+                  <option value="ingress">Ingress</option>
+                  <option value="egress">Egress</option>
+                </select>
+              </div>
+              <div className="properties-field">
+                <label htmlFor="firewall-action">Action</label>
+                <select
+                  id="firewall-action"
+                  value={selectedNode.data.action}
+                  onChange={(e) =>
+                    updateNodeData(selectedNode.id, {
+                      action: e.target.value as FirewallAction,
+                    })
+                  }
+                >
+                  <option value="allow">Allow</option>
+                  <option value="deny">Deny</option>
+                </select>
+              </div>
+              <div className="properties-field">
+                <label htmlFor="firewall-source">Source</label>
+                <input
+                  id="firewall-source"
+                  value={selectedNode.data.source}
+                  onChange={(e) =>
+                    updateNodeData(selectedNode.id, { source: e.target.value })
+                  }
+                  placeholder="0.0.0.0/0"
+                />
+              </div>
+              <div className="properties-field">
+                <label htmlFor="firewall-destination">Destination</label>
+                <input
+                  id="firewall-destination"
+                  value={selectedNode.data.destination}
+                  onChange={(e) =>
+                    updateNodeData(selectedNode.id, {
+                      destination: e.target.value,
+                    })
+                  }
+                  placeholder="0.0.0.0/0"
+                />
+              </div>
+              <div className="properties-field">
+                <label htmlFor="firewall-protocols">Protocols</label>
+                <input
+                  id="firewall-protocols"
+                  value={selectedNode.data.protocols}
+                  onChange={(e) =>
+                    updateNodeData(selectedNode.id, {
+                      protocols: e.target.value,
+                    })
+                  }
+                  placeholder="tcp:80,443"
+                />
+                <span className="properties-field__hint">
+                  Ex.: tcp:80,443 ou icmp,tcp,udp
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="properties-field">
+              <label htmlFor="firewall-direction">Direção</label>
+              <select
+                id="firewall-direction"
+                value={selectedNode.data.direction}
+                onChange={(e) =>
+                  updateNodeData(selectedNode.id, {
+                    direction: e.target.value as FirewallDirection,
+                  })
+                }
+              >
+                <option value="ingress">Entrada (ingress)</option>
+                <option value="egress">Saída (egress)</option>
+              </select>
+            </div>
+          )}
           <FirewallVpcInfo
             firewall={selectedNode}
             edges={edges}

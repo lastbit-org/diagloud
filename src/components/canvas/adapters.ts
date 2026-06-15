@@ -10,6 +10,7 @@ import type {
   GcpNodeData,
   GithubNodeData,
   IamNodeData,
+  FirewallNodeData,
   InfocardNodeData,
   ProjectNodeData,
   ZoneNodeData,
@@ -161,7 +162,7 @@ export function toFlowNode(
   selected = false,
   issues: DiagramIssue[] = [],
 ): Node<
-  GcpNodeData | ZoneNodeData | InfocardNodeData | FolderNodeData | ProjectNodeData | GithubNodeData | IamNodeData
+  GcpNodeData | ZoneNodeData | InfocardNodeData | FolderNodeData | ProjectNodeData | GithubNodeData | IamNodeData | FirewallNodeData
 > {
   if (node.kind === "zone") {
     return {
@@ -269,6 +270,33 @@ export function toFlowNode(
         workloadProviderId: node.data.workloadProviderId,
         groupEmail: node.data.groupEmail,
         roles: node.data.roles,
+        issueCount: issueCount > 0 ? issueCount : undefined,
+      },
+    };
+  }
+
+  if (node.kind === "firewall") {
+    const issueCount = issueCountForNode(node.id, issues);
+    return {
+      id: node.id,
+      type: "firewall",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      data: {
+        kind: "firewall",
+        label: node.data.name,
+        showDetails: node.data.showDetails,
+        direction: node.data.direction,
+        action: node.data.action,
+        source: node.data.source,
+        destination: node.data.destination,
+        protocols: node.data.protocols,
+        subtitle: node.data.showDetails
+          ? undefined
+          : node.data.direction === "ingress"
+            ? "Entrada"
+            : "Saída",
         issueCount: issueCount > 0 ? issueCount : undefined,
       },
     };

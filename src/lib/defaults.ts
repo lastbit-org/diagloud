@@ -135,6 +135,11 @@ export function defaultResourceData<K extends ResourceKind>(
       return {
         name,
         direction: "ingress",
+        showDetails: false,
+        action: "allow",
+        source: "0.0.0.0/0",
+        destination: "",
+        protocols: "tcp:80,443",
       } as FirewallProps as ResourcePropsByKind[K];
     case "dns":
       return {

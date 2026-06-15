@@ -357,9 +357,16 @@ function parseFirewallData(raw: unknown): FirewallProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de Firewall inválidos.");
   }
+  const action = raw.action === "deny" ? "deny" : "allow";
   return {
     name: raw.name,
     direction: raw.direction === "egress" ? "egress" : "ingress",
+    showDetails: raw.showDetails === true,
+    action,
+    source: typeof raw.source === "string" ? raw.source : "0.0.0.0/0",
+    destination: typeof raw.destination === "string" ? raw.destination : "",
+    protocols:
+      typeof raw.protocols === "string" ? raw.protocols : "tcp:80,443",
   };
 }
 
