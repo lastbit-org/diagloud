@@ -133,6 +133,10 @@ import type {
   AlloydbProps,
   CloudShellProps,
   MonitoringProps,
+  CloudLoggingProps,
+  CloudArmorProps,
+  KnowledgeCatalogProps,
+  UserGroupProps,
   IamProps,
 } from "../types";
 
@@ -217,6 +221,10 @@ type DiagramActions = {
       | Partial<AlloydbProps>
       | Partial<CloudShellProps>
       | Partial<MonitoringProps>
+      | Partial<CloudLoggingProps>
+      | Partial<CloudArmorProps>
+      | Partial<KnowledgeCatalogProps>
+      | Partial<UserGroupProps>
       | Partial<IamProps>,
   ) => void;
   updateNodeDimensions: (id: string, width: number, height: number) => void;
@@ -765,6 +773,42 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "cloudlogging":
+      return {
+        ...base,
+        kind: "cloudlogging",
+        data: {
+          ...defaultResourceData("cloudlogging", resourceContext),
+          ...data,
+        },
+      };
+    case "cloudarmor":
+      return {
+        ...base,
+        kind: "cloudarmor",
+        data: {
+          ...defaultResourceData("cloudarmor", resourceContext),
+          ...data,
+        },
+      };
+    case "knowledgecatalog":
+      return {
+        ...base,
+        kind: "knowledgecatalog",
+        data: {
+          ...defaultResourceData("knowledgecatalog", resourceContext),
+          ...data,
+        },
+      };
+    case "usergroup":
+      return {
+        ...base,
+        kind: "usergroup",
+        data: {
+          ...defaultResourceData("usergroup", resourceContext),
+          ...data,
+        },
+      };
   }
 }
 
@@ -825,6 +869,11 @@ function mergeNodeData(
     | Partial<MemorystoreProps>
     | Partial<AlloydbProps>
     | Partial<CloudShellProps>
+    | Partial<MonitoringProps>
+    | Partial<CloudLoggingProps>
+    | Partial<CloudArmorProps>
+    | Partial<KnowledgeCatalogProps>
+    | Partial<UserGroupProps>
     | Partial<IamProps>,
 ): DiagramNode {
   switch (node.kind) {
@@ -1130,6 +1179,29 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<MonitoringProps>) },
+      };
+    case "cloudlogging":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<CloudLoggingProps>) },
+      };
+    case "cloudarmor":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<CloudArmorProps>) },
+      };
+    case "knowledgecatalog":
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          ...(patch as Partial<KnowledgeCatalogProps>),
+        },
+      };
+    case "usergroup":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<UserGroupProps>) },
       };
   }
 }

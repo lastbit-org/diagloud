@@ -115,8 +115,12 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "dataflow") {
     return node.data.pipelineType === "streaming" ? "Streaming" : node.data.region;
   }
-  if (node.kind === "modelregistry" || node.kind === "tuning" || node.kind === "evaluation" || node.kind === "endpoints" || node.kind === "batchinference" || node.kind === "featurestore" || node.kind === "experiments" || node.kind === "training" || node.kind === "pipelines" || node.kind === "mlmonitoring") {
+  if (node.kind === "modelregistry" || node.kind === "tuning" || node.kind === "evaluation" || node.kind === "endpoints" || node.kind === "batchinference" || node.kind === "featurestore" || node.kind === "experiments" || node.kind === "training" || node.kind === "pipelines" || node.kind === "mlmonitoring" || node.kind === "cloudlogging" || node.kind === "knowledgecatalog") {
     return node.data.location;
+  }
+  if (node.kind === "usergroup") {
+    const email = node.data.groupEmail.trim();
+    return email || undefined;
   }
   if (node.kind === "loadbalancer") {
     return node.data.type === "internal" ? "Interno" : node.data.region;

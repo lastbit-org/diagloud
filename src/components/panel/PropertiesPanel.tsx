@@ -2891,6 +2891,115 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           </p>
         </>
       )}
+
+      {selectedNode?.kind === "cloudlogging" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="cloudlogging-name">Log sink / bucket</label>
+            <input
+              id="cloudlogging-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="cloudlogging-location">Localização</label>
+            <input
+              id="cloudlogging-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="global"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Coleta e armazenamento de logs. Ligue VMs, GKE ou Cloud Run como
+            origem e ao Cloud Monitoring para alertas.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "cloudarmor" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="cloudarmor-name">Política</label>
+            <input
+              id="cloudarmor-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <p className="properties-field__hint">
+            WAF e proteção DDoS. Ligue a Cloud Load Balancing ou Cloud CDN na
+            borda pública.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "knowledgecatalog" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="knowledgecatalog-name">Catálogo</label>
+            <input
+              id="knowledgecatalog-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="knowledgecatalog-location">Localização</label>
+            <input
+              id="knowledgecatalog-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Governança e catálogo de dados (sucessor do Dataplex). Ligue ao
+            BigQuery, Cloud Storage ou Feature Store.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "usergroup" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="usergroup-name">Grupo</label>
+            <input
+              id="usergroup-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="usergroup-email">E-mail do grupo</label>
+            <input
+              id="usergroup-email"
+              value={selectedNode.data.groupEmail}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { groupEmail: e.target.value })
+              }
+              placeholder="eng-platform@example.com"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Grupo de usuários para documentar acesso e permissões. Ligue a IAM,
+            Projeto, VMs, Cloud Run, GKE ou usuários individuais.
+          </p>
+        </>
+      )}
     </>
   );
 

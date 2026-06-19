@@ -117,7 +117,11 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "memorystore" ||
     value === "alloydb" ||
     value === "cloudshell" ||
-    value === "monitoring"
+    value === "monitoring" ||
+    value === "cloudlogging" ||
+    value === "cloudarmor" ||
+    value === "knowledgecatalog" ||
+    value === "usergroup"
   );
 }
 
@@ -233,6 +237,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.spark,
     description: "Processamento de dados — cluster ou serverless",
     icon: GCP_RESOURCE_ICONS.spark,
+  },
+  {
+    paletteKey: "knowledgecatalog",
+    kind: "knowledgecatalog",
+    category: "analytics",
+    label: GCP_RESOURCE_LABELS.knowledgecatalog,
+    description: "Catálogo e governança de dados (ex-Dataplex)",
+    icon: GCP_RESOURCE_ICONS.knowledgecatalog,
   },
   {
     paletteKey: "vpc",
@@ -571,12 +583,36 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     icon: GCP_RESOURCE_ICONS.certificatemanager,
   },
   {
+    paletteKey: "cloudarmor",
+    kind: "cloudarmor",
+    category: "security",
+    label: GCP_RESOURCE_LABELS.cloudarmor,
+    description: "WAF e proteção DDoS na borda",
+    icon: GCP_RESOURCE_ICONS.cloudarmor,
+  },
+  {
     paletteKey: "monitoring",
     kind: "monitoring",
     category: "observability",
     label: GCP_RESOURCE_LABELS.monitoring,
     description: "Métricas, alertas e dashboards do Cloud Monitoring",
     icon: GCP_RESOURCE_ICONS.monitoring,
+  },
+  {
+    paletteKey: "cloudlogging",
+    kind: "cloudlogging",
+    category: "observability",
+    label: GCP_RESOURCE_LABELS.cloudlogging,
+    description: "Coleta, armazenamento e análise de logs",
+    icon: GCP_RESOURCE_ICONS.cloudlogging,
+  },
+  {
+    paletteKey: "usergroup",
+    kind: "usergroup",
+    category: "other",
+    label: GCP_RESOURCE_LABELS.usergroup,
+    description: "Grupo de usuários para acesso e permissões",
+    icon: GCP_RESOURCE_ICONS.usergroup,
   },
   {
     paletteKey: "pcuser",

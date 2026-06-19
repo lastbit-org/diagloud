@@ -54,6 +54,9 @@ import traceIcon from "./google-cloud-legacy-icons/trace/trace.svg";
 import dataplexIcon from "./google-cloud-legacy-icons/dataplex/dataplex.svg";
 import tensorflowIcon from "./google-cloud-legacy-icons/tensorflow_enterprise/tensorflow_enterprise.svg";
 import cloudDeployIcon from "./google-cloud-legacy-icons/cloud_deploy/cloud_deploy.svg";
+import loggingIcon from "./google-cloud-legacy-icons/cloud_logging/cloud_logging.svg";
+import armorIcon from "./google-cloud-legacy-icons/cloud_armor/cloud_armor.svg";
+import permissionsIcon from "./google-cloud-legacy-icons/permissions/permissions.svg";
 import monitoringIcon from "./google-cloud-legacy-icons/cloud_monitoring/cloud_monitoring.svg";
 import alloydbIcon from "./core-products-icons/Unique Icons/AlloyDB/SVG/AlloyDB-512-color.svg";
 
@@ -119,6 +122,10 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   alloydb: alloydbIcon,
   cloudshell: cloudShellIcon,
   monitoring: monitoringIcon,
+  cloudlogging: loggingIcon,
+  cloudarmor: armorIcon,
+  knowledgecatalog: dataplexIcon,
+  usergroup: permissionsIcon,
 };
 
 export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
@@ -182,4 +189,8 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   alloydb: "AlloyDB",
   cloudshell: "Cloud Shell",
   monitoring: "Cloud Monitoring",
+  cloudlogging: "Cloud Logging",
+  cloudarmor: "Cloud Armor",
+  knowledgecatalog: "Knowledge Catalog",
+  usergroup: "Grupo de usuários",
 };

@@ -212,5 +212,11 @@ resource "google_alloydb_instance" "${resourceName}_primary" {
 }`);
   }
 
+  for (const node of nodesOfKind(ctx, "knowledgecatalog")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Knowledge Catalog: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_dataplex_lake" "${resourceName}" { ... }`);
+  }
+
   return blocks.length > 1 ? blocks.join("\n\n") : "";
 }

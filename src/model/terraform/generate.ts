@@ -75,6 +75,9 @@ const EXPORTABLE_KINDS = new Set<ResourceKind>([
   "orgpolicy",
   "folder",
   "project",
+  "cloudlogging",
+  "cloudarmor",
+  "knowledgecatalog",
 ]);
 
 const SKIPPED_KINDS = new Set<ResourceKind>([
@@ -87,6 +90,7 @@ const SKIPPED_KINDS = new Set<ResourceKind>([
   "internet",
   "cloudshell",
   "monitoring",
+  "usergroup",
 ]);
 
 const TERRAFORM_FILE_ORDER = [

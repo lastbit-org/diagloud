@@ -61,6 +61,10 @@ import type {
   AlloydbProps,
   CloudShellProps,
   MonitoringProps,
+  CloudLoggingProps,
+  CloudArmorProps,
+  KnowledgeCatalogProps,
+  UserGroupProps,
 } from "./resources";
 
 export const DIAGRAM_DOCUMENT_VERSION = 1 as const;
@@ -135,7 +139,11 @@ export type DiagramNode =
   | (NodeBase & { kind: "memorystore"; data: MemorystoreProps })
   | (NodeBase & { kind: "alloydb"; data: AlloydbProps })
   | (NodeBase & { kind: "cloudshell"; data: CloudShellProps })
-  | (NodeBase & { kind: "monitoring"; data: MonitoringProps });
+  | (NodeBase & { kind: "monitoring"; data: MonitoringProps })
+  | (NodeBase & { kind: "cloudlogging"; data: CloudLoggingProps })
+  | (NodeBase & { kind: "cloudarmor"; data: CloudArmorProps })
+  | (NodeBase & { kind: "knowledgecatalog"; data: KnowledgeCatalogProps })
+  | (NodeBase & { kind: "usergroup"; data: UserGroupProps });
 
 export type DiagramEdge = {
   id: string;
@@ -291,6 +299,21 @@ export type DiagramEdge = {
     | "pipelines-modelregistry"
     | "mlmonitoring-experiments"
     | "mlmonitoring-endpoints"
+    | "vm-cloudlogging"
+    | "gke-cloudlogging"
+    | "run-cloudlogging"
+    | "cloudlogging-monitoring"
+    | "loadbalancer-cloudarmor"
+    | "cdn-cloudarmor"
+    | "knowledgecatalog-bigquery"
+    | "knowledgecatalog-storage"
+    | "knowledgecatalog-featurestore"
+    | "usergroup-iam"
+    | "usergroup-project"
+    | "usergroup-vm"
+    | "usergroup-run"
+    | "usergroup-gke"
+    | "pcuser-usergroup"
     | "pubsub-eventarc"
     | "storage-eventarc"
     | "eventarc-run"

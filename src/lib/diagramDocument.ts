@@ -84,6 +84,10 @@ import {
   type AlloydbProps,
   type CloudShellProps,
   type MonitoringProps,
+  type CloudLoggingProps,
+  type CloudArmorProps,
+  type KnowledgeCatalogProps,
+  type UserGroupProps,
 } from "../types";
 
 export const DIAGRAM_STORAGE_KEY = "diagloud-diagram";
@@ -791,6 +795,40 @@ function parseMonitoringData(raw: unknown): MonitoringProps {
     throw new DiagramParseError("Dados de Cloud Monitoring inválidos.");
   }
   return { name: raw.name };
+}
+
+function parseCloudLoggingData(raw: unknown): CloudLoggingProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Cloud Logging inválidos.");
+  }
+  return {
+    name: raw.name,
+    location: typeof raw.location === "string" ? raw.location : "global",
+  };
+}
+
+function parseCloudArmorData(raw: unknown): CloudArmorProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Cloud Armor inválidos.");
+  }
+  return { name: raw.name };
+}
+
+function parseKnowledgeCatalogData(raw: unknown): KnowledgeCatalogProps {
+  return parseAgentPlatformLocationData(raw, "Knowledge Catalog");
+}
+
+function parseUserGroupData(raw: unknown): UserGroupProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Grupo de usuários inválidos.");
+  }
+  return {
+    name: raw.name,
+    groupEmail:
+      typeof raw.groupEmail === "string"
+        ? raw.groupEmail
+        : "eng-platform@example.com",
+  };
 }
 
 const LOAD_BALANCER_TYPES = new Set<LoadBalancerType>(["external", "internal"]);
@@ -1784,6 +1822,58 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseMonitoringData(data),
       };
+    case "cloudlogging":
+      if (!nodeIdMatchesKind(nodeId, "cloudlogging")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Logging.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "cloudlogging",
+        position: parsedPosition,
+        zIndex,
+        data: parseCloudLoggingData(data),
+      };
+    case "cloudarmor":
+      if (!nodeIdMatchesKind(nodeId, "cloudarmor")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Armor.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "cloudarmor",
+        position: parsedPosition,
+        zIndex,
+        data: parseCloudArmorData(data),
+      };
+    case "knowledgecatalog":
+      if (!nodeIdMatchesKind(nodeId, "knowledgecatalog")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Knowledge Catalog.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "knowledgecatalog",
+        position: parsedPosition,
+        zIndex,
+        data: parseKnowledgeCatalogData(data),
+      };
+    case "usergroup":
+      if (!nodeIdMatchesKind(nodeId, "usergroup")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Grupo de usuários.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "usergroup",
+        position: parsedPosition,
+        zIndex,
+        data: parseUserGroupData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -1956,6 +2046,21 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "pipelines-modelregistry" &&
     kind !== "mlmonitoring-experiments" &&
     kind !== "mlmonitoring-endpoints" &&
+    kind !== "vm-cloudlogging" &&
+    kind !== "gke-cloudlogging" &&
+    kind !== "run-cloudlogging" &&
+    kind !== "cloudlogging-monitoring" &&
+    kind !== "loadbalancer-cloudarmor" &&
+    kind !== "cdn-cloudarmor" &&
+    kind !== "knowledgecatalog-bigquery" &&
+    kind !== "knowledgecatalog-storage" &&
+    kind !== "knowledgecatalog-featurestore" &&
+    kind !== "usergroup-iam" &&
+    kind !== "usergroup-project" &&
+    kind !== "usergroup-vm" &&
+    kind !== "usergroup-run" &&
+    kind !== "usergroup-gke" &&
+    kind !== "pcuser-usergroup" &&
     kind !== "pubsub-eventarc" &&
     kind !== "storage-eventarc" &&
     kind !== "eventarc-run" &&
@@ -2331,6 +2436,22 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.monitoring === "string"
           ? patterns.monitoring
           : DEFAULT_NAMING_PATTERNS.monitoring,
+      cloudlogging:
+        typeof patterns.cloudlogging === "string"
+          ? patterns.cloudlogging
+          : DEFAULT_NAMING_PATTERNS.cloudlogging,
+      cloudarmor:
+        typeof patterns.cloudarmor === "string"
+          ? patterns.cloudarmor
+          : DEFAULT_NAMING_PATTERNS.cloudarmor,
+      knowledgecatalog:
+        typeof patterns.knowledgecatalog === "string"
+          ? patterns.knowledgecatalog
+          : DEFAULT_NAMING_PATTERNS.knowledgecatalog,
+      usergroup:
+        typeof patterns.usergroup === "string"
+          ? patterns.usergroup
+          : DEFAULT_NAMING_PATTERNS.usergroup,
     },
   };
 }
@@ -2542,7 +2663,11 @@ function namingMetadataEqual(
     a.patterns.memorystore === b.patterns.memorystore &&
     a.patterns.alloydb === b.patterns.alloydb &&
     a.patterns.cloudshell === b.patterns.cloudshell &&
-    a.patterns.monitoring === b.patterns.monitoring
+    a.patterns.monitoring === b.patterns.monitoring &&
+    a.patterns.cloudlogging === b.patterns.cloudlogging &&
+    a.patterns.cloudarmor === b.patterns.cloudarmor &&
+    a.patterns.knowledgecatalog === b.patterns.knowledgecatalog &&
+    a.patterns.usergroup === b.patterns.usergroup
   );
 }
 

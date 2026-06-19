@@ -68,6 +68,10 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   alloydb: "alloydb-AREA-AMBIENTE",
   cloudshell: "shell-AREA-AMBIENTE",
   monitoring: "monitoring-AREA-AMBIENTE",
+  cloudlogging: "log-AREA-AMBIENTE",
+  cloudarmor: "armor-AREA-AMBIENTE",
+  knowledgecatalog: "catalog-AREA-AMBIENTE",
+  usergroup: "group-AREA-AMBIENTE",
 };
 
 export const NAMING_TOKEN_HINTS = [

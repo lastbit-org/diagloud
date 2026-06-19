@@ -214,6 +214,14 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `cloudshell-${count}`;
     case "monitoring":
       return `monitoring-${count}`;
+    case "cloudlogging":
+      return `log-${count}`;
+    case "cloudarmor":
+      return `armor-${count}`;
+    case "knowledgecatalog":
+      return `catalog-${count}`;
+    case "usergroup":
+      return `group-${count}`;
   }
 }
 

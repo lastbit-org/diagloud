@@ -61,7 +61,11 @@ export type ResourceKind =
   | "memorystore"
   | "alloydb"
   | "cloudshell"
-  | "monitoring";
+  | "monitoring"
+  | "cloudlogging"
+  | "cloudarmor"
+  | "knowledgecatalog"
+  | "usergroup";
 
 export type RunAccessMode = "public" | "vpc";
 
@@ -439,6 +443,30 @@ export type MonitoringProps = {
   name: string;
 };
 
+export type CloudLoggingProps = {
+  /** Nome do log bucket ou sink. */
+  name: string;
+  location: string;
+};
+
+export type CloudArmorProps = {
+  /** Nome da política de segurança. */
+  name: string;
+};
+
+export type KnowledgeCatalogProps = {
+  /** Nome do catálogo. */
+  name: string;
+  location: string;
+};
+
+export type UserGroupProps = {
+  /** Nome do grupo no diagrama. */
+  name: string;
+  /** E-mail do grupo (ex.: eng-platform@example.com). */
+  groupEmail: string;
+};
+
 export type LoadBalancerType = "external" | "internal";
 
 export type LoadBalancerProps = {
@@ -575,4 +603,8 @@ export type ResourcePropsByKind = {
   alloydb: AlloydbProps;
   cloudshell: CloudShellProps;
   monitoring: MonitoringProps;
+  cloudlogging: CloudLoggingProps;
+  cloudarmor: CloudArmorProps;
+  knowledgecatalog: KnowledgeCatalogProps;
+  usergroup: UserGroupProps;
 };

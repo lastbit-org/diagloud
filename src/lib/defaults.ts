@@ -66,6 +66,10 @@ import type {
   AlloydbProps,
   CloudShellProps,
   MonitoringProps,
+  CloudLoggingProps,
+  CloudArmorProps,
+  KnowledgeCatalogProps,
+  UserGroupProps,
 } from "../types";
 
 export function defaultResourceData<K extends ResourceKind>(
@@ -396,6 +400,23 @@ export function defaultResourceData<K extends ResourceKind>(
       return { name } as CloudShellProps as ResourcePropsByKind[K];
     case "monitoring":
       return { name } as MonitoringProps as ResourcePropsByKind[K];
+    case "cloudlogging":
+      return {
+        name,
+        location: "global",
+      } as CloudLoggingProps as ResourcePropsByKind[K];
+    case "cloudarmor":
+      return { name } as CloudArmorProps as ResourcePropsByKind[K];
+    case "knowledgecatalog":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as KnowledgeCatalogProps as ResourcePropsByKind[K];
+    case "usergroup":
+      return {
+        name,
+        groupEmail: "eng-platform@example.com",
+      } as UserGroupProps as ResourcePropsByKind[K];
   }
 }
 
@@ -522,5 +543,13 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `cloudshell-${count}`;
     case "monitoring":
       return `monitoring-${count}`;
+    case "cloudlogging":
+      return `log-${count}`;
+    case "cloudarmor":
+      return `armor-${count}`;
+    case "knowledgecatalog":
+      return `catalog-${count}`;
+    case "usergroup":
+      return `group-${count}`;
   }
 }

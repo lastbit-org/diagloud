@@ -151,6 +151,13 @@ describe("getEdgeKind", () => {
     );
     expect(getEdgeKind("pipelines", "training")).toBe("pipelines-training");
     expect(getEdgeKind("mlmonitoring", "endpoints")).toBe("mlmonitoring-endpoints");
+    expect(getEdgeKind("vm", "cloudlogging")).toBe("vm-cloudlogging");
+    expect(getEdgeKind("loadbalancer", "cloudarmor")).toBe("loadbalancer-cloudarmor");
+    expect(getEdgeKind("knowledgecatalog", "bigquery")).toBe(
+      "knowledgecatalog-bigquery",
+    );
+    expect(getEdgeKind("usergroup", "iam")).toBe("usergroup-iam");
+    expect(getEdgeKind("pcuser", "usergroup")).toBe("pcuser-usergroup");
     expect(getEdgeKind("pubsub", "run")).toBe("pubsub-run");
     expect(getEdgeKind("pubsub", "storage")).toBe("pubsub-storage");
     expect(getEdgeKind("pubsub", "bigquery")).toBe("pubsub-bigquery");

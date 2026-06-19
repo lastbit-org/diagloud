@@ -59,6 +59,10 @@ import {
   AlloydbNode,
   CloudShellNode,
   MonitoringNode,
+  CloudLoggingNode,
+  CloudArmorNode,
+  KnowledgeCatalogNode,
+  UserGroupNode,
 } from "../nodes";
 
 export const nodeTypes = {
@@ -122,4 +126,8 @@ export const nodeTypes = {
   alloydb: AlloydbNode,
   cloudshell: CloudShellNode,
   monitoring: MonitoringNode,
+  cloudlogging: CloudLoggingNode,
+  cloudarmor: CloudArmorNode,
+  knowledgecatalog: KnowledgeCatalogNode,
+  usergroup: UserGroupNode,
 };

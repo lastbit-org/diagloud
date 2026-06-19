@@ -183,6 +183,19 @@ resource "google_apigee_environment" "${resourceName}_env" {
 }`);
   }
 
+  for (const node of nodesOfKind(ctx, "cloudlogging")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Cloud Logging: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_logging_project_sink" "${resourceName}" { ... }`);
+  }
+
+  for (const node of nodesOfKind(ctx, "cloudarmor")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`resource "google_compute_security_policy" "${resourceName}" {
+  name = "${escapeHclString(node.data.name)}"
+}`);
+  }
+
   return blocks.length > 1 ? blocks.join("\n\n") : "";
 }
 
