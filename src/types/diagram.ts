@@ -51,6 +51,7 @@ import type {
   MemorystoreProps,
   AlloydbProps,
   CloudShellProps,
+  MonitoringProps,
 } from "./resources";
 
 export const DIAGRAM_DOCUMENT_VERSION = 1 as const;
@@ -115,7 +116,8 @@ export type DiagramNode =
   | (NodeBase & { kind: "apigee"; data: ApigeeProps })
   | (NodeBase & { kind: "memorystore"; data: MemorystoreProps })
   | (NodeBase & { kind: "alloydb"; data: AlloydbProps })
-  | (NodeBase & { kind: "cloudshell"; data: CloudShellProps });
+  | (NodeBase & { kind: "cloudshell"; data: CloudShellProps })
+  | (NodeBase & { kind: "monitoring"; data: MonitoringProps });
 
 export type DiagramEdge = {
   id: string;

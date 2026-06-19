@@ -194,6 +194,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `alloydb-${count}`;
     case "cloudshell":
       return `cloudshell-${count}`;
+    case "monitoring":
+      return `monitoring-${count}`;
   }
 }
 

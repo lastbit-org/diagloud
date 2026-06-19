@@ -47,6 +47,7 @@ import secretManagerIcon from "./google-cloud-legacy-icons/secret_manager/secret
 import certificateManagerIcon from "./google-cloud-legacy-icons/certificate_manager/certificate_manager.svg";
 import apigeeIcon from "./google-cloud-legacy-icons/apigee_api_platform/apigee_api_platform.svg";
 import memorystoreIcon from "./google-cloud-legacy-icons/memorystore/memorystore.svg";
+import monitoringIcon from "./google-cloud-legacy-icons/cloud_monitoring/cloud_monitoring.svg";
 import alloydbIcon from "./core-products-icons/Unique Icons/AlloyDB/SVG/AlloyDB-512-color.svg";
 
 /** Ícones oficiais GCP (legacy 24px). Sub-rede usa Cloud Network (sem ícone subnet no pacote). */
@@ -101,6 +102,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   memorystore: memorystoreIcon,
   alloydb: alloydbIcon,
   cloudshell: cloudShellIcon,
+  monitoring: monitoringIcon,
 };
 
 export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
@@ -154,4 +156,5 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   memorystore: "Memorystore",
   alloydb: "AlloyDB",
   cloudshell: "Cloud Shell",
+  monitoring: "Cloud Monitoring",
 };

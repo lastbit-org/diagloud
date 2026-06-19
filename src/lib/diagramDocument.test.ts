@@ -76,6 +76,7 @@ const sampleDocument: DiagramDocument = {
         memorystore: "ms-AREA-AMBIENTE",
         alloydb: "alloydb-AREA-AMBIENTE",
         cloudshell: "shell-AREA-AMBIENTE",
+        monitoring: "monitoring-AREA-AMBIENTE",
       },
     },
   },

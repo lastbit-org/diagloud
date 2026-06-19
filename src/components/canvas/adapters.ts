@@ -318,6 +318,23 @@ export function toFlowNode(
     };
   }
 
+  if (node.kind === "monitoring") {
+    const issueCount = issueCountForNode(node.id, issues);
+    return {
+      id: node.id,
+      type: "monitoring",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      connectable: false,
+      data: {
+        kind: "monitoring",
+        label: node.data.name,
+        issueCount: issueCount > 0 ? issueCount : undefined,
+      },
+    };
+  }
+
   const issueCount = issueCountForNode(node.id, issues);
   return {
     id: node.id,

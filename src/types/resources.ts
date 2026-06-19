@@ -51,7 +51,8 @@ export type ResourceKind =
   | "apigee"
   | "memorystore"
   | "alloydb"
-  | "cloudshell";
+  | "cloudshell"
+  | "monitoring";
 
 export type RunAccessMode = "public" | "vpc";
 
@@ -370,6 +371,11 @@ export type CloudShellProps = {
   name: string;
 };
 
+export type MonitoringProps = {
+  /** Nome no diagrama. */
+  name: string;
+};
+
 export type LoadBalancerType = "external" | "internal";
 
 export type LoadBalancerProps = {
@@ -496,4 +502,5 @@ export type ResourcePropsByKind = {
   memorystore: MemorystoreProps;
   alloydb: AlloydbProps;
   cloudshell: CloudShellProps;
+  monitoring: MonitoringProps;
 };

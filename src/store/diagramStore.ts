@@ -123,6 +123,7 @@ import type {
   MemorystoreProps,
   AlloydbProps,
   CloudShellProps,
+  MonitoringProps,
   IamProps,
 } from "../types";
 
@@ -197,6 +198,7 @@ type DiagramActions = {
       | Partial<MemorystoreProps>
       | Partial<AlloydbProps>
       | Partial<CloudShellProps>
+      | Partial<MonitoringProps>
       | Partial<IamProps>,
   ) => void;
   updateNodeDimensions: (id: string, width: number, height: number) => void;
@@ -655,6 +657,15 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "monitoring":
+      return {
+        ...base,
+        kind: "monitoring",
+        data: {
+          ...defaultResourceData("monitoring", resourceContext),
+          ...data,
+        },
+      };
   }
 }
 
@@ -961,6 +972,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<CloudShellProps>) },
+      };
+    case "monitoring":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<MonitoringProps>) },
       };
   }
 }

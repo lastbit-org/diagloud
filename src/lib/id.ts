@@ -55,6 +55,7 @@ const ID_PREFIXES = [
   "memorystore",
   "alloydb",
   "cloudshell",
+  "monitoring",
   "edge",
 ] as const;
 
@@ -123,7 +124,8 @@ export function createId(prefix = "node"): string {
     prefix === "apigee" ||
     prefix === "memorystore" ||
     prefix === "alloydb" ||
-    prefix === "cloudshell"
+    prefix === "cloudshell" ||
+    prefix === "monitoring"
   ) {
     return createNodeId(prefix);
   }
@@ -135,7 +137,7 @@ export function isUuid(value: string): boolean {
 }
 
 const ID_PREFIX_PATTERN =
-  /^(vpc|subnet|vm|storage|sql|gke|nat|router|peering|vpn|interconnect|firewall|dns|artifact|build|kms|internet|run|pubsub|eventarc|bigquery|spanner|firestore|bigtable|firebase|workbench|notebook|spark|airflow|dataflow|modelregistry|zone|folder|project|entra|infocard|pcuser|onprem|github|iam|loadbalancer|cdn|orgpolicy|psc|secretmanager|certificatemanager|apigee|memorystore|alloydb|cloudshell|edge)-(.+)$/;
+  /^(vpc|subnet|vm|storage|sql|gke|nat|router|peering|vpn|interconnect|firewall|dns|artifact|build|kms|internet|run|pubsub|eventarc|bigquery|spanner|firestore|bigtable|firebase|workbench|notebook|spark|airflow|dataflow|modelregistry|zone|folder|project|entra|infocard|pcuser|onprem|github|iam|loadbalancer|cdn|orgpolicy|psc|secretmanager|certificatemanager|apigee|memorystore|alloydb|cloudshell|monitoring|edge)-(.+)$/;
 
 function parsePrefixedId(
   id: string,

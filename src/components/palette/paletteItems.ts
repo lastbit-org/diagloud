@@ -19,6 +19,7 @@ export type PaletteCategoryId =
   | "integration"
   | "ai"
   | "security"
+  | "observability"
   | "other";
 
 export type PaletteCategoryConfig = {
@@ -49,6 +50,7 @@ export const PALETTE_CATEGORIES: PaletteCategoryConfig[] = [
   { id: "integration", label: "Integration Services" },
   { id: "ai", label: "Artificial Intelligence" },
   { id: "security", label: "Security" },
+  { id: "observability", label: "Observability" },
   { id: "other", label: "Other" },
 ];
 
@@ -105,7 +107,8 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "apigee" ||
     value === "memorystore" ||
     value === "alloydb" ||
-    value === "cloudshell"
+    value === "cloudshell" ||
+    value === "monitoring"
   );
 }
 
@@ -485,6 +488,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.certificatemanager,
     description: "Certificados TLS/SSL gerenciados ou próprios",
     icon: GCP_RESOURCE_ICONS.certificatemanager,
+  },
+  {
+    paletteKey: "monitoring",
+    kind: "monitoring",
+    category: "observability",
+    label: GCP_RESOURCE_LABELS.monitoring,
+    description: "Métricas, alertas e dashboards do Cloud Monitoring",
+    icon: GCP_RESOURCE_ICONS.monitoring,
   },
   {
     paletteKey: "pcuser",

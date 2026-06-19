@@ -56,6 +56,7 @@ import type {
   MemorystoreProps,
   AlloydbProps,
   CloudShellProps,
+  MonitoringProps,
 } from "../types";
 
 export function defaultResourceData<K extends ResourceKind>(
@@ -339,6 +340,8 @@ export function defaultResourceData<K extends ResourceKind>(
       } as AlloydbProps as ResourcePropsByKind[K];
     case "cloudshell":
       return { name } as CloudShellProps as ResourcePropsByKind[K];
+    case "monitoring":
+      return { name } as MonitoringProps as ResourcePropsByKind[K];
   }
 }
 
@@ -445,5 +448,7 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `alloydb-${count}`;
     case "cloudshell":
       return `cloudshell-${count}`;
+    case "monitoring":
+      return `monitoring-${count}`;
   }
 }

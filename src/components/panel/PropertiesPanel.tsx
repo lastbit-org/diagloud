@@ -2601,6 +2601,25 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           />
         </>
       )}
+
+      {selectedNode?.kind === "monitoring" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="monitoring-name">Workspace</label>
+            <input
+              id="monitoring-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <p className="properties-field__hint">
+            Representa métricas, alertas e dashboards do Cloud Monitoring. Pode
+            ficar isolado no diagrama — sem conexões com outros recursos.
+          </p>
+        </>
+      )}
     </>
   );
 

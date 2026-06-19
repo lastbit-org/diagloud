@@ -17,9 +17,10 @@ export type GcpNodeData = {
 
 type BaseNodeProps = NodeProps & {
   kind: ResourceKind;
+  hideHandles?: boolean;
 };
 
-export function BaseNode({ id, data, selected, kind }: BaseNodeProps) {
+export function BaseNode({ id, data, selected, kind, hideHandles }: BaseNodeProps) {
   const { label, subtitle, issueCount } = (data ?? {}) as GcpNodeData;
   const iconSrc = GCP_RESOURCE_ICONS[kind];
   const typeLabel = GCP_RESOURCE_LABELS[kind];
@@ -55,7 +56,7 @@ export function BaseNode({ id, data, selected, kind }: BaseNodeProps) {
           <span className="gcp-node__subtitle">{subtitle}</span>
         ) : null}
       </div>
-      <NodeHandles nodeId={id} />
+      {hideHandles ? null : <NodeHandles nodeId={id} />}
     </div>
   );
 }

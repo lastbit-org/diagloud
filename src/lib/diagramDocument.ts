@@ -74,6 +74,7 @@ import {
   type MemorystoreTier,
   type AlloydbProps,
   type CloudShellProps,
+  type MonitoringProps,
 } from "../types";
 
 export const DIAGRAM_STORAGE_KEY = "diagloud-diagram";
@@ -729,6 +730,13 @@ function parseGithubData(raw: unknown): GithubProps {
 function parseCloudShellData(raw: unknown): CloudShellProps {
   if (!isRecord(raw) || typeof raw.name !== "string") {
     throw new DiagramParseError("Dados de Cloud Shell inválidos.");
+  }
+  return { name: raw.name };
+}
+
+function parseMonitoringData(raw: unknown): MonitoringProps {
+  if (!isRecord(raw) || typeof raw.name !== "string") {
+    throw new DiagramParseError("Dados de Cloud Monitoring inválidos.");
   }
   return { name: raw.name };
 }
@@ -1594,6 +1602,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseCloudShellData(data),
       };
+    case "monitoring":
+      if (!nodeIdMatchesKind(nodeId, "monitoring")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Cloud Monitoring.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "monitoring",
+        position: parsedPosition,
+        zIndex,
+        data: parseMonitoringData(data),
+      };
     default:
       throw new DiagramParseError(`Tipo de recurso desconhecido: ${String(kind)}`);
   }
@@ -2080,6 +2101,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.cloudshell === "string"
           ? patterns.cloudshell
           : DEFAULT_NAMING_PATTERNS.cloudshell,
+      monitoring:
+        typeof patterns.monitoring === "string"
+          ? patterns.monitoring
+          : DEFAULT_NAMING_PATTERNS.monitoring,
     },
   };
 }
@@ -2281,7 +2306,8 @@ function namingMetadataEqual(
     a.patterns.apigee === b.patterns.apigee &&
     a.patterns.memorystore === b.patterns.memorystore &&
     a.patterns.alloydb === b.patterns.alloydb &&
-    a.patterns.cloudshell === b.patterns.cloudshell
+    a.patterns.cloudshell === b.patterns.cloudshell &&
+    a.patterns.monitoring === b.patterns.monitoring
   );
 }
 

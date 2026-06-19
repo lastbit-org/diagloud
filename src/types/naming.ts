@@ -58,6 +58,7 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   memorystore: "ms-AREA-AMBIENTE",
   alloydb: "alloydb-AREA-AMBIENTE",
   cloudshell: "shell-AREA-AMBIENTE",
+  monitoring: "monitoring-AREA-AMBIENTE",
 };
 
 export const NAMING_TOKEN_HINTS = [

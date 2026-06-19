@@ -49,6 +49,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "memorystore",
   "alloydb",
   "cloudshell",
+  "monitoring",
   "entra",
   "pcuser",
   "onprem",
