@@ -28,6 +28,11 @@ import type {
   EvaluationProps,
   EndpointsProps,
   BatchInferenceProps,
+  FeatureStoreProps,
+  ExperimentsProps,
+  TrainingProps,
+  PipelinesProps,
+  MlMonitoringProps,
   PubsubProps,
   EventarcProps,
   RunProps,
@@ -106,6 +111,11 @@ export type DiagramNode =
   | (NodeBase & { kind: "evaluation"; data: EvaluationProps })
   | (NodeBase & { kind: "endpoints"; data: EndpointsProps })
   | (NodeBase & { kind: "batchinference"; data: BatchInferenceProps })
+  | (NodeBase & { kind: "featurestore"; data: FeatureStoreProps })
+  | (NodeBase & { kind: "experiments"; data: ExperimentsProps })
+  | (NodeBase & { kind: "training"; data: TrainingProps })
+  | (NodeBase & { kind: "pipelines"; data: PipelinesProps })
+  | (NodeBase & { kind: "mlmonitoring"; data: MlMonitoringProps })
   | (NodeBase & { kind: "zone"; data: ZoneProps })
   | (NodeBase & { kind: "folder"; data: FolderProps })
   | (NodeBase & { kind: "project"; data: ProjectProps })
@@ -271,6 +281,16 @@ export type DiagramEdge = {
     | "endpoints-gke"
     | "batchinference-modelregistry"
     | "batchinference-storage"
+    | "featurestore-bigquery"
+    | "featurestore-storage"
+    | "workbench-experiments"
+    | "notebook-experiments"
+    | "experiments-modelregistry"
+    | "training-modelregistry"
+    | "pipelines-training"
+    | "pipelines-modelregistry"
+    | "mlmonitoring-experiments"
+    | "mlmonitoring-endpoints"
     | "pubsub-eventarc"
     | "storage-eventarc"
     | "eventarc-run"

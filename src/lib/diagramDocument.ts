@@ -54,6 +54,11 @@ import {
   type EvaluationProps,
   type EndpointsProps,
   type BatchInferenceProps,
+  type FeatureStoreProps,
+  type ExperimentsProps,
+  type TrainingProps,
+  type PipelinesProps,
+  type MlMonitoringProps,
   type ZoneProps,
   type FolderProps,
   type ProjectProps,
@@ -650,6 +655,26 @@ function parseEndpointsData(raw: unknown): EndpointsProps {
 
 function parseBatchInferenceData(raw: unknown): BatchInferenceProps {
   return parseAgentPlatformLocationData(raw, "Batch inference");
+}
+
+function parseFeatureStoreData(raw: unknown): FeatureStoreProps {
+  return parseAgentPlatformLocationData(raw, "Feature Store");
+}
+
+function parseExperimentsData(raw: unknown): ExperimentsProps {
+  return parseAgentPlatformLocationData(raw, "Experiments");
+}
+
+function parseTrainingData(raw: unknown): TrainingProps {
+  return parseAgentPlatformLocationData(raw, "Training");
+}
+
+function parsePipelinesData(raw: unknown): PipelinesProps {
+  return parseAgentPlatformLocationData(raw, "Pipelines");
+}
+
+function parseMlMonitoringData(raw: unknown): MlMonitoringProps {
+  return parseAgentPlatformLocationData(raw, "Monitoring");
 }
 
 function parseAirflowData(raw: unknown): AirflowProps {
@@ -1449,6 +1474,71 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseBatchInferenceData(data),
       };
+    case "featurestore":
+      if (!nodeIdMatchesKind(nodeId, "featurestore")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Feature Store.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "featurestore",
+        position: parsedPosition,
+        zIndex,
+        data: parseFeatureStoreData(data),
+      };
+    case "experiments":
+      if (!nodeIdMatchesKind(nodeId, "experiments")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Experiments.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "experiments",
+        position: parsedPosition,
+        zIndex,
+        data: parseExperimentsData(data),
+      };
+    case "training":
+      if (!nodeIdMatchesKind(nodeId, "training")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Training.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "training",
+        position: parsedPosition,
+        zIndex,
+        data: parseTrainingData(data),
+      };
+    case "pipelines":
+      if (!nodeIdMatchesKind(nodeId, "pipelines")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Pipelines.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "pipelines",
+        position: parsedPosition,
+        zIndex,
+        data: parsePipelinesData(data),
+      };
+    case "mlmonitoring":
+      if (!nodeIdMatchesKind(nodeId, "mlmonitoring")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Monitoring.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "mlmonitoring",
+        position: parsedPosition,
+        zIndex,
+        data: parseMlMonitoringData(data),
+      };
     case "zone":
       if (!nodeIdMatchesKind(nodeId, "zone")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Zona.`);
@@ -1856,6 +1946,16 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "endpoints-gke" &&
     kind !== "batchinference-modelregistry" &&
     kind !== "batchinference-storage" &&
+    kind !== "featurestore-bigquery" &&
+    kind !== "featurestore-storage" &&
+    kind !== "workbench-experiments" &&
+    kind !== "notebook-experiments" &&
+    kind !== "experiments-modelregistry" &&
+    kind !== "training-modelregistry" &&
+    kind !== "pipelines-training" &&
+    kind !== "pipelines-modelregistry" &&
+    kind !== "mlmonitoring-experiments" &&
+    kind !== "mlmonitoring-endpoints" &&
     kind !== "pubsub-eventarc" &&
     kind !== "storage-eventarc" &&
     kind !== "eventarc-run" &&
@@ -2135,6 +2235,26 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.batchinference === "string"
           ? patterns.batchinference
           : DEFAULT_NAMING_PATTERNS.batchinference,
+      featurestore:
+        typeof patterns.featurestore === "string"
+          ? patterns.featurestore
+          : DEFAULT_NAMING_PATTERNS.featurestore,
+      experiments:
+        typeof patterns.experiments === "string"
+          ? patterns.experiments
+          : DEFAULT_NAMING_PATTERNS.experiments,
+      training:
+        typeof patterns.training === "string"
+          ? patterns.training
+          : DEFAULT_NAMING_PATTERNS.training,
+      pipelines:
+        typeof patterns.pipelines === "string"
+          ? patterns.pipelines
+          : DEFAULT_NAMING_PATTERNS.pipelines,
+      mlmonitoring:
+        typeof patterns.mlmonitoring === "string"
+          ? patterns.mlmonitoring
+          : DEFAULT_NAMING_PATTERNS.mlmonitoring,
       zone:
         typeof patterns.zone === "string"
           ? patterns.zone
@@ -2399,6 +2519,11 @@ function namingMetadataEqual(
     a.patterns.evaluation === b.patterns.evaluation &&
     a.patterns.endpoints === b.patterns.endpoints &&
     a.patterns.batchinference === b.patterns.batchinference &&
+    a.patterns.featurestore === b.patterns.featurestore &&
+    a.patterns.experiments === b.patterns.experiments &&
+    a.patterns.training === b.patterns.training &&
+    a.patterns.pipelines === b.patterns.pipelines &&
+    a.patterns.mlmonitoring === b.patterns.mlmonitoring &&
     a.patterns.zone === b.patterns.zone &&
     a.patterns.folder === b.patterns.folder &&
     a.patterns.project === b.patterns.project &&

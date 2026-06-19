@@ -1594,6 +1594,156 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "featurestore" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="featurestore-name">Feature Store</label>
+            <input
+              id="featurestore-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="featurestore-location">Localização</label>
+            <input
+              id="featurestore-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Repositório de features no Agent Platform. Ligue ao BigQuery ou Cloud
+            Storage para origem de dados.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "experiments" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="experiments-name">Experimento</label>
+            <input
+              id="experiments-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="experiments-location">Localização</label>
+            <input
+              id="experiments-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Rastreamento de experimentos no Agent Platform. Ligue a Workbench ou
+            Notebook e ao Model Registry.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "training" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="training-name">Job</label>
+            <input
+              id="training-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="training-location">Localização</label>
+            <input
+              id="training-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Treinamento de modelos no Agent Platform. Publique resultados no
+            Model Registry.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "pipelines" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="pipelines-name">Pipeline</label>
+            <input
+              id="pipelines-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="pipelines-location">Localização</label>
+            <input
+              id="pipelines-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Pipelines ML no Agent Platform. Orquestre treinamento e registro de
+            modelos.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "mlmonitoring" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="mlmonitoring-name">Monitoramento</label>
+            <input
+              id="mlmonitoring-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="mlmonitoring-location">Localização</label>
+            <input
+              id="mlmonitoring-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Monitoramento de modelos no Agent Platform. Ligue a Experiments e
+            Endpoints para observar drift e desempenho.
+          </p>
+        </>
+      )}
+
       {selectedNode?.kind === "nat" && (
         <>
           <div className="properties-field">

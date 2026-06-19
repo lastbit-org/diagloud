@@ -37,6 +37,11 @@ export type ResourceKind =
   | "evaluation"
   | "endpoints"
   | "batchinference"
+  | "featurestore"
+  | "experiments"
+  | "training"
+  | "pipelines"
+  | "mlmonitoring"
   | "zone"
   | "folder"
   | "project"
@@ -347,6 +352,36 @@ export type BatchInferenceProps = {
   location: string;
 };
 
+export type FeatureStoreProps = {
+  /** Nome da feature store. */
+  name: string;
+  location: string;
+};
+
+export type ExperimentsProps = {
+  /** Nome do experimento. */
+  name: string;
+  location: string;
+};
+
+export type TrainingProps = {
+  /** Nome do job de treinamento. */
+  name: string;
+  location: string;
+};
+
+export type PipelinesProps = {
+  /** Nome do pipeline ML. */
+  name: string;
+  location: string;
+};
+
+export type MlMonitoringProps = {
+  /** Nome do recurso de monitoramento ML. */
+  name: string;
+  location: string;
+};
+
 export type ZoneProps = {
   name: string;
   colorId: ZoneColorId;
@@ -515,6 +550,11 @@ export type ResourcePropsByKind = {
   evaluation: EvaluationProps;
   endpoints: EndpointsProps;
   batchinference: BatchInferenceProps;
+  featurestore: FeatureStoreProps;
+  experiments: ExperimentsProps;
+  training: TrainingProps;
+  pipelines: PipelinesProps;
+  mlmonitoring: MlMonitoringProps;
   zone: ZoneProps;
   folder: FolderProps;
   project: ProjectProps;

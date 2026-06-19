@@ -50,6 +50,10 @@ import memorystoreIcon from "./google-cloud-legacy-icons/memorystore/memorystore
 import vertexAiIcon from "./core-products-icons/Unique Icons/Vertex AI/SVG/VertexAI-512-color.svg";
 import automlIcon from "./google-cloud-legacy-icons/automl/automl.svg";
 import batchIcon from "./google-cloud-legacy-icons/batch/batch.svg";
+import traceIcon from "./google-cloud-legacy-icons/trace/trace.svg";
+import dataplexIcon from "./google-cloud-legacy-icons/dataplex/dataplex.svg";
+import tensorflowIcon from "./google-cloud-legacy-icons/tensorflow_enterprise/tensorflow_enterprise.svg";
+import cloudDeployIcon from "./google-cloud-legacy-icons/cloud_deploy/cloud_deploy.svg";
 import monitoringIcon from "./google-cloud-legacy-icons/cloud_monitoring/cloud_monitoring.svg";
 import alloydbIcon from "./core-products-icons/Unique Icons/AlloyDB/SVG/AlloyDB-512-color.svg";
 
@@ -91,6 +95,11 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   evaluation: vertexAiIcon,
   endpoints: vertexAiIcon,
   batchinference: batchIcon,
+  featurestore: dataplexIcon,
+  experiments: vertexAiIcon,
+  training: tensorflowIcon,
+  pipelines: cloudDeployIcon,
+  mlmonitoring: traceIcon,
   zone: zoneIcon,
   folder: folderIcon,
   project: projectIcon,
@@ -149,6 +158,11 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   evaluation: "Evaluation",
   endpoints: "Endpoints",
   batchinference: "Batch inference",
+  featurestore: "Feature Store",
+  experiments: "Experiments",
+  training: "Training",
+  pipelines: "Pipelines",
+  mlmonitoring: "Monitoring",
   zone: "Zona",
   folder: "Pasta",
   project: "Projeto",

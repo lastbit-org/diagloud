@@ -199,5 +199,35 @@ export function generateMlTerraform(ctx: TerraformGenContext): string {
 # resource "google_vertex_ai_batch_prediction_job" "${resourceName}" { ... }`);
   }
 
+  for (const node of nodesOfKind(ctx, "featurestore")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Agent Platform — Feature Store: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_vertex_ai_featurestore" "${resourceName}" { ... }`);
+  }
+
+  for (const node of nodesOfKind(ctx, "experiments")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Agent Platform — Experiments: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_vertex_ai_metadata_store" "${resourceName}" { ... }`);
+  }
+
+  for (const node of nodesOfKind(ctx, "training")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Agent Platform — Training: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_vertex_ai_custom_job" "${resourceName}" { ... }`);
+  }
+
+  for (const node of nodesOfKind(ctx, "pipelines")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Agent Platform — Pipelines: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_vertex_ai_pipeline_job" "${resourceName}" { ... }`);
+  }
+
+  for (const node of nodesOfKind(ctx, "mlmonitoring")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Agent Platform — Monitoring: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_vertex_ai_model_deployment_monitoring_job" "${resourceName}" { ... }`);
+  }
+
   return blocks.length > 1 ? blocks.join("\n\n") : "";
 }

@@ -41,6 +41,11 @@ import type {
   EvaluationProps,
   EndpointsProps,
   BatchInferenceProps,
+  FeatureStoreProps,
+  ExperimentsProps,
+  TrainingProps,
+  PipelinesProps,
+  MlMonitoringProps,
   ZoneProps,
   FolderProps,
   ProjectProps,
@@ -280,6 +285,31 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         location: "southamerica-east1",
       } as BatchInferenceProps as ResourcePropsByKind[K];
+    case "featurestore":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as FeatureStoreProps as ResourcePropsByKind[K];
+    case "experiments":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as ExperimentsProps as ResourcePropsByKind[K];
+    case "training":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as TrainingProps as ResourcePropsByKind[K];
+    case "pipelines":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as PipelinesProps as ResourcePropsByKind[K];
+    case "mlmonitoring":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as MlMonitoringProps as ResourcePropsByKind[K];
     case "zone":
       return {
         name,
@@ -444,6 +474,16 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `endpoint-${count}`;
     case "batchinference":
       return `batch-inf-${count}`;
+    case "featurestore":
+      return `featurestore-${count}`;
+    case "experiments":
+      return `exp-${count}`;
+    case "training":
+      return `training-${count}`;
+    case "pipelines":
+      return `pipeline-${count}`;
+    case "mlmonitoring":
+      return `ml-mon-${count}`;
     case "zone":
       return `zona-${count}`;
     case "folder":

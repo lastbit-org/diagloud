@@ -88,6 +88,11 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "evaluation" ||
     value === "endpoints" ||
     value === "batchinference" ||
+    value === "featurestore" ||
+    value === "experiments" ||
+    value === "training" ||
+    value === "pipelines" ||
+    value === "mlmonitoring" ||
     value === "zone" ||
     value === "folder" ||
     value === "project" ||
@@ -452,6 +457,46 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.batchinference,
     description: "Jobs de inferência em lote no Agent Platform",
     icon: GCP_RESOURCE_ICONS.batchinference,
+  },
+  {
+    paletteKey: "featurestore",
+    kind: "featurestore",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.featurestore,
+    description: "Repositório centralizado de features no Agent Platform",
+    icon: GCP_RESOURCE_ICONS.featurestore,
+  },
+  {
+    paletteKey: "experiments",
+    kind: "experiments",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.experiments,
+    description: "Rastreamento de experimentos ML no Agent Platform",
+    icon: GCP_RESOURCE_ICONS.experiments,
+  },
+  {
+    paletteKey: "training",
+    kind: "training",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.training,
+    description: "Jobs de treinamento de modelos no Agent Platform",
+    icon: GCP_RESOURCE_ICONS.training,
+  },
+  {
+    paletteKey: "pipelines",
+    kind: "pipelines",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.pipelines,
+    description: "Pipelines ML orquestrados no Agent Platform",
+    icon: GCP_RESOURCE_ICONS.pipelines,
+  },
+  {
+    paletteKey: "mlmonitoring",
+    kind: "mlmonitoring",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.mlmonitoring,
+    description: "Monitoramento de modelos e experimentos no Agent Platform",
+    icon: GCP_RESOURCE_ICONS.mlmonitoring,
   },
   {
     paletteKey: "cloudshell",

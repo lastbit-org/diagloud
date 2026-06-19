@@ -40,6 +40,11 @@ const ID_PREFIXES = [
   "evaluation",
   "endpoints",
   "batchinference",
+  "featurestore",
+  "experiments",
+  "training",
+  "pipelines",
+  "mlmonitoring",
   "zone",
   "folder",
   "project",
@@ -114,6 +119,11 @@ export function createId(prefix = "node"): string {
     prefix === "evaluation" ||
     prefix === "endpoints" ||
     prefix === "batchinference" ||
+    prefix === "featurestore" ||
+    prefix === "experiments" ||
+    prefix === "training" ||
+    prefix === "pipelines" ||
+    prefix === "mlmonitoring" ||
     prefix === "zone" ||
     prefix === "folder" ||
     prefix === "project" ||
@@ -145,7 +155,7 @@ export function isUuid(value: string): boolean {
 }
 
 const ID_PREFIX_PATTERN =
-  /^(vpc|subnet|vm|storage|sql|gke|nat|router|peering|vpn|interconnect|firewall|dns|artifact|build|kms|internet|run|pubsub|eventarc|bigquery|spanner|firestore|bigtable|firebase|workbench|notebook|spark|airflow|dataflow|modelregistry|tuning|evaluation|endpoints|batchinference|zone|folder|project|entra|infocard|pcuser|onprem|github|iam|loadbalancer|cdn|orgpolicy|psc|secretmanager|certificatemanager|apigee|memorystore|alloydb|cloudshell|monitoring|edge)-(.+)$/;
+  /^(vpc|subnet|vm|storage|sql|gke|nat|router|peering|vpn|interconnect|firewall|dns|artifact|build|kms|internet|run|pubsub|eventarc|bigquery|spanner|firestore|bigtable|firebase|workbench|notebook|spark|airflow|dataflow|modelregistry|tuning|evaluation|endpoints|batchinference|featurestore|experiments|training|pipelines|mlmonitoring|zone|folder|project|entra|infocard|pcuser|onprem|github|iam|loadbalancer|cdn|orgpolicy|psc|secretmanager|certificatemanager|apigee|memorystore|alloydb|cloudshell|monitoring|edge)-(.+)$/;
 
 function parsePrefixedId(
   id: string,

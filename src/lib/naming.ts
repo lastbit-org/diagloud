@@ -166,6 +166,16 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `endpoint-${count}`;
     case "batchinference":
       return `batch-inf-${count}`;
+    case "featurestore":
+      return `featurestore-${count}`;
+    case "experiments":
+      return `exp-${count}`;
+    case "training":
+      return `training-${count}`;
+    case "pipelines":
+      return `pipeline-${count}`;
+    case "mlmonitoring":
+      return `ml-mon-${count}`;
     case "zone":
       return `zona-${count}`;
     case "folder":

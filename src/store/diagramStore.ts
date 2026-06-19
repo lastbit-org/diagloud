@@ -109,6 +109,11 @@ import type {
   EvaluationProps,
   EndpointsProps,
   BatchInferenceProps,
+  FeatureStoreProps,
+  ExperimentsProps,
+  TrainingProps,
+  PipelinesProps,
+  MlMonitoringProps,
   ZoneProps,
   FolderProps,
   ProjectProps,
@@ -188,6 +193,11 @@ type DiagramActions = {
       | Partial<EvaluationProps>
       | Partial<EndpointsProps>
       | Partial<BatchInferenceProps>
+      | Partial<FeatureStoreProps>
+      | Partial<ExperimentsProps>
+      | Partial<TrainingProps>
+      | Partial<PipelinesProps>
+      | Partial<MlMonitoringProps>
       | Partial<ZoneProps>
       | Partial<FolderProps>
       | Partial<ProjectProps>
@@ -569,6 +579,51 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "featurestore":
+      return {
+        ...base,
+        kind: "featurestore",
+        data: {
+          ...defaultResourceData("featurestore", resourceContext),
+          ...data,
+        },
+      };
+    case "experiments":
+      return {
+        ...base,
+        kind: "experiments",
+        data: {
+          ...defaultResourceData("experiments", resourceContext),
+          ...data,
+        },
+      };
+    case "training":
+      return {
+        ...base,
+        kind: "training",
+        data: {
+          ...defaultResourceData("training", resourceContext),
+          ...data,
+        },
+      };
+    case "pipelines":
+      return {
+        ...base,
+        kind: "pipelines",
+        data: {
+          ...defaultResourceData("pipelines", resourceContext),
+          ...data,
+        },
+      };
+    case "mlmonitoring":
+      return {
+        ...base,
+        kind: "mlmonitoring",
+        data: {
+          ...defaultResourceData("mlmonitoring", resourceContext),
+          ...data,
+        },
+      };
     case "zone":
       return {
         ...base,
@@ -749,6 +804,11 @@ function mergeNodeData(
     | Partial<EvaluationProps>
     | Partial<EndpointsProps>
     | Partial<BatchInferenceProps>
+    | Partial<FeatureStoreProps>
+    | Partial<ExperimentsProps>
+    | Partial<TrainingProps>
+    | Partial<PipelinesProps>
+    | Partial<MlMonitoringProps>
     | Partial<ZoneProps>
     | Partial<FolderProps>
     | Partial<EntraProps>
@@ -947,6 +1007,31 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<BatchInferenceProps>) },
+      };
+    case "featurestore":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<FeatureStoreProps>) },
+      };
+    case "experiments":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<ExperimentsProps>) },
+      };
+    case "training":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<TrainingProps>) },
+      };
+    case "pipelines":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<PipelinesProps>) },
+      };
+    case "mlmonitoring":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<MlMonitoringProps>) },
       };
     case "zone":
       return {

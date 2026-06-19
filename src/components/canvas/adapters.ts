@@ -115,7 +115,7 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "dataflow") {
     return node.data.pipelineType === "streaming" ? "Streaming" : node.data.region;
   }
-  if (node.kind === "modelregistry" || node.kind === "tuning" || node.kind === "evaluation" || node.kind === "endpoints" || node.kind === "batchinference") {
+  if (node.kind === "modelregistry" || node.kind === "tuning" || node.kind === "evaluation" || node.kind === "endpoints" || node.kind === "batchinference" || node.kind === "featurestore" || node.kind === "experiments" || node.kind === "training" || node.kind === "pipelines" || node.kind === "mlmonitoring") {
     return node.data.location;
   }
   if (node.kind === "loadbalancer") {

@@ -145,6 +145,12 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("batchinference", "storage")).toBe(
       "batchinference-storage",
     );
+    expect(getEdgeKind("featurestore", "bigquery")).toBe("featurestore-bigquery");
+    expect(getEdgeKind("experiments", "modelregistry")).toBe(
+      "experiments-modelregistry",
+    );
+    expect(getEdgeKind("pipelines", "training")).toBe("pipelines-training");
+    expect(getEdgeKind("mlmonitoring", "endpoints")).toBe("mlmonitoring-endpoints");
     expect(getEdgeKind("pubsub", "run")).toBe("pubsub-run");
     expect(getEdgeKind("pubsub", "storage")).toBe("pubsub-storage");
     expect(getEdgeKind("pubsub", "bigquery")).toBe("pubsub-bigquery");
