@@ -50,6 +50,10 @@ import {
   type AirflowProps,
   type DataflowProps,
   type ModelRegistryProps,
+  type TuningProps,
+  type EvaluationProps,
+  type EndpointsProps,
+  type BatchInferenceProps,
   type ZoneProps,
   type FolderProps,
   type ProjectProps,
@@ -611,18 +615,41 @@ function parseSparkData(raw: unknown): SparkProps {
   };
 }
 
-function parseModelRegistryData(raw: unknown): ModelRegistryProps {
+function parseAgentPlatformLocationData(
+  raw: unknown,
+  label: string,
+): { name: string; location: string } {
   if (
     !isRecord(raw) ||
     typeof raw.name !== "string" ||
     typeof raw.location !== "string"
   ) {
-    throw new DiagramParseError("Dados de Model Registry inválidos.");
+    throw new DiagramParseError(`Dados de ${label} inválidos.`);
   }
   return {
     name: raw.name,
     location: raw.location,
   };
+}
+
+function parseModelRegistryData(raw: unknown): ModelRegistryProps {
+  return parseAgentPlatformLocationData(raw, "Model Registry");
+}
+
+function parseTuningData(raw: unknown): TuningProps {
+  return parseAgentPlatformLocationData(raw, "Tuning");
+}
+
+function parseEvaluationData(raw: unknown): EvaluationProps {
+  return parseAgentPlatformLocationData(raw, "Evaluation");
+}
+
+function parseEndpointsData(raw: unknown): EndpointsProps {
+  return parseAgentPlatformLocationData(raw, "Endpoints");
+}
+
+function parseBatchInferenceData(raw: unknown): BatchInferenceProps {
+  return parseAgentPlatformLocationData(raw, "Batch inference");
 }
 
 function parseAirflowData(raw: unknown): AirflowProps {
@@ -1370,6 +1397,58 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseModelRegistryData(data),
       };
+    case "tuning":
+      if (!nodeIdMatchesKind(nodeId, "tuning")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Tuning.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "tuning",
+        position: parsedPosition,
+        zIndex,
+        data: parseTuningData(data),
+      };
+    case "evaluation":
+      if (!nodeIdMatchesKind(nodeId, "evaluation")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Evaluation.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "evaluation",
+        position: parsedPosition,
+        zIndex,
+        data: parseEvaluationData(data),
+      };
+    case "endpoints":
+      if (!nodeIdMatchesKind(nodeId, "endpoints")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Endpoints.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "endpoints",
+        position: parsedPosition,
+        zIndex,
+        data: parseEndpointsData(data),
+      };
+    case "batchinference":
+      if (!nodeIdMatchesKind(nodeId, "batchinference")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Batch inference.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "batchinference",
+        position: parsedPosition,
+        zIndex,
+        data: parseBatchInferenceData(data),
+      };
     case "zone":
       if (!nodeIdMatchesKind(nodeId, "zone")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Zona.`);
@@ -1766,6 +1845,17 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "modelregistry-gke" &&
     kind !== "modelregistry-storage" &&
     kind !== "modelregistry-kms" &&
+    kind !== "workbench-tuning" &&
+    kind !== "notebook-tuning" &&
+    kind !== "tuning-modelregistry" &&
+    kind !== "workbench-evaluation" &&
+    kind !== "notebook-evaluation" &&
+    kind !== "evaluation-modelregistry" &&
+    kind !== "modelregistry-endpoints" &&
+    kind !== "endpoints-run" &&
+    kind !== "endpoints-gke" &&
+    kind !== "batchinference-modelregistry" &&
+    kind !== "batchinference-storage" &&
     kind !== "pubsub-eventarc" &&
     kind !== "storage-eventarc" &&
     kind !== "eventarc-run" &&
@@ -2029,6 +2119,22 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.modelregistry === "string"
           ? patterns.modelregistry
           : DEFAULT_NAMING_PATTERNS.modelregistry,
+      tuning:
+        typeof patterns.tuning === "string"
+          ? patterns.tuning
+          : DEFAULT_NAMING_PATTERNS.tuning,
+      evaluation:
+        typeof patterns.evaluation === "string"
+          ? patterns.evaluation
+          : DEFAULT_NAMING_PATTERNS.evaluation,
+      endpoints:
+        typeof patterns.endpoints === "string"
+          ? patterns.endpoints
+          : DEFAULT_NAMING_PATTERNS.endpoints,
+      batchinference:
+        typeof patterns.batchinference === "string"
+          ? patterns.batchinference
+          : DEFAULT_NAMING_PATTERNS.batchinference,
       zone:
         typeof patterns.zone === "string"
           ? patterns.zone
@@ -2289,6 +2395,10 @@ function namingMetadataEqual(
     a.patterns.airflow === b.patterns.airflow &&
     a.patterns.dataflow === b.patterns.dataflow &&
     a.patterns.modelregistry === b.patterns.modelregistry &&
+    a.patterns.tuning === b.patterns.tuning &&
+    a.patterns.evaluation === b.patterns.evaluation &&
+    a.patterns.endpoints === b.patterns.endpoints &&
+    a.patterns.batchinference === b.patterns.batchinference &&
     a.patterns.zone === b.patterns.zone &&
     a.patterns.folder === b.patterns.folder &&
     a.patterns.project === b.patterns.project &&

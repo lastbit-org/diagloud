@@ -33,6 +33,10 @@ export type ResourceKind =
   | "airflow"
   | "dataflow"
   | "modelregistry"
+  | "tuning"
+  | "evaluation"
+  | "endpoints"
+  | "batchinference"
   | "zone"
   | "folder"
   | "project"
@@ -319,6 +323,30 @@ export type ModelRegistryProps = {
   location: string;
 };
 
+export type TuningProps = {
+  /** Nome do job ou pipeline de tuning. */
+  name: string;
+  location: string;
+};
+
+export type EvaluationProps = {
+  /** Nome do job ou pipeline de avaliação. */
+  name: string;
+  location: string;
+};
+
+export type EndpointsProps = {
+  /** Nome do endpoint de inferência. */
+  name: string;
+  location: string;
+};
+
+export type BatchInferenceProps = {
+  /** Nome do job de inferência em lote. */
+  name: string;
+  location: string;
+};
+
 export type ZoneProps = {
   name: string;
   colorId: ZoneColorId;
@@ -483,6 +511,10 @@ export type ResourcePropsByKind = {
   airflow: AirflowProps;
   dataflow: DataflowProps;
   modelregistry: ModelRegistryProps;
+  tuning: TuningProps;
+  evaluation: EvaluationProps;
+  endpoints: EndpointsProps;
+  batchinference: BatchInferenceProps;
   zone: ZoneProps;
   folder: FolderProps;
   project: ProjectProps;

@@ -172,5 +172,32 @@ export function generateMlTerraform(ctx: TerraformGenContext): string {
 }`);
   }
 
+  for (const node of nodesOfKind(ctx, "tuning")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Agent Platform — Tuning: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_vertex_ai_hyperparameter_tuning_job" "${resourceName}" { ... }`);
+  }
+
+  for (const node of nodesOfKind(ctx, "evaluation")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Agent Platform — Evaluation: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_vertex_ai_model_evaluation" "${resourceName}" { ... }`);
+  }
+
+  for (const node of nodesOfKind(ctx, "endpoints")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`resource "google_vertex_ai_endpoint" "${resourceName}" {
+  name         = "${escapeHclString(node.data.name)}"
+  display_name = "${escapeHclString(node.data.name)}"
+  location     = "${escapeHclString(node.data.location)}"
+}`);
+  }
+
+  for (const node of nodesOfKind(ctx, "batchinference")) {
+    const resourceName = ctx.getTfResourceName(node);
+    blocks.push(`# Agent Platform — Batch inference: ${escapeHclString(node.data.name)} (${escapeHclString(node.data.location)})
+# resource "google_vertex_ai_batch_prediction_job" "${resourceName}" { ... }`);
+  }
+
   return blocks.length > 1 ? blocks.join("\n\n") : "";
 }

@@ -1461,15 +1461,136 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
             />
           </div>
           <p className="properties-field__hint">
-            Vertex AI Model Registry — versionamento e deploy de modelos ML.
-            Registre a partir de notebooks ou pipelines e publique em Cloud Run
-            ou GKE.
+            Agent Platform Model Registry — versionamento e publicação de modelos.
+            Registre a partir de tuning, evaluation, notebooks ou pipelines e
+            publique em endpoints, Cloud Run ou GKE.
           </p>
           <ModelRegistryConnectionsInfo
             modelregistry={selectedNode}
             edges={edges}
             nodes={nodes}
           />
+        </>
+      )}
+
+      {selectedNode?.kind === "tuning" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="tuning-name">Job</label>
+            <input
+              id="tuning-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="tuning-location">Localização</label>
+            <input
+              id="tuning-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Fine-tuning de modelos no Agent Platform. Ligue a Workbench ou
+            Notebook como origem e ao Model Registry para registrar o modelo
+            ajustado.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "evaluation" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="evaluation-name">Job</label>
+            <input
+              id="evaluation-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="evaluation-location">Localização</label>
+            <input
+              id="evaluation-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Avaliação de modelos no Agent Platform. Ligue a Workbench ou
+            Notebook e ao Model Registry para documentar métricas e versões.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "endpoints" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="endpoints-name">Endpoint</label>
+            <input
+              id="endpoints-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="endpoints-location">Localização</label>
+            <input
+              id="endpoints-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Endpoint de inferência online no Agent Platform. Recebe modelos do
+            Model Registry e pode publicar em Cloud Run ou GKE.
+          </p>
+        </>
+      )}
+
+      {selectedNode?.kind === "batchinference" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="batchinference-name">Job</label>
+            <input
+              id="batchinference-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="batchinference-location">Localização</label>
+            <input
+              id="batchinference-location"
+              value={selectedNode.data.location}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { location: e.target.value })
+              }
+              placeholder="southamerica-east1"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Inferência em lote no Agent Platform. Ligue ao Model Registry e ao
+            Cloud Storage para entrada/saída de dados.
+          </p>
         </>
       )}
 
@@ -3142,7 +3263,7 @@ function PubsubDestinationsInfo({
       ) : null}
       {notebooks.length > 0 ? (
         <>
-          <dt>Notebook (Vertex AI)</dt>
+          <dt>Notebook (Agent Platform)</dt>
           <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
         </>
       ) : null}
@@ -3393,7 +3514,7 @@ function ModelRegistryConnectionsInfo({
   ) {
     return (
       <p className="properties-field__hint">
-        Ligue Vertex AI Workbench, Notebook ou Cloud Build para registro; Cloud
+        Ligue Workbench, Notebook ou Cloud Build para registro; Endpoints, Cloud
         Run, GKE, Storage ou Cloud KMS para deploy e artefatos.
       </p>
     );
@@ -3403,13 +3524,13 @@ function ModelRegistryConnectionsInfo({
     <dl className="properties-stats">
       {workbenches.length > 0 ? (
         <>
-          <dt>Vertex AI Workbench</dt>
+          <dt>Workbench (Agent Platform)</dt>
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
         </>
       ) : null}
       {notebooks.length > 0 ? (
         <>
-          <dt>Notebook (Vertex AI)</dt>
+          <dt>Notebook (Agent Platform)</dt>
           <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
         </>
       ) : null}
@@ -4046,13 +4167,13 @@ function FirestoreClientsInfo({
       ) : null}
       {workbenches.length > 0 ? (
         <>
-          <dt>Vertex AI Workbench</dt>
+          <dt>Workbench (Agent Platform)</dt>
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
         </>
       ) : null}
       {notebooks.length > 0 ? (
         <>
-          <dt>Notebook (Vertex AI)</dt>
+          <dt>Notebook (Agent Platform)</dt>
           <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
         </>
       ) : null}
@@ -4146,13 +4267,13 @@ function SpannerClientsInfo({
       ) : null}
       {workbenches.length > 0 ? (
         <>
-          <dt>Vertex AI Workbench</dt>
+          <dt>Workbench (Agent Platform)</dt>
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
         </>
       ) : null}
       {notebooks.length > 0 ? (
         <>
-          <dt>Notebook (Vertex AI)</dt>
+          <dt>Notebook (Agent Platform)</dt>
           <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
         </>
       ) : null}
@@ -4262,13 +4383,13 @@ function BigtableClientsInfo({
       ) : null}
       {workbenches.length > 0 ? (
         <>
-          <dt>Vertex AI Workbench</dt>
+          <dt>Workbench (Agent Platform)</dt>
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
         </>
       ) : null}
       {notebooks.length > 0 ? (
         <>
-          <dt>Notebook (Vertex AI)</dt>
+          <dt>Notebook (Agent Platform)</dt>
           <dd>{notebooks.map((n) => n.data.name).join(", ")}</dd>
         </>
       ) : null}
@@ -7019,7 +7140,7 @@ function StorageVmInfo({
       ) : null}
       {workbenches.length > 0 ? (
         <>
-          <dt>Vertex AI Workbench</dt>
+          <dt>Workbench (Agent Platform)</dt>
           <dd>{workbenches.map((w) => w.data.name).join(", ")}</dd>
         </>
       ) : null}

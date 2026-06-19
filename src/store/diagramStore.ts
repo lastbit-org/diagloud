@@ -105,6 +105,10 @@ import type {
   AirflowProps,
   DataflowProps,
   ModelRegistryProps,
+  TuningProps,
+  EvaluationProps,
+  EndpointsProps,
+  BatchInferenceProps,
   ZoneProps,
   FolderProps,
   ProjectProps,
@@ -180,6 +184,10 @@ type DiagramActions = {
       | Partial<AirflowProps>
       | Partial<DataflowProps>
       | Partial<ModelRegistryProps>
+      | Partial<TuningProps>
+      | Partial<EvaluationProps>
+      | Partial<EndpointsProps>
+      | Partial<BatchInferenceProps>
       | Partial<ZoneProps>
       | Partial<FolderProps>
       | Partial<ProjectProps>
@@ -525,6 +533,42 @@ function buildNode<K extends ResourceKind>(
           ...data,
         },
       };
+    case "tuning":
+      return {
+        ...base,
+        kind: "tuning",
+        data: {
+          ...defaultResourceData("tuning", resourceContext),
+          ...data,
+        },
+      };
+    case "evaluation":
+      return {
+        ...base,
+        kind: "evaluation",
+        data: {
+          ...defaultResourceData("evaluation", resourceContext),
+          ...data,
+        },
+      };
+    case "endpoints":
+      return {
+        ...base,
+        kind: "endpoints",
+        data: {
+          ...defaultResourceData("endpoints", resourceContext),
+          ...data,
+        },
+      };
+    case "batchinference":
+      return {
+        ...base,
+        kind: "batchinference",
+        data: {
+          ...defaultResourceData("batchinference", resourceContext),
+          ...data,
+        },
+      };
     case "zone":
       return {
         ...base,
@@ -701,6 +745,10 @@ function mergeNodeData(
     | Partial<AirflowProps>
     | Partial<DataflowProps>
     | Partial<ModelRegistryProps>
+    | Partial<TuningProps>
+    | Partial<EvaluationProps>
+    | Partial<EndpointsProps>
+    | Partial<BatchInferenceProps>
     | Partial<ZoneProps>
     | Partial<FolderProps>
     | Partial<EntraProps>
@@ -879,6 +927,26 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<ModelRegistryProps>) },
+      };
+    case "tuning":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<TuningProps>) },
+      };
+    case "evaluation":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<EvaluationProps>) },
+      };
+    case "endpoints":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<EndpointsProps>) },
+      };
+    case "batchinference":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<BatchInferenceProps>) },
       };
     case "zone":
       return {

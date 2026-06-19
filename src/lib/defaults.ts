@@ -37,6 +37,10 @@ import type {
   AirflowProps,
   DataflowProps,
   ModelRegistryProps,
+  TuningProps,
+  EvaluationProps,
+  EndpointsProps,
+  BatchInferenceProps,
   ZoneProps,
   FolderProps,
   ProjectProps,
@@ -256,6 +260,26 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         location: "southamerica-east1",
       } as ModelRegistryProps as ResourcePropsByKind[K];
+    case "tuning":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as TuningProps as ResourcePropsByKind[K];
+    case "evaluation":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as EvaluationProps as ResourcePropsByKind[K];
+    case "endpoints":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as EndpointsProps as ResourcePropsByKind[K];
+    case "batchinference":
+      return {
+        name,
+        location: "southamerica-east1",
+      } as BatchInferenceProps as ResourcePropsByKind[K];
     case "zone":
       return {
         name,
@@ -412,6 +436,14 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `dataflow-${count}`;
     case "modelregistry":
       return `mr-${count}`;
+    case "tuning":
+      return `tuning-${count}`;
+    case "evaluation":
+      return `eval-${count}`;
+    case "endpoints":
+      return `endpoint-${count}`;
+    case "batchinference":
+      return `batch-inf-${count}`;
     case "zone":
       return `zona-${count}`;
     case "folder":

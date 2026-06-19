@@ -84,6 +84,10 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "airflow" ||
     value === "dataflow" ||
     value === "modelregistry" ||
+    value === "tuning" ||
+    value === "evaluation" ||
+    value === "endpoints" ||
+    value === "batchinference" ||
     value === "zone" ||
     value === "folder" ||
     value === "project" ||
@@ -412,10 +416,42 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
   {
     paletteKey: "modelregistry",
     kind: "modelregistry",
-    category: "cicd",
+    category: "ai",
     label: GCP_RESOURCE_LABELS.modelregistry,
-    description: "Registro e versionamento de modelos ML",
+    description: "Registro e versionamento de modelos no Agent Platform",
     icon: GCP_RESOURCE_ICONS.modelregistry,
+  },
+  {
+    paletteKey: "tuning",
+    kind: "tuning",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.tuning,
+    description: "Fine-tuning de modelos no Agent Platform",
+    icon: GCP_RESOURCE_ICONS.tuning,
+  },
+  {
+    paletteKey: "evaluation",
+    kind: "evaluation",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.evaluation,
+    description: "Avaliação de modelos no Agent Platform",
+    icon: GCP_RESOURCE_ICONS.evaluation,
+  },
+  {
+    paletteKey: "endpoints",
+    kind: "endpoints",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.endpoints,
+    description: "Endpoints de inferência online no Agent Platform",
+    icon: GCP_RESOURCE_ICONS.endpoints,
+  },
+  {
+    paletteKey: "batchinference",
+    kind: "batchinference",
+    category: "ai",
+    label: GCP_RESOURCE_LABELS.batchinference,
+    description: "Jobs de inferência em lote no Agent Platform",
+    icon: GCP_RESOURCE_ICONS.batchinference,
   },
   {
     paletteKey: "cloudshell",
@@ -454,7 +490,7 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     kind: "workbench",
     category: "ai",
     label: GCP_RESOURCE_LABELS.workbench,
-    description: "Notebooks gerenciados na Vertex AI",
+    description: "Notebooks gerenciados no Agent Platform",
     icon: GCP_RESOURCE_ICONS.workbench,
   },
   {
@@ -462,7 +498,7 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     kind: "notebook",
     category: "ai",
     label: GCP_RESOURCE_LABELS.notebook,
-    description: "Instância de notebook gerenciada na Vertex AI",
+    description: "Instância de notebook gerenciada no Agent Platform",
     icon: GCP_RESOURCE_ICONS.notebook,
   },
   {

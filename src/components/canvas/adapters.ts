@@ -115,7 +115,7 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "dataflow") {
     return node.data.pipelineType === "streaming" ? "Streaming" : node.data.region;
   }
-  if (node.kind === "modelregistry") {
+  if (node.kind === "modelregistry" || node.kind === "tuning" || node.kind === "evaluation" || node.kind === "endpoints" || node.kind === "batchinference") {
     return node.data.location;
   }
   if (node.kind === "loadbalancer") {

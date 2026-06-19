@@ -133,6 +133,18 @@ describe("getEdgeKind", () => {
       "modelregistry-storage",
     );
     expect(getEdgeKind("modelregistry", "kms")).toBe("modelregistry-kms");
+    expect(getEdgeKind("workbench", "tuning")).toBe("workbench-tuning");
+    expect(getEdgeKind("tuning", "modelregistry")).toBe("tuning-modelregistry");
+    expect(getEdgeKind("evaluation", "modelregistry")).toBe(
+      "evaluation-modelregistry",
+    );
+    expect(getEdgeKind("modelregistry", "endpoints")).toBe(
+      "modelregistry-endpoints",
+    );
+    expect(getEdgeKind("endpoints", "run")).toBe("endpoints-run");
+    expect(getEdgeKind("batchinference", "storage")).toBe(
+      "batchinference-storage",
+    );
     expect(getEdgeKind("pubsub", "run")).toBe("pubsub-run");
     expect(getEdgeKind("pubsub", "storage")).toBe("pubsub-storage");
     expect(getEdgeKind("pubsub", "bigquery")).toBe("pubsub-bigquery");

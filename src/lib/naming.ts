@@ -158,6 +158,14 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `dataflow-${count}`;
     case "modelregistry":
       return `mr-${count}`;
+    case "tuning":
+      return `tuning-${count}`;
+    case "evaluation":
+      return `eval-${count}`;
+    case "endpoints":
+      return `endpoint-${count}`;
+    case "batchinference":
+      return `batch-inf-${count}`;
     case "zone":
       return `zona-${count}`;
     case "folder":

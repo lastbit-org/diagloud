@@ -47,6 +47,9 @@ import secretManagerIcon from "./google-cloud-legacy-icons/secret_manager/secret
 import certificateManagerIcon from "./google-cloud-legacy-icons/certificate_manager/certificate_manager.svg";
 import apigeeIcon from "./google-cloud-legacy-icons/apigee_api_platform/apigee_api_platform.svg";
 import memorystoreIcon from "./google-cloud-legacy-icons/memorystore/memorystore.svg";
+import vertexAiIcon from "./core-products-icons/Unique Icons/Vertex AI/SVG/VertexAI-512-color.svg";
+import automlIcon from "./google-cloud-legacy-icons/automl/automl.svg";
+import batchIcon from "./google-cloud-legacy-icons/batch/batch.svg";
 import monitoringIcon from "./google-cloud-legacy-icons/cloud_monitoring/cloud_monitoring.svg";
 import alloydbIcon from "./core-products-icons/Unique Icons/AlloyDB/SVG/AlloyDB-512-color.svg";
 
@@ -84,6 +87,10 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   airflow: airflowIcon,
   dataflow: dataflowIcon,
   modelregistry: modelRegistryIcon,
+  tuning: automlIcon,
+  evaluation: vertexAiIcon,
+  endpoints: vertexAiIcon,
+  batchinference: batchIcon,
   zone: zoneIcon,
   folder: folderIcon,
   project: projectIcon,
@@ -133,11 +140,15 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   bigtable: "Cloud Bigtable",
   firebase: "Firebase",
   workbench: "Workbench",
-  notebook: "Notebook (Vertex AI)",
+  notebook: "Notebook (Agent Platform)",
   spark: "Managed Apache Spark",
   airflow: "Managed Airflow",
   dataflow: "Dataflow",
-  modelregistry: "Model registry",
+  modelregistry: "Model Registry",
+  tuning: "Tuning",
+  evaluation: "Evaluation",
+  endpoints: "Endpoints",
+  batchinference: "Batch inference",
   zone: "Zona",
   folder: "Pasta",
   project: "Projeto",
