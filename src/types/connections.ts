@@ -76,11 +76,18 @@ import type { ResourceKind } from "./resources";
  * - Recursos → Zona (`zone-link`): agrupamento visual no diagrama
  * - Pasta → Projeto (`folder-project`): projeto contido na pasta
  * - IAM → Projeto / Sub-rede / KMS / BigQuery: identidade e permissões
+ * - VM / GKE / Cloud Run → Cloud Logging (`vm-cloudlogging`, etc.)
+ * - Cloud Logging → Cloud Monitoring (`cloudlogging-monitoring`)
+ * - VM / GKE / Cloud Run → Cloud Monitoring (`vm-monitoring`, etc.): métricas
+ * - VM → Instance Group (`vm-instancegroup`): instâncias em grupo não gerenciado
+ * - Instance Group → Sub-rede (`instancegroup-subnet`): execução na VPC
+ * - Cloud Load Balancing → Instance Group (`loadbalancer-instancegroup`): backend
  * - VPC pode ter várias sub-redes; VM pode ligar a vários buckets
  */
 export const EDGE_ENDPOINTS = {
   "subnet-vpc": { from: "subnet", to: "vpc" },
   "vm-subnet": { from: "vm", to: "subnet" },
+  "vm-instancegroup": { from: "vm", to: "instancegroup" },
   "vm-storage": { from: "vm", to: "storage" },
   "vm-iam": { from: "vm", to: "iam" },
   "vm-nat": { from: "vm", to: "nat" },
@@ -89,6 +96,7 @@ export const EDGE_ENDPOINTS = {
   "vm-bigquery": { from: "vm", to: "bigquery" },
   "sql-subnet": { from: "sql", to: "subnet" },
   "gke-subnet": { from: "gke", to: "subnet" },
+  "instancegroup-subnet": { from: "instancegroup", to: "subnet" },
   "nat-vpc": { from: "nat", to: "vpc" },
   "router-vpc": { from: "router", to: "vpc" },
   "peering-vpc": { from: "peering", to: "vpc" },
@@ -223,6 +231,13 @@ export const EDGE_ENDPOINTS = {
   "gke-cloudlogging": { from: "gke", to: "cloudlogging" },
   "run-cloudlogging": { from: "run", to: "cloudlogging" },
   "cloudlogging-monitoring": { from: "cloudlogging", to: "monitoring" },
+  "vm-monitoring": { from: "vm", to: "monitoring" },
+  "gke-monitoring": { from: "gke", to: "monitoring" },
+  "run-monitoring": { from: "run", to: "monitoring" },
+  "instancegroup-cloudlogging": { from: "instancegroup", to: "cloudlogging" },
+  "instancegroup-monitoring": { from: "instancegroup", to: "monitoring" },
+  "instancegroup-iam": { from: "instancegroup", to: "iam" },
+  "instancegroup-firewall": { from: "instancegroup", to: "firewall" },
   "loadbalancer-cloudarmor": { from: "loadbalancer", to: "cloudarmor" },
   "cdn-cloudarmor": { from: "cdn", to: "cloudarmor" },
   "knowledgecatalog-bigquery": { from: "knowledgecatalog", to: "bigquery" },
@@ -271,6 +286,7 @@ export const EDGE_ENDPOINTS = {
   "iam-bigquery": { from: "iam", to: "bigquery" },
   "internet-loadbalancer": { from: "internet", to: "loadbalancer" },
   "loadbalancer-vm": { from: "loadbalancer", to: "vm" },
+  "loadbalancer-instancegroup": { from: "loadbalancer", to: "instancegroup" },
   "loadbalancer-gke": { from: "loadbalancer", to: "gke" },
   "loadbalancer-run": { from: "loadbalancer", to: "run" },
   "loadbalancer-vpc": { from: "loadbalancer", to: "vpc" },

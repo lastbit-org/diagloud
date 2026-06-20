@@ -30,6 +30,8 @@ const MESSAGES: Record<ConnectionInvalidReason, string> = {
   "gke-has-subnet": "Este cluster GKE já está ligado a uma sub-rede.",
   "subnet-gke-capacity":
     "Não há mais endereços de IP na sub-rede para o cluster GKE.",
+  "instancegroup-has-subnet":
+    "Este Instance Group já está ligado a uma sub-rede.",
   "nat-has-vpc": "Este Cloud NAT já está ligado a uma VPC.",
   "nat-has-router": "Este Cloud NAT já está ligado a um Cloud Router.",
   "router-has-vpc": "Este Cloud Router já está ligado a uma VPC.",

@@ -5,6 +5,7 @@ export type ResourceKind =
   | "vpc"
   | "subnet"
   | "vm"
+  | "instancegroup"
   | "storage"
   | "sql"
   | "gke"
@@ -102,6 +103,18 @@ export type VmProps = {
   region?: string;
   /** IP interno atribuído ao conectar à sub-rede (primeiro utilizável GCP). */
   internalIp?: string;
+};
+
+export type InstanceGroupType = "managed" | "unmanaged";
+
+export type InstanceGroupProps = {
+  name: string;
+  groupType: InstanceGroupType;
+  /** Tamanho alvo do MIG. */
+  targetSize: number;
+  machineType: string;
+  /** Região — herdada da sub-rede ao conectar. */
+  region?: string;
 };
 
 export type StorageProps = {
@@ -546,6 +559,7 @@ export type ResourcePropsByKind = {
   vpc: VpcProps;
   subnet: SubnetProps;
   vm: VmProps;
+  instancegroup: InstanceGroupProps;
   storage: StorageProps;
   sql: SqlProps;
   gke: GkeProps;

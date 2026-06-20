@@ -29,6 +29,7 @@ const EXPORTABLE_KINDS = new Set<ResourceKind>([
   "vpc",
   "subnet",
   "vm",
+  "instancegroup",
   "storage",
   "sql",
   "gke",

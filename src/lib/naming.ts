@@ -100,6 +100,8 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `subnet-${count}`;
     case "vm":
       return `vm-${count}`;
+    case "instancegroup":
+      return `ig-${count}`;
     case "storage":
       return `bucket-${count}`;
     case "sql":

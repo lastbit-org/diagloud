@@ -59,6 +59,7 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "vpc" ||
     value === "subnet" ||
     value === "vm" ||
+    value === "instancegroup" ||
     value === "storage" ||
     value === "sql" ||
     value === "gke" ||
@@ -189,6 +190,14 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.gke,
     description: "Cluster Kubernetes gerenciado",
     icon: GCP_RESOURCE_ICONS.gke,
+  },
+  {
+    paletteKey: "instancegroup",
+    kind: "instancegroup",
+    category: "compute",
+    label: GCP_RESOURCE_LABELS.instancegroup,
+    description: "Grupo de instâncias gerenciado ou não gerenciado",
+    icon: GCP_RESOURCE_ICONS.instancegroup,
   },
   {
     paletteKey: "storage",

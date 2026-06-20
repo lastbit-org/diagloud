@@ -52,6 +52,7 @@ import type {
   MemorystoreEngine,
   MemorystoreTier,
   IamVariant,
+  InstanceGroupType,
 } from "../../types";
 import { EDGE_ENDPOINTS } from "../../types/connections";
 import "./properties.css";
@@ -697,6 +698,84 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
           <GkeSubnetInfo gke={selectedNode} edges={edges} nodes={nodes} />
           <GkeEventarcInfo gke={selectedNode} edges={edges} nodes={nodes} />
           <GkeGithubInfo gke={selectedNode} edges={edges} nodes={nodes} />
+        </>
+      )}
+
+      {selectedNode?.kind === "instancegroup" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="instancegroup-name">Nome</label>
+            <input
+              id="instancegroup-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="instancegroup-type">Tipo</label>
+            <select
+              id="instancegroup-type"
+              value={selectedNode.data.groupType}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  groupType: e.target.value as InstanceGroupType,
+                })
+              }
+            >
+              <option value="managed">Gerenciado (MIG)</option>
+              <option value="unmanaged">Não gerenciado</option>
+            </select>
+          </div>
+          {selectedNode.data.groupType === "managed" ? (
+            <>
+              <div className="properties-field">
+                <label htmlFor="instancegroup-size">Tamanho alvo</label>
+                <input
+                  id="instancegroup-size"
+                  type="number"
+                  min={1}
+                  value={selectedNode.data.targetSize}
+                  onChange={(e) => {
+                    const targetSize = Number.parseInt(e.target.value, 10);
+                    if (targetSize >= 1) {
+                      updateNodeData(selectedNode.id, { targetSize });
+                    }
+                  }}
+                />
+              </div>
+              <div className="properties-field">
+                <label htmlFor="instancegroup-machine">Machine type</label>
+                <input
+                  id="instancegroup-machine"
+                  value={selectedNode.data.machineType}
+                  onChange={(e) =>
+                    updateNodeData(selectedNode.id, {
+                      machineType: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </>
+          ) : null}
+          <div className="properties-field">
+            <label htmlFor="instancegroup-region">Região</label>
+            <input
+              id="instancegroup-region"
+              value={selectedNode.data.region ?? "—"}
+              readOnly
+              aria-readonly
+            />
+            <span className="properties-field__hint">
+              Preenchida automaticamente com a região da sub-rede ligada.
+            </span>
+          </div>
+          <InstanceGroupSubnetInfo
+            instanceGroup={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
         </>
       )}
 
@@ -4998,6 +5077,38 @@ function BigqueryConnectionsInfo({
           <dd>{exportDataflow.map((d) => d.data.name).join(", ")}</dd>
         </>
       ) : null}
+    </dl>
+  );
+}
+
+function InstanceGroupSubnetInfo({
+  instanceGroup,
+  edges,
+  nodes,
+}: {
+  instanceGroup: Extract<DiagramNode, { kind: "instancegroup" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const edge = edges.find(
+    (e) => e.kind === "instancegroup-subnet" && e.source === instanceGroup.id,
+  );
+  if (!edge) {
+    return (
+      <p className="properties-field__hint">
+        Ligue o grupo à sub-rede para definir a região de execução na VPC.
+      </p>
+    );
+  }
+  const subnet = nodes.find((n) => n.id === edge.target && n.kind === "subnet");
+  if (!subnet || subnet.kind !== "subnet") return null;
+
+  return (
+    <dl className="properties-stats">
+      <dt>Sub-rede</dt>
+      <dd>
+        {subnet.data.name} ({subnet.data.cidr})
+      </dd>
     </dl>
   );
 }

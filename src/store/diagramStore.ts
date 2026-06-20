@@ -28,6 +28,10 @@ import {
   clearWorkbenchNetwork,
   reassignSubnetWorkbenchIps,
 } from "../model/workbenchSubnet";
+import {
+  assignInstanceGroupSubnetRegion,
+  clearInstanceGroupNetwork,
+} from "../model/instanceGroupSubnet";
 import { assignSparkSubnetRegion } from "../model/sparkSubnet";
 import { assignAirflowSubnetRegion } from "../model/airflowSubnet";
 import { assignDataflowSubnetRegion } from "../model/dataflowSubnet";
@@ -79,6 +83,7 @@ import type {
   StorageProps,
   SubnetProps,
   VmProps,
+  InstanceGroupProps,
   VpcProps,
   NatProps,
   RouterProps,
@@ -169,6 +174,7 @@ type DiagramActions = {
       | Partial<StorageProps>
       | Partial<SqlProps>
       | Partial<GkeProps>
+      | Partial<InstanceGroupProps>
       | Partial<NatProps>
       | Partial<RouterProps>
       | Partial<PeeringProps>
@@ -388,6 +394,15 @@ function buildNode<K extends ResourceKind>(
         ...base,
         kind: "gke",
         data: { ...defaultResourceData("gke", resourceContext), ...data },
+      };
+    case "instancegroup":
+      return {
+        ...base,
+        kind: "instancegroup",
+        data: {
+          ...defaultResourceData("instancegroup", resourceContext),
+          ...data,
+        },
       };
     case "nat":
       return {
@@ -821,6 +836,7 @@ function mergeNodeData(
     | Partial<StorageProps>
     | Partial<SqlProps>
     | Partial<GkeProps>
+    | Partial<InstanceGroupProps>
     | Partial<NatProps>
     | Partial<RouterProps>
     | Partial<PeeringProps>
@@ -906,6 +922,11 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<GkeProps>) },
+      };
+    case "instancegroup":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<InstanceGroupProps>) },
       };
     case "nat":
       return {
@@ -1462,6 +1483,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         next.kind === "vm-subnet" ||
         next.kind === "sql-subnet" ||
         next.kind === "gke-subnet" ||
+        next.kind === "instancegroup-subnet" ||
         next.kind === "run-subnet" ||
         next.kind === "workbench-subnet" ||
         next.kind === "notebook-subnet" ||
@@ -1484,10 +1506,18 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         if (next.kind === "dataflow-subnet") {
           nodes = assignDataflowSubnetRegion(next.source, next.target, nodes);
         }
+        if (next.kind === "instancegroup-subnet") {
+          nodes = assignInstanceGroupSubnetRegion(
+            next.source,
+            next.target,
+            nodes,
+          );
+        }
         if (
           next.kind !== "spark-subnet" &&
           next.kind !== "airflow-subnet" &&
-          next.kind !== "dataflow-subnet"
+          next.kind !== "dataflow-subnet" &&
+          next.kind !== "instancegroup-subnet"
         ) {
           nodes = reassignSubnetHostIps(next.target, nodes, edges);
         }
@@ -1519,6 +1549,10 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       if (removed?.kind === "gke-subnet") {
         nodes = clearGkeNetwork(removed.source, nodes);
         nodes = reassignSubnetHostIps(removed.target, nodes, edges);
+      }
+
+      if (removed?.kind === "instancegroup-subnet") {
+        nodes = clearInstanceGroupNetwork(removed.source, nodes);
       }
 
       if (removed?.kind === "run-subnet") {

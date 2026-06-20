@@ -22,6 +22,8 @@ import {
   type StorageProps,
   type SubnetProps,
   type VmProps,
+  type InstanceGroupProps,
+  type InstanceGroupType,
   type VpcProps,
   type NatProps,
   type RouterProps,
@@ -241,6 +243,35 @@ function parseGkeData(raw: unknown): GkeProps {
   }
   if (typeof raw.internalIp === "string") {
     data.internalIp = raw.internalIp;
+  }
+  return data;
+}
+
+const INSTANCE_GROUP_TYPES = new Set<InstanceGroupType>(["managed", "unmanaged"]);
+
+function parseInstanceGroupData(raw: unknown): InstanceGroupProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    (raw.groupType !== "managed" && raw.groupType !== "unmanaged") ||
+    typeof raw.machineType !== "string" ||
+    typeof raw.targetSize !== "number" ||
+    !Number.isInteger(raw.targetSize) ||
+    raw.targetSize < 1
+  ) {
+    throw new DiagramParseError("Dados de Instance Group inválidos.");
+  }
+  if (!INSTANCE_GROUP_TYPES.has(raw.groupType)) {
+    throw new DiagramParseError("Dados de Instance Group inválidos.");
+  }
+  const data: InstanceGroupProps = {
+    name: raw.name,
+    groupType: raw.groupType,
+    targetSize: raw.targetSize,
+    machineType: raw.machineType,
+  };
+  if (typeof raw.region === "string") {
+    data.region = raw.region;
   }
   return data;
 }
@@ -1136,6 +1167,19 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseGkeData(data),
       };
+    case "instancegroup":
+      if (!nodeIdMatchesKind(nodeId, "instancegroup")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Instance Group.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "instancegroup",
+        position: parsedPosition,
+        zIndex,
+        data: parseInstanceGroupData(data),
+      };
     case "nat":
       if (!nodeIdMatchesKind(nodeId, "nat")) {
         throw new DiagramParseError(`ID "${nodeId}" não corresponde ao tipo Cloud NAT.`);
@@ -1903,6 +1947,7 @@ function parseEdge(raw: unknown): DiagramEdge {
   if (
     kind !== "subnet-vpc" &&
     kind !== "vm-subnet" &&
+    kind !== "vm-instancegroup" &&
     kind !== "vm-storage" &&
     kind !== "vm-iam" &&
     kind !== "vm-nat" &&
@@ -1911,6 +1956,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "vm-bigquery" &&
     kind !== "sql-subnet" &&
     kind !== "gke-subnet" &&
+    kind !== "instancegroup-subnet" &&
     kind !== "nat-vpc" &&
     kind !== "router-vpc" &&
     kind !== "peering-vpc" &&
@@ -2050,6 +2096,13 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "gke-cloudlogging" &&
     kind !== "run-cloudlogging" &&
     kind !== "cloudlogging-monitoring" &&
+    kind !== "vm-monitoring" &&
+    kind !== "gke-monitoring" &&
+    kind !== "run-monitoring" &&
+    kind !== "instancegroup-cloudlogging" &&
+    kind !== "instancegroup-monitoring" &&
+    kind !== "instancegroup-iam" &&
+    kind !== "instancegroup-firewall" &&
     kind !== "loadbalancer-cloudarmor" &&
     kind !== "cdn-cloudarmor" &&
     kind !== "knowledgecatalog-bigquery" &&
@@ -2093,6 +2146,7 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "iam-bigquery" &&
     kind !== "internet-loadbalancer" &&
     kind !== "loadbalancer-vm" &&
+    kind !== "loadbalancer-instancegroup" &&
     kind !== "loadbalancer-gke" &&
     kind !== "loadbalancer-run" &&
     kind !== "loadbalancer-vpc" &&
@@ -2220,6 +2274,10 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.gke === "string"
           ? patterns.gke
           : DEFAULT_NAMING_PATTERNS.gke,
+      instancegroup:
+        typeof patterns.instancegroup === "string"
+          ? patterns.instancegroup
+          : DEFAULT_NAMING_PATTERNS.instancegroup,
       nat:
         typeof patterns.nat === "string"
           ? patterns.nat
@@ -2610,6 +2668,7 @@ function namingMetadataEqual(
     a.patterns.storage === b.patterns.storage &&
     a.patterns.sql === b.patterns.sql &&
     a.patterns.gke === b.patterns.gke &&
+    a.patterns.instancegroup === b.patterns.instancegroup &&
     a.patterns.nat === b.patterns.nat &&
     a.patterns.router === b.patterns.router &&
     a.patterns.peering === b.patterns.peering &&

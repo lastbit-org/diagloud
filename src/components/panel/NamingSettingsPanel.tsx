@@ -17,6 +17,7 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "firewall",
   "dns",
   "vm",
+  "instancegroup",
   "gke",
   "run",
   "storage",

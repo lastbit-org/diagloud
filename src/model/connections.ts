@@ -99,6 +99,7 @@ export type ConnectionInvalidReason =
   | "subnet-alloydb-capacity"
   | "gke-has-subnet"
   | "subnet-gke-capacity"
+  | "instancegroup-has-subnet"
   | "nat-has-vpc"
   | "nat-has-router"
   | "router-has-vpc"
@@ -555,6 +556,23 @@ export function validateConnection(
     }
     if (!canAttachGkeToSubnet(directed.target, context.nodes, context.edges)) {
       return { valid: false, reason: "subnet-gke-capacity" };
+    }
+  }
+
+  if (
+    edgeKind === "instancegroup-subnet" &&
+    context.edges.some(
+      (edge) =>
+        edge.kind === "instancegroup-subnet" && edge.source === directed.source,
+    )
+  ) {
+    return { valid: false, reason: "instancegroup-has-subnet" };
+  }
+
+  if (edgeKind === "instancegroup-subnet") {
+    const subnet = getSubnetNode(directed.target, context.nodes);
+    if (!subnet || !parseCidr(subnet.data.cidr)) {
+      return { valid: false, reason: "subnet-invalid-cidr" };
     }
   }
 

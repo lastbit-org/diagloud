@@ -29,6 +29,7 @@ const sampleDocument: DiagramDocument = {
         vpc: "vpc-AREA-AMBIENTE",
         subnet: "sub-AREA-AMBIENTE",
         vm: "vm-##-AREA-AMBIENTE",
+        instancegroup: "ig-AREA-AMBIENTE",
         storage: "gcs-AREA-AMBIENTE",
         sql: "sql-AREA-AMBIENTE",
         gke: "gke-AREA-AMBIENTE",

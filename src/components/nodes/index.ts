@@ -39,6 +39,7 @@ export { SqlNode } from "./SqlNode";
 export { StorageNode } from "./StorageNode";
 export { SubnetNode } from "./SubnetNode";
 export { VmNode } from "./VmNode";
+export { InstanceGroupNode } from "./InstanceGroupNode";
 export { VpcNode } from "./VpcNode";
 export type { ZoneNodeData } from "./ZoneNode";
 export { ZoneNode } from "./ZoneNode";

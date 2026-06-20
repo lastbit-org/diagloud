@@ -40,6 +40,7 @@ import type {
   StorageProps,
   SubnetProps,
   VmProps,
+  InstanceGroupProps,
   VpcProps,
   ZoneProps,
   FolderProps,
@@ -83,6 +84,7 @@ export type DiagramNode =
   | (NodeBase & { kind: "vpc"; data: VpcProps })
   | (NodeBase & { kind: "subnet"; data: SubnetProps })
   | (NodeBase & { kind: "vm"; data: VmProps })
+  | (NodeBase & { kind: "instancegroup"; data: InstanceGroupProps })
   | (NodeBase & { kind: "storage"; data: StorageProps })
   | (NodeBase & { kind: "sql"; data: SqlProps })
   | (NodeBase & { kind: "gke"; data: GkeProps })
@@ -156,6 +158,7 @@ export type DiagramEdge = {
   kind:
     | "subnet-vpc"
     | "vm-subnet"
+    | "vm-instancegroup"
     | "vm-storage"
     | "vm-iam"
     | "vm-nat"
@@ -164,6 +167,7 @@ export type DiagramEdge = {
     | "vm-bigquery"
     | "sql-subnet"
     | "gke-subnet"
+    | "instancegroup-subnet"
     | "nat-vpc"
     | "router-vpc"
     | "peering-vpc"
@@ -303,6 +307,13 @@ export type DiagramEdge = {
     | "gke-cloudlogging"
     | "run-cloudlogging"
     | "cloudlogging-monitoring"
+    | "vm-monitoring"
+    | "gke-monitoring"
+    | "run-monitoring"
+    | "instancegroup-cloudlogging"
+    | "instancegroup-monitoring"
+    | "instancegroup-iam"
+    | "instancegroup-firewall"
     | "loadbalancer-cloudarmor"
     | "cdn-cloudarmor"
     | "knowledgecatalog-bigquery"
@@ -346,6 +357,7 @@ export type DiagramEdge = {
     | "iam-bigquery"
     | "internet-loadbalancer"
     | "loadbalancer-vm"
+    | "loadbalancer-instancegroup"
     | "loadbalancer-gke"
     | "loadbalancer-run"
     | "loadbalancer-vpc"

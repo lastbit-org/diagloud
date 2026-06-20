@@ -41,6 +41,7 @@ export type ResolvedGraph = {
   dnsForApigee: Map<string, string>;
   subnetForPsc: Map<string, string>;
   subnetForGke: Map<string, string>;
+  subnetForInstanceGroup: Map<string, string>;
   subnetForRun: Map<string, string>;
   subnetForSql: Map<string, string>;
   subnetForMemorystore: Map<string, string>;
@@ -132,6 +133,9 @@ function applyEdge(
     case "gke-subnet":
       graph.subnetForGke.set(source, target);
       break;
+    case "instancegroup-subnet":
+      graph.subnetForInstanceGroup.set(source, target);
+      break;
     case "run-subnet":
       graph.subnetForRun.set(source, target);
       break;
@@ -197,6 +201,7 @@ export function resolveGraph(document: DiagramDocument): ResolvedGraph {
     dnsForApigee: new Map(),
     subnetForPsc: new Map(),
     subnetForGke: new Map(),
+    subnetForInstanceGroup: new Map(),
     subnetForRun: new Map(),
     subnetForSql: new Map(),
     subnetForMemorystore: new Map(),

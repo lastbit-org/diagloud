@@ -11,6 +11,7 @@ import type {
   StorageProps,
   SubnetProps,
   VmProps,
+  InstanceGroupProps,
   VpcProps,
   RouterProps,
   NatProps,
@@ -101,6 +102,13 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         machineType: "e2-micro",
       } as VmProps as ResourcePropsByKind[K];
+    case "instancegroup":
+      return {
+        name,
+        groupType: "managed",
+        targetSize: 2,
+        machineType: "e2-medium",
+      } as InstanceGroupProps as ResourcePropsByKind[K];
     case "storage":
       return {
         name,
@@ -429,6 +437,8 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `subnet-${count}`;
     case "vm":
       return `vm-${count}`;
+    case "instancegroup":
+      return `ig-${count}`;
     case "storage":
       return `bucket-${count}`;
     case "sql":

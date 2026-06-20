@@ -1,6 +1,7 @@
 import {
   nodesOfKind,
   vpcNodeForSubnet,
+  findNode,
   type TerraformGenContext,
 } from "../context";
 import { defaultZone, escapeHclString, sectionHeader } from "../hcl";
@@ -73,6 +74,70 @@ resource "google_container_node_pool" "${resourceName}_pool" {
     ]
   }
 }`);
+  }
+
+  for (const node of nodesOfKind(ctx, "instancegroup")) {
+    const subnetId = ctx.graph.subnetForInstanceGroup.get(node.id);
+    if (!subnetId) continue;
+    const chain = vpcNodeForSubnet(ctx, subnetId);
+    if (!chain) continue;
+
+    const resourceName = ctx.getTfResourceName(node);
+    const vpcResourceName = ctx.getTfResourceName(chain.vpc);
+    const subnetResourceName = ctx.getTfResourceName(chain.subnet);
+    const zone = defaultZone(chain.subnet.data.region);
+
+    if (node.data.groupType === "managed") {
+      blocks.push(`resource "google_compute_instance_template" "${resourceName}_template" {
+  name         = "${escapeHclString(node.data.name)}-template"
+  machine_type = "${escapeHclString(node.data.machineType)}"
+
+  disk {
+    source_image = "debian-cloud/debian-12"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.${subnetResourceName}.id
+  }
+}
+
+resource "google_compute_instance_group_manager" "${resourceName}" {
+  name               = "${escapeHclString(node.data.name)}"
+  base_instance_name = "${escapeHclString(node.data.name)}"
+  zone               = "${escapeHclString(zone)}"
+  target_size        = ${node.data.targetSize}
+
+  version {
+    instance_template = google_compute_instance_template.${resourceName}_template.id
+  }
+}`);
+    } else {
+      const instanceRefs = ctx.document.edges
+        .filter(
+          (edge) => edge.kind === "vm-instancegroup" && edge.target === node.id,
+        )
+        .map((edge) => edge.source)
+        .map((vmId) => {
+          const vmNode = findNode(ctx.document.nodes, vmId);
+          if (!vmNode || vmNode.kind !== "vm") return null;
+          if (!ctx.graph.subnetForVm.get(vmId)) return null;
+          return `google_compute_instance.${ctx.getTfResourceName(vmNode)}.self_link`;
+        })
+        .filter((ref): ref is string => ref !== null);
+
+      const instancesBlock =
+        instanceRefs.length > 0
+          ? `\n  instances = [\n    ${instanceRefs.join(",\n    ")},\n  ]`
+          : "";
+
+      blocks.push(`resource "google_compute_instance_group" "${resourceName}" {
+  name        = "${escapeHclString(node.data.name)}"
+  zone        = "${escapeHclString(zone)}"
+  network     = google_compute_network.${vpcResourceName}.id${instancesBlock}
+}`);
+    }
   }
 
   for (const node of nodesOfKind(ctx, "run")) {

@@ -57,6 +57,7 @@ import cloudDeployIcon from "./google-cloud-legacy-icons/cloud_deploy/cloud_depl
 import loggingIcon from "./google-cloud-legacy-icons/cloud_logging/cloud_logging.svg";
 import armorIcon from "./google-cloud-legacy-icons/cloud_armor/cloud_armor.svg";
 import permissionsIcon from "./google-cloud-legacy-icons/permissions/permissions.svg";
+import instanceGroupIcon from "./google-cloud-legacy-icons/gce_systems_management/gce_systems_management.svg";
 import monitoringIcon from "./google-cloud-legacy-icons/cloud_monitoring/cloud_monitoring.svg";
 import alloydbIcon from "./core-products-icons/Unique Icons/AlloyDB/SVG/AlloyDB-512-color.svg";
 
@@ -65,6 +66,7 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   vpc: vpcIcon,
   subnet: subnetIcon,
   vm: vmIcon,
+  instancegroup: instanceGroupIcon,
   storage: storageIcon,
   sql: sqlIcon,
   gke: gkeIcon,
@@ -132,6 +134,7 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   vpc: "VPC",
   subnet: "Sub-rede",
   vm: "Compute Engine",
+  instancegroup: "Instance Group",
   storage: "Cloud Storage",
   sql: "Cloud SQL",
   gke: "GKE",

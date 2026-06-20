@@ -69,6 +69,12 @@ function nodeSubtitle(node: DiagramNode): string | undefined {
   if (node.kind === "nat" || node.kind === "router" || node.kind === "vpn" || node.kind === "interconnect") {
     return node.data.region;
   }
+  if (node.kind === "instancegroup") {
+    if (node.data.region) {
+      return node.data.region;
+    }
+    return node.data.groupType === "managed" ? "Gerenciado" : "Não gerenciado";
+  }
   if (node.kind === "peering") {
     return "Peering";
   }
@@ -330,7 +336,7 @@ export function toFlowNode(
       position: node.position,
       selected,
       zIndex: resolveNodeZIndex(node),
-      connectable: false,
+      connectable: true,
       data: {
         kind: "monitoring",
         label: node.data.name,

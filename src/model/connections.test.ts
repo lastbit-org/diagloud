@@ -98,6 +98,11 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("gke", "artifact")).toBe("gke-artifact");
     expect(getEdgeKind("vm", "artifact")).toBe("vm-artifact");
     expect(getEdgeKind("run", "subnet")).toBe("run-subnet");
+    expect(getEdgeKind("instancegroup", "subnet")).toBe("instancegroup-subnet");
+    expect(getEdgeKind("loadbalancer", "instancegroup")).toBe(
+      "loadbalancer-instancegroup",
+    );
+    expect(getEdgeKind("vm", "instancegroup")).toBe("vm-instancegroup");
     expect(getEdgeKind("run", "artifact")).toBe("run-artifact");
     expect(getEdgeKind("build", "artifact")).toBe("build-artifact");
     expect(getEdgeKind("pubsub", "build")).toBe("pubsub-build");
@@ -152,6 +157,10 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("pipelines", "training")).toBe("pipelines-training");
     expect(getEdgeKind("mlmonitoring", "endpoints")).toBe("mlmonitoring-endpoints");
     expect(getEdgeKind("vm", "cloudlogging")).toBe("vm-cloudlogging");
+    expect(getEdgeKind("cloudlogging", "monitoring")).toBe("cloudlogging-monitoring");
+    expect(getEdgeKind("vm", "monitoring")).toBe("vm-monitoring");
+    expect(getEdgeKind("gke", "monitoring")).toBe("gke-monitoring");
+    expect(getEdgeKind("run", "monitoring")).toBe("run-monitoring");
     expect(getEdgeKind("loadbalancer", "cloudarmor")).toBe("loadbalancer-cloudarmor");
     expect(getEdgeKind("knowledgecatalog", "bigquery")).toBe(
       "knowledgecatalog-bigquery",
