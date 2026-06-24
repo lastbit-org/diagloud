@@ -50,6 +50,8 @@ import type {
   PcUserProps,
   OnpremProps,
   GithubProps,
+  AzDoRepoProps,
+  AzDoPipelineProps,
   IamProps,
   LoadBalancerProps,
   CdnProps,
@@ -130,6 +132,8 @@ export type DiagramNode =
   | (NodeBase & { kind: "pcuser"; data: PcUserProps })
   | (NodeBase & { kind: "onprem"; data: OnpremProps })
   | (NodeBase & { kind: "github"; data: GithubProps })
+  | (NodeBase & { kind: "azdorepo"; data: AzDoRepoProps })
+  | (NodeBase & { kind: "azdopipeline"; data: AzDoPipelineProps })
   | (NodeBase & { kind: "iam"; data: IamProps })
   | (NodeBase & { kind: "loadbalancer"; data: LoadBalancerProps })
   | (NodeBase & { kind: "cdn"; data: CdnProps })
@@ -201,6 +205,13 @@ export type DiagramEdge = {
     | "github-build"
     | "github-run"
     | "github-gke"
+    | "azdorepo-azdopipeline"
+    | "azdorepo-build"
+    | "azdorepo-run"
+    | "azdorepo-gke"
+    | "azdopipeline-build"
+    | "azdopipeline-run"
+    | "azdopipeline-gke"
     | "cloudshell-project"
     | "cloudshell-vm"
     | "cloudshell-gke"

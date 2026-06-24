@@ -57,6 +57,8 @@ export const DEFAULT_NAMING_PATTERNS: NamingPatternByKind = {
   pcuser: "user-AREA-AMBIENTE",
   onprem: "onprem-AREA-AMBIENTE",
   github: "github-AREA-AMBIENTE",
+  azdorepo: "ado-repo-AREA-AMBIENTE",
+  azdopipeline: "ado-pipeline-AREA-AMBIENTE",
   iam: "iam-AREA-AMBIENTE",
   loadbalancer: "lb-AREA-AMBIENTE",
   cdn: "cdn-AREA-AMBIENTE",

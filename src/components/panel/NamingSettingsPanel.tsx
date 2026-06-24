@@ -47,6 +47,8 @@ const RESOURCE_ORDER: ResourceKind[] = [
   "artifact",
   "build",
   "github",
+  "azdorepo",
+  "azdopipeline",
   "kms",
   "iam",
   "loadbalancer",

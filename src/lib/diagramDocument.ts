@@ -69,6 +69,8 @@ import {
   type PcUserProps,
   type OnpremProps,
   type GithubProps,
+  type AzDoRepoProps,
+  type AzDoPipelineProps,
   type LoadBalancerProps,
   type LoadBalancerType,
   type CdnProps,
@@ -811,6 +813,42 @@ function parseGithubData(raw: unknown): GithubProps {
   return {
     name: raw.name,
     repository: raw.repository,
+  };
+}
+
+function parseAzDoRepoData(raw: unknown): AzDoRepoProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.organization !== "string" ||
+    typeof raw.project !== "string" ||
+    typeof raw.repository !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Azure DevOps Repo inválidos.");
+  }
+  return {
+    name: raw.name,
+    organization: raw.organization,
+    project: raw.project,
+    repository: raw.repository,
+  };
+}
+
+function parseAzDoPipelineData(raw: unknown): AzDoPipelineProps {
+  if (
+    !isRecord(raw) ||
+    typeof raw.name !== "string" ||
+    typeof raw.organization !== "string" ||
+    typeof raw.project !== "string" ||
+    typeof raw.pipelineName !== "string"
+  ) {
+    throw new DiagramParseError("Dados de Azure DevOps Pipeline inválidos.");
+  }
+  return {
+    name: raw.name,
+    organization: raw.organization,
+    project: raw.project,
+    pipelineName: raw.pipelineName,
   };
 }
 
@@ -1723,6 +1761,32 @@ function parseNode(raw: unknown): DiagramNode {
         zIndex,
         data: parseGithubData(data),
       };
+    case "azdorepo":
+      if (!nodeIdMatchesKind(nodeId, "azdorepo")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Azure DevOps Repo.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "azdorepo",
+        position: parsedPosition,
+        zIndex,
+        data: parseAzDoRepoData(data),
+      };
+    case "azdopipeline":
+      if (!nodeIdMatchesKind(nodeId, "azdopipeline")) {
+        throw new DiagramParseError(
+          `ID "${nodeId}" não corresponde ao tipo Azure DevOps Pipeline.`,
+        );
+      }
+      return {
+        id: nodeId,
+        kind: "azdopipeline",
+        position: parsedPosition,
+        zIndex,
+        data: parseAzDoPipelineData(data),
+      };
     case "loadbalancer":
       if (!nodeIdMatchesKind(nodeId, "loadbalancer")) {
         throw new DiagramParseError(
@@ -1990,6 +2054,13 @@ function parseEdge(raw: unknown): DiagramEdge {
     kind !== "github-build" &&
     kind !== "github-run" &&
     kind !== "github-gke" &&
+    kind !== "azdorepo-azdopipeline" &&
+    kind !== "azdorepo-build" &&
+    kind !== "azdorepo-run" &&
+    kind !== "azdorepo-gke" &&
+    kind !== "azdopipeline-build" &&
+    kind !== "azdopipeline-run" &&
+    kind !== "azdopipeline-gke" &&
     kind !== "cloudshell-project" &&
     kind !== "cloudshell-vm" &&
     kind !== "cloudshell-gke" &&
@@ -2450,6 +2521,14 @@ function parseNamingMetadata(raw: unknown): DiagramNamingMetadata | undefined {
         typeof patterns.github === "string"
           ? patterns.github
           : DEFAULT_NAMING_PATTERNS.github,
+      azdorepo:
+        typeof patterns.azdorepo === "string"
+          ? patterns.azdorepo
+          : DEFAULT_NAMING_PATTERNS.azdorepo,
+      azdopipeline:
+        typeof patterns.azdopipeline === "string"
+          ? patterns.azdopipeline
+          : DEFAULT_NAMING_PATTERNS.azdopipeline,
       loadbalancer:
         typeof patterns.loadbalancer === "string"
           ? patterns.loadbalancer
@@ -2712,6 +2791,8 @@ function namingMetadataEqual(
     a.patterns.pcuser === b.patterns.pcuser &&
     a.patterns.onprem === b.patterns.onprem &&
     a.patterns.github === b.patterns.github &&
+    a.patterns.azdorepo === b.patterns.azdorepo &&
+    a.patterns.azdopipeline === b.patterns.azdopipeline &&
     a.patterns.loadbalancer === b.patterns.loadbalancer &&
     a.patterns.cdn === b.patterns.cdn &&
     a.patterns.orgpolicy === b.patterns.orgpolicy &&

@@ -34,6 +34,7 @@ import type { ResourceKind } from "./resources";
  * - Pub/Sub → Cloud Build (`pubsub-build`): trigger de pipeline
  * - Cloud Storage → Cloud Build (`storage-build`): código-fonte no bucket
  * - GitHub → Cloud Build / Cloud Run / GKE (`github-build`, `github-run`, `github-gke`): CI/CD e deploy contínuo
+ * - Azure DevOps Repo → Pipeline / Cloud Build / Cloud Run / GKE (`azdorepo-*`, `azdopipeline-*`)
  * - Cloud Shell → Projeto / compute / dados / CI (`cloudshell-*`): administração via console (gcloud, kubectl, bq)
  * - Cloud Run → Sub-rede (`run-subnet`): VPC connector (modo VPC)
  * - Pub/Sub → Cloud Run (`pubsub-run`): push subscription / evento
@@ -130,6 +131,13 @@ export const EDGE_ENDPOINTS = {
   "github-build": { from: "github", to: "build" },
   "github-run": { from: "github", to: "run" },
   "github-gke": { from: "github", to: "gke" },
+  "azdorepo-azdopipeline": { from: "azdorepo", to: "azdopipeline" },
+  "azdorepo-build": { from: "azdorepo", to: "build" },
+  "azdorepo-run": { from: "azdorepo", to: "run" },
+  "azdorepo-gke": { from: "azdorepo", to: "gke" },
+  "azdopipeline-build": { from: "azdopipeline", to: "build" },
+  "azdopipeline-run": { from: "azdopipeline", to: "run" },
+  "azdopipeline-gke": { from: "azdopipeline", to: "gke" },
   "cloudshell-project": { from: "cloudshell", to: "project" },
   "cloudshell-vm": { from: "cloudshell", to: "vm" },
   "cloudshell-gke": { from: "cloudshell", to: "gke" },

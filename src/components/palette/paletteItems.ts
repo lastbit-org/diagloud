@@ -102,6 +102,8 @@ export function isPaletteResourceKind(value: string): value is ResourceKind {
     value === "pcuser" ||
     value === "onprem" ||
     value === "github" ||
+    value === "azdorepo" ||
+    value === "azdopipeline" ||
     value === "iam" ||
     value === "bigtable" ||
     value === "memorystore" ||
@@ -534,6 +536,22 @@ export const PALETTE_ITEMS: PaletteItemConfig[] = [
     label: GCP_RESOURCE_LABELS.github,
     description: "Repositório de código-fonte no GitHub",
     icon: GCP_RESOURCE_ICONS.github,
+  },
+  {
+    paletteKey: "azdorepo",
+    kind: "azdorepo",
+    category: "cicd",
+    label: GCP_RESOURCE_LABELS.azdorepo,
+    description: "Repositório Git no Azure DevOps",
+    icon: GCP_RESOURCE_ICONS.azdorepo,
+  },
+  {
+    paletteKey: "azdopipeline",
+    kind: "azdopipeline",
+    category: "cicd",
+    label: GCP_RESOURCE_LABELS.azdopipeline,
+    description: "Pipeline YAML ou classic no Azure DevOps",
+    icon: GCP_RESOURCE_ICONS.azdopipeline,
   },
   {
     paletteKey: "eventarc",

@@ -263,6 +263,39 @@ export function toFlowNode(
     };
   }
 
+  if (node.kind === "azdorepo") {
+    const issueCount = issueCountForNode(node.id, issues);
+    const subtitle = `${node.data.project}/${node.data.repository}`.trim();
+    return {
+      id: node.id,
+      type: "azdorepo",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      data: {
+        kind: "azdorepo",
+        label: subtitle || node.data.repository,
+        issueCount: issueCount > 0 ? issueCount : undefined,
+      },
+    };
+  }
+
+  if (node.kind === "azdopipeline") {
+    const issueCount = issueCountForNode(node.id, issues);
+    return {
+      id: node.id,
+      type: "azdopipeline",
+      position: node.position,
+      selected,
+      zIndex: resolveNodeZIndex(node),
+      data: {
+        kind: "azdopipeline",
+        label: node.data.pipelineName,
+        issueCount: issueCount > 0 ? issueCount : undefined,
+      },
+    };
+  }
+
   if (node.kind === "iam") {
     const issueCount = issueCountForNode(node.id, issues);
     return {

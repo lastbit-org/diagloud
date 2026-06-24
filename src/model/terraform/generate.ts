@@ -88,6 +88,8 @@ const SKIPPED_KINDS = new Set<ResourceKind>([
   "pcuser",
   "onprem",
   "github",
+  "azdorepo",
+  "azdopipeline",
   "internet",
   "cloudshell",
   "monitoring",

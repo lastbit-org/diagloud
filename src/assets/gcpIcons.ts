@@ -38,6 +38,8 @@ import infocardIcon from "./icons/infocard.svg";
 import pcUserIcon from "./icons/pc-user.svg";
 import onpremIcon from "./icons/onprem.svg";
 import githubIcon from "./github/github.svg";
+import azDoRepoIcon from "./azure-devops/repo.svg";
+import azDoPipelineIcon from "./azure-devops/pipeline.svg";
 import loadBalancerIcon from "./google-cloud-legacy-icons/cloud_load_balancing/cloud_load_balancing.svg";
 import cdnIcon from "./google-cloud-legacy-icons/cloud_cdn/cloud_cdn.svg";
 import orgPolicyIcon from "./google-cloud-legacy-icons/policy_analyzer/policy_analyzer.svg";
@@ -113,6 +115,8 @@ export const GCP_RESOURCE_ICONS: Record<ResourceKind, string> = {
   pcuser: pcUserIcon,
   onprem: onpremIcon,
   github: githubIcon,
+  azdorepo: azDoRepoIcon,
+  azdopipeline: azDoPipelineIcon,
   loadbalancer: loadBalancerIcon,
   cdn: cdnIcon,
   orgpolicy: orgPolicyIcon,
@@ -181,6 +185,8 @@ export const GCP_RESOURCE_LABELS: Record<ResourceKind, string> = {
   pcuser: "Usuário",
   onprem: "On-premises",
   github: "GitHub",
+  azdorepo: "Azure DevOps Repo",
+  azdopipeline: "Azure DevOps Pipeline",
   loadbalancer: "Cloud Load Balancing",
   cdn: "Cloud CDN",
   orgpolicy: "Organization Policy",

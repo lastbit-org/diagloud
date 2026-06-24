@@ -56,6 +56,8 @@ import type {
   OnpremProps,
   IamProps,
   GithubProps,
+  AzDoRepoProps,
+  AzDoPipelineProps,
   LoadBalancerProps,
   CdnProps,
   OrgPolicyProps,
@@ -354,6 +356,20 @@ export function defaultResourceData<K extends ResourceKind>(
         name,
         repository: "org/repository",
       } as GithubProps as ResourcePropsByKind[K];
+    case "azdorepo":
+      return {
+        name,
+        organization: "my-organization",
+        project: "my-project",
+        repository: "my-repository",
+      } as AzDoRepoProps as ResourcePropsByKind[K];
+    case "azdopipeline":
+      return {
+        name,
+        organization: "my-organization",
+        project: "my-project",
+        pipelineName: "deploy-pipeline",
+      } as AzDoPipelineProps as ResourcePropsByKind[K];
     case "loadbalancer":
       return {
         name,
@@ -531,6 +547,10 @@ function legacyDefaultName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `onprem-${count}`;
     case "github":
       return `github-${count}`;
+    case "azdorepo":
+      return `ado-repo-${count}`;
+    case "azdopipeline":
+      return `ado-pipeline-${count}`;
     case "loadbalancer":
       return `lb-${count}`;
     case "cdn":

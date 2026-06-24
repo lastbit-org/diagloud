@@ -194,6 +194,10 @@ function fallbackName(kind: ResourceKind, nodes: DiagramNode[]): string {
       return `onprem-${count}`;
     case "github":
       return `github-${count}`;
+    case "azdorepo":
+      return `ado-repo-${count}`;
+    case "azdopipeline":
+      return `ado-pipeline-${count}`;
     case "loadbalancer":
       return `lb-${count}`;
     case "cdn":

@@ -51,6 +51,8 @@ export type ResourceKind =
   | "pcuser"
   | "onprem"
   | "github"
+  | "azdorepo"
+  | "azdopipeline"
   | "iam"
   | "loadbalancer"
   | "cdn"
@@ -446,6 +448,28 @@ export type GithubProps = {
   repository: string;
 };
 
+export type AzDoRepoProps = {
+  /** Nome do recurso no diagrama. */
+  name: string;
+  /** Organização Azure DevOps. */
+  organization: string;
+  /** Nome do projeto. */
+  project: string;
+  /** Nome do repositório Git. */
+  repository: string;
+};
+
+export type AzDoPipelineProps = {
+  /** Nome do recurso no diagrama. */
+  name: string;
+  /** Organização Azure DevOps. */
+  organization: string;
+  /** Nome do projeto. */
+  project: string;
+  /** Nome da pipeline YAML/classic. */
+  pipelineName: string;
+};
+
 export type CloudShellProps = {
   /** Nome no diagrama. */
   name: string;
@@ -605,6 +629,8 @@ export type ResourcePropsByKind = {
   pcuser: PcUserProps;
   onprem: OnpremProps;
   github: GithubProps;
+  azdorepo: AzDoRepoProps;
+  azdopipeline: AzDoPipelineProps;
   iam: IamProps;
   loadbalancer: LoadBalancerProps;
   cdn: CdnProps;

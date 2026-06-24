@@ -127,6 +127,8 @@ import type {
   PcUserProps,
   OnpremProps,
   GithubProps,
+  AzDoRepoProps,
+  AzDoPipelineProps,
   LoadBalancerProps,
   CdnProps,
   OrgPolicyProps,
@@ -216,6 +218,8 @@ type DiagramActions = {
       | Partial<PcUserProps>
       | Partial<OnpremProps>
       | Partial<GithubProps>
+      | Partial<AzDoRepoProps>
+      | Partial<AzDoPipelineProps>
       | Partial<LoadBalancerProps>
       | Partial<CdnProps>
       | Partial<OrgPolicyProps>
@@ -695,6 +699,21 @@ function buildNode<K extends ResourceKind>(
         kind: "github",
         data: { ...defaultResourceData("github", resourceContext), ...data },
       };
+    case "azdorepo":
+      return {
+        ...base,
+        kind: "azdorepo",
+        data: { ...defaultResourceData("azdorepo", resourceContext), ...data },
+      };
+    case "azdopipeline":
+      return {
+        ...base,
+        kind: "azdopipeline",
+        data: {
+          ...defaultResourceData("azdopipeline", resourceContext),
+          ...data,
+        },
+      };
     case "loadbalancer":
       return {
         ...base,
@@ -876,6 +895,8 @@ function mergeNodeData(
     | Partial<PcUserProps>
     | Partial<OnpremProps>
     | Partial<GithubProps>
+    | Partial<AzDoRepoProps>
+    | Partial<AzDoPipelineProps>
     | Partial<LoadBalancerProps>
     | Partial<OrgPolicyProps>
     | Partial<PscProps>
@@ -1142,6 +1163,16 @@ function mergeNodeData(
       return {
         ...node,
         data: { ...node.data, ...(patch as Partial<GithubProps>) },
+      };
+    case "azdorepo":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<AzDoRepoProps>) },
+      };
+    case "azdopipeline":
+      return {
+        ...node,
+        data: { ...node.data, ...(patch as Partial<AzDoPipelineProps>) },
       };
     case "loadbalancer":
       return {

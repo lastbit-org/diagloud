@@ -157,17 +157,55 @@ resource "google_apigee_environment" "${resourceName}_env" {
     const githubEdge = ctx.document.edges.find(
       (edge) => edge.kind === "github-build" && edge.target === node.id,
     );
+    const azDoRepoEdge = ctx.document.edges.find(
+      (edge) => edge.kind === "azdorepo-build" && edge.target === node.id,
+    );
+    const azDoPipelineEdge = ctx.document.edges.find(
+      (edge) => edge.kind === "azdopipeline-build" && edge.target === node.id,
+    );
     const githubNode = githubEdge
       ? ctx.document.nodes.find(
           (n) => n.id === githubEdge.source && n.kind === "github",
         )
       : undefined;
-    const { owner, name } =
-      githubNode && githubNode.kind === "github"
-        ? parseGithubRepository(githubNode.data.repository)
-        : { owner: "your-org", name: "your-repo" };
+    const azDoRepoNode = azDoRepoEdge
+      ? ctx.document.nodes.find(
+          (n) => n.id === azDoRepoEdge.source && n.kind === "azdorepo",
+        )
+      : undefined;
+    const azDoPipelineNode = azDoPipelineEdge
+      ? ctx.document.nodes.find(
+          (n) => n.id === azDoPipelineEdge.source && n.kind === "azdopipeline",
+        )
+      : undefined;
 
-    blocks.push(`resource "google_cloudbuild_trigger" "${resourceName}" {
+    if (azDoRepoNode && azDoRepoNode.kind === "azdorepo") {
+      blocks.push(`# Cloud Build trigger "${escapeHclString(node.data.name)}" — origem Azure DevOps Repo
+# ${escapeHclString(azDoRepoNode.data.organization)}/${escapeHclString(azDoRepoNode.data.project)}/${escapeHclString(azDoRepoNode.data.repository)}
+# Configure webhook ou Cloud Build GitHub App equivalente com service connection Azure DevOps.
+resource "google_cloudbuild_trigger" "${resourceName}" {
+  name     = "${escapeHclString(node.data.name)}"
+  location = "${escapeHclString(node.data.location)}"
+
+  filename = "cloudbuild.yaml"
+}`);
+    } else if (azDoPipelineNode && azDoPipelineNode.kind === "azdopipeline") {
+      blocks.push(`# Cloud Build trigger "${escapeHclString(node.data.name)}" — origem Azure DevOps Pipeline
+# ${escapeHclString(azDoPipelineNode.data.organization)}/${escapeHclString(azDoPipelineNode.data.project)}/${escapeHclString(azDoPipelineNode.data.pipelineName)}
+# Integre via webhook da pipeline ADO ou artefato publicado no trigger.
+resource "google_cloudbuild_trigger" "${resourceName}" {
+  name     = "${escapeHclString(node.data.name)}"
+  location = "${escapeHclString(node.data.location)}"
+
+  filename = "cloudbuild.yaml"
+}`);
+    } else {
+      const { owner, name } =
+        githubNode && githubNode.kind === "github"
+          ? parseGithubRepository(githubNode.data.repository)
+          : { owner: "your-org", name: "your-repo" };
+
+      blocks.push(`resource "google_cloudbuild_trigger" "${resourceName}" {
   name     = "${escapeHclString(node.data.name)}"
   location = "${escapeHclString(node.data.location)}"
 
@@ -181,6 +219,7 @@ resource "google_apigee_environment" "${resourceName}_env" {
 
   filename = "cloudbuild.yaml"
 }`);
+    }
   }
 
   for (const node of nodesOfKind(ctx, "cloudlogging")) {

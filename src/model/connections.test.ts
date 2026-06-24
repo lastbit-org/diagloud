@@ -110,6 +110,10 @@ describe("getEdgeKind", () => {
     expect(getEdgeKind("github", "build")).toBe("github-build");
     expect(getEdgeKind("github", "run")).toBe("github-run");
     expect(getEdgeKind("github", "gke")).toBe("github-gke");
+    expect(getEdgeKind("azdorepo", "azdopipeline")).toBe("azdorepo-azdopipeline");
+    expect(getEdgeKind("azdorepo", "build")).toBe("azdorepo-build");
+    expect(getEdgeKind("azdopipeline", "run")).toBe("azdopipeline-run");
+    expect(getEdgeKind("azdopipeline", "gke")).toBe("azdopipeline-gke");
     expect(getEdgeKind("iam", "project")).toBe("iam-project");
     expect(getEdgeKind("iam", "subnet")).toBe("iam-subnet");
     expect(getEdgeKind("iam", "kms")).toBe("iam-kms");

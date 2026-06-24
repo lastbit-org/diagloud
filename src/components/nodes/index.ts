@@ -54,6 +54,8 @@ export { EntraNode } from "./EntraNode";
 export { PcUserNode } from "./PcUserNode";
 export { OnpremNode } from "./OnpremNode";
 export { GithubNode } from "./GithubNode";
+export { AzDoRepoNode } from "./AzDoRepoNode";
+export { AzDoPipelineNode } from "./AzDoPipelineNode";
 export { LoadBalancerNode } from "./LoadBalancerNode";
 export { CdnNode } from "./CdnNode";
 export { OrgPolicyNode } from "./OrgPolicyNode";

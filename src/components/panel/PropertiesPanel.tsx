@@ -2928,6 +2928,124 @@ export function PropertiesPanel({ embedded = false }: PropertiesPanelProps) {
         </>
       )}
 
+      {selectedNode?.kind === "azdorepo" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="azdorepo-name">Recurso</label>
+            <input
+              id="azdorepo-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="azdorepo-organization">Organização</label>
+            <input
+              id="azdorepo-organization"
+              value={selectedNode.data.organization}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { organization: e.target.value })
+              }
+              placeholder="my-organization"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="azdorepo-project">Projeto</label>
+            <input
+              id="azdorepo-project"
+              value={selectedNode.data.project}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { project: e.target.value })
+              }
+              placeholder="my-project"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="azdorepo-repository">Repositório</label>
+            <input
+              id="azdorepo-repository"
+              value={selectedNode.data.repository}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { repository: e.target.value })
+              }
+              placeholder="my-repository"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Repositório Git no Azure DevOps. Ligue à pipeline ADO, Cloud Build,
+            Cloud Run ou GKE para documentar CI/CD.
+          </p>
+          <AzDoRepoConnectionsInfo
+            repo={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
+      {selectedNode?.kind === "azdopipeline" && (
+        <>
+          <div className="properties-field">
+            <label htmlFor="azdopipeline-name">Recurso</label>
+            <input
+              id="azdopipeline-name"
+              value={selectedNode.data.name}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { name: e.target.value })
+              }
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="azdopipeline-organization">Organização</label>
+            <input
+              id="azdopipeline-organization"
+              value={selectedNode.data.organization}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  organization: e.target.value,
+                })
+              }
+              placeholder="my-organization"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="azdopipeline-project">Projeto</label>
+            <input
+              id="azdopipeline-project"
+              value={selectedNode.data.project}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, { project: e.target.value })
+              }
+              placeholder="my-project"
+            />
+          </div>
+          <div className="properties-field">
+            <label htmlFor="azdopipeline-name-field">Pipeline</label>
+            <input
+              id="azdopipeline-name-field"
+              value={selectedNode.data.pipelineName}
+              onChange={(e) =>
+                updateNodeData(selectedNode.id, {
+                  pipelineName: e.target.value,
+                })
+              }
+              placeholder="deploy-pipeline"
+            />
+          </div>
+          <p className="properties-field__hint">
+            Pipeline de build/release no Azure DevOps. Ligue ao Cloud Build,
+            Cloud Run ou GKE para documentar deploy no GCP.
+          </p>
+          <AzDoPipelineConnectionsInfo
+            pipeline={selectedNode}
+            edges={edges}
+            nodes={nodes}
+          />
+        </>
+      )}
+
       {selectedNode?.kind === "cloudshell" && (
         <>
           <div className="properties-field">
@@ -6322,6 +6440,154 @@ function CloudShellConnectionsInfo({
         <>
           <dt>Cloud Build</dt>
           <dd>{builds.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function AzDoRepoConnectionsInfo({
+  repo,
+  edges,
+  nodes,
+}: {
+  repo: Extract<DiagramNode, { kind: "azdorepo" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const pipelines = edges
+    .filter((e) => e.kind === "azdorepo-azdopipeline" && e.source === repo.id)
+    .map((e) =>
+      nodes.find((n) => n.id === e.target && n.kind === "azdopipeline"),
+    )
+    .filter(
+      (n): n is Extract<DiagramNode, { kind: "azdopipeline" }> => n != null,
+    );
+  const builds = edges
+    .filter((e) => e.kind === "azdorepo-build" && e.source === repo.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "build"))
+    .filter((n): n is Extract<DiagramNode, { kind: "build" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "azdorepo-run" && e.source === repo.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "azdorepo-gke" && e.source === repo.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+
+  if (
+    pipelines.length === 0 &&
+    builds.length === 0 &&
+    runs.length === 0 &&
+    clusters.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue à pipeline ADO, Cloud Build, Cloud Run ou GKE para documentar o
+        fluxo de CI/CD.
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {pipelines.length > 0 ? (
+        <>
+          <dt>Azure DevOps Pipeline</dt>
+          <dd>{pipelines.map((p) => p.data.pipelineName).join(", ")}</dd>
+        </>
+      ) : null}
+      {builds.length > 0 ? (
+        <>
+          <dt>Cloud Build</dt>
+          <dd>{builds.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
+function AzDoPipelineConnectionsInfo({
+  pipeline,
+  edges,
+  nodes,
+}: {
+  pipeline: Extract<DiagramNode, { kind: "azdopipeline" }>;
+  edges: ReturnType<typeof useDiagramStore.getState>["edges"];
+  nodes: DiagramNode[];
+}) {
+  const repos = edges
+    .filter((e) => e.kind === "azdorepo-azdopipeline" && e.target === pipeline.id)
+    .map((e) => nodes.find((n) => n.id === e.source && n.kind === "azdorepo"))
+    .filter((n): n is Extract<DiagramNode, { kind: "azdorepo" }> => n != null);
+  const builds = edges
+    .filter((e) => e.kind === "azdopipeline-build" && e.source === pipeline.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "build"))
+    .filter((n): n is Extract<DiagramNode, { kind: "build" }> => n != null);
+  const runs = edges
+    .filter((e) => e.kind === "azdopipeline-run" && e.source === pipeline.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "run"))
+    .filter((n): n is Extract<DiagramNode, { kind: "run" }> => n != null);
+  const clusters = edges
+    .filter((e) => e.kind === "azdopipeline-gke" && e.source === pipeline.id)
+    .map((e) => nodes.find((n) => n.id === e.target && n.kind === "gke"))
+    .filter((n): n is Extract<DiagramNode, { kind: "gke" }> => n != null);
+
+  if (
+    repos.length === 0 &&
+    builds.length === 0 &&
+    runs.length === 0 &&
+    clusters.length === 0
+  ) {
+    return (
+      <p className="properties-field__hint">
+        Ligue a um repositório ADO (origem) ou a Cloud Build, Cloud Run e GKE
+        (destinos de deploy).
+      </p>
+    );
+  }
+
+  return (
+    <dl className="properties-stats">
+      {repos.length > 0 ? (
+        <>
+          <dt>Azure DevOps Repo</dt>
+          <dd>
+            {repos
+              .map((r) => `${r.data.project}/${r.data.repository}`)
+              .join(", ")}
+          </dd>
+        </>
+      ) : null}
+      {builds.length > 0 ? (
+        <>
+          <dt>Cloud Build</dt>
+          <dd>{builds.map((b) => b.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {runs.length > 0 ? (
+        <>
+          <dt>Cloud Run</dt>
+          <dd>{runs.map((r) => r.data.name).join(", ")}</dd>
+        </>
+      ) : null}
+      {clusters.length > 0 ? (
+        <>
+          <dt>GKE</dt>
+          <dd>{clusters.map((g) => g.data.name).join(", ")}</dd>
         </>
       ) : null}
     </dl>

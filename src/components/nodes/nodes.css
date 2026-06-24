@@ -106,7 +106,9 @@
   white-space: nowrap;
 }
 
-.gcp-node--github {
+.gcp-node--github,
+.gcp-node--azdorepo,
+.gcp-node--azdopipeline {
   padding-left: 24px;
   padding-right: 24px;
 }
